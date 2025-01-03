@@ -43,32 +43,7 @@ export class AppComponent {
       totalRating: 0,
     },
     allPlayers: {
-      players: [
-        {name: 'aqqqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-        {name: 'aqqqqqqq', rating: 2},
-
-      ] as Player [],
+      players: [] as Player [],
       totalRating: 0,
     }
   }
