@@ -43,7 +43,32 @@ export class AppComponent {
       totalRating: 0,
     },
     allPlayers: {
-      players: [] as Player [],
+      players: [
+        {name: 'aqqqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+        {name: 'aqqqqqqq', rating: 2},
+
+      ] as Player [],
       totalRating: 0,
     }
   }
@@ -77,7 +102,7 @@ export class AppComponent {
   constructor(private fb: FormBuilder) {
     this.playerForm = this.fb.group({
       name: '',
-      rating: 0
+      rating: ''
     });
   }
 

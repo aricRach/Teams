@@ -59,6 +59,8 @@
 }
 
 .box.available-player {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: normal;
 }
 
