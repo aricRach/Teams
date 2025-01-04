@@ -28,7 +28,7 @@ interface Team {
 export class AppComponent {
 
   playerForm!: FormGroup;
-
+  hideRating = false;
   teams = {
     teamA: {
       players: [] as Player [],
@@ -104,5 +104,9 @@ export class AppComponent {
     if(savedTeams) {
       this.teams = JSON.parse(savedTeams);
     }
+  }
+
+  toggleShowHideRating() {
+    this.hideRating = !this.hideRating;
   }
 }

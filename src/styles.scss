@@ -1,1 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
+
+.in-row {
+  display: flex;
+}
+
+.mrg {
+  margin: 5px;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}

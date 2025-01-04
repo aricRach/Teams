@@ -1,6 +1,11 @@
 
-<h1>Teams</h1>
-<button (click)="load()">load previous saved status</button>
+<h1 class="center">Teams</h1>
+
+<div class="in-row">
+<button class="mrg" (click)="load()">load previous saved status</button>
+<button class="mrg" (click)="toggleShowHideRating()">show/hide ratings</button>
+</div>
+
 <div>
   <h2>Add Player</h2>
   <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
@@ -22,7 +27,12 @@
       class="list"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamA.players; track item) {
-        <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
+        @if(hideRating) {
+          <div class="box" cdkDrag>{{item.name}}</div>
+
+        } @else {
+          <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
+        }
       }
     </div>
     </div>
@@ -39,7 +49,12 @@
       class="list"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamB.players; track item) {
-        <div class="box" cdkDrag>{{item?.name}} - {{item?.rating}}</div>
+        @if(hideRating) {
+          <div class="box" cdkDrag>{{item.name}}</div>
+
+        } @else {
+          <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
+        }
       }
     </div>
     </div>
@@ -56,7 +71,11 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of teams.teamC.players; track item) {
-          <div class="box" cdkDrag>{{item?.name}} - {{item?.rating}}</div>
+          @if(hideRating) {
+            <div class="box" cdkDrag>{{item.name}}</div>
+          } @else {
+            <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
+          }
         }
       </div>
     </div>
@@ -72,9 +91,13 @@
       class="box available-player"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.allPlayers.players; track item; let idx = $index) {
-        <div class="box" cdkDrag>{{item?.name}} - {{item?.rating}}
+        @if(hideRating) {
+          <div class="box" cdkDrag>{{item.name}}</div>
+
+        } @else {
+          <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
+        }
           <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>
-        </div>
       }
     </div>
 
