@@ -12,9 +12,16 @@ export class ModalComponent {
 
   isVisible = input(false);
   showCloseButton = input(true);
+  showCloseIcon = input(true);
+  showSubmitButton = input(true);
   close = output();
+  submit = output();
 
   closeModal(): void {
     this.close.emit();
+  }
+
+  submitModal(): void {
+    this.submit.emit();
   }
 }

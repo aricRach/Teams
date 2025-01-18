@@ -1,8 +1,15 @@
 <div class="modal-backdrop" *ngIf="isVisible">
   <div class="modal-container">
-    @if(showCloseButton()) {
-      <button class="close-button" (click)="closeModal()">×</button>
-    }
+
     <ng-content></ng-content>
+    @if(showCloseIcon()) {
+      <button class="close-icon" (click)="closeModal()">×</button>
+    }
+    @if(showCloseButton()) {
+      <button (click)="closeModal()">close</button>
+    }
+    @if(showSubmitButton()) {
+      <button (click)="submitModal()">submit</button>
+    }
   </div>
 </div>

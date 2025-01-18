@@ -1,4 +1,4 @@
-import {Component, computed, ElementRef, signal, ViewChild, WritableSignal} from '@angular/core';
+import {Component, ElementRef, signal, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {
   CdkDragDrop,
@@ -44,7 +44,7 @@ import {GameDetails, GameDetailsComponent} from './game-details/game-details.com
 export class AppComponent {
 
   playerForm!: FormGroup;
-  hideRating = false;
+  hideRating = signal(true);
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
 
   teams = {
@@ -73,6 +73,7 @@ export class AppComponent {
   isTeamWinModalVisible = signal(false);
 
   @ViewChild('nameField') nameField!: ElementRef;
+  protected isCodeModalVisible = signal(false);
 
 
   drop(event: CdkDragDrop<any>) {
@@ -132,7 +133,11 @@ export class AppComponent {
   }
 
   toggleShowHideRating() {
-    this.hideRating = !this.hideRating;
+    this.isCodeModalVisible.set(true);
+    // if(this.code === 2626) {
+    //   this.hideRating = !this.hideRating;
+
+    // }
   }
 
   openSetGoalModal(event: {mouseEvent: MouseEvent, player: Player, team: string}) {
@@ -164,6 +169,7 @@ export class AppComponent {
   }
 
   // team win modal
+  code!: string;
   showTeamWinModal() {
     this.isTeamWinModalVisible.set(true);
   }
@@ -188,4 +194,11 @@ export class AppComponent {
     this.closeTeamWinModal();
   }
 
+  codeModalSubmitted() {
+    this.isCodeModalVisible.set(false);
+    if(this.code === '2626') {
+      this.hideRating.set(!this.hideRating());
+    }
+    this.code = '';
+  }
 }
