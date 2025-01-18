@@ -1,0 +1,10 @@
+<div class="stopwatch">
+  <div class="time-display">{{ formattedTime }}</div>
+  <div class="controls">
+    <button (click)="start()" [disabled]="running">Start</button>
+    <button (click)="pause()" [disabled]="!running">Pause</button>
+
+    <button (click)="endGame()">End Game</button>
+    <button (click)="reset()">Reset</button>
+  </div>
+</div>

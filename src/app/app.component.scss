@@ -68,3 +68,30 @@
   margin-left: 5px;
   cursor: pointer;
 }
+
+
+.long-press-area {
+  width: 200px;
+  height: 100px;
+  background-color: lightblue;
+  text-align: center;
+  line-height: 100px;
+  cursor: pointer;
+}
+
+.modal {
+  position: absolute;
+  width: 150px;
+  background: white;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  z-index: 1000;
+}
+
+.game-details {
+  label,
+  div {
+    margin: 1rem;
+  }
+}
