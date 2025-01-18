@@ -9,8 +9,9 @@ import {CommonModule} from '@angular/common';
 import {LongPressDirective} from './directives/long-press.directive';
 import {StopwatchComponent} from './stopwatch/stopwatch.component';
 import {ModalComponent} from './modal/modal.component';
+import {GameDetails, GameDetailsComponent} from './game-details/game-details.component';
 
-interface Player {
+ export interface Player {
   name: string;
   rating: number;
   goals: number;
@@ -20,7 +21,7 @@ interface Player {
   games: number
 }
 
-interface Team {
+ export interface Team {
   name: string;
   players: Player[];
   totalRating: number;
@@ -28,7 +29,7 @@ interface Team {
 
 @Component({
   selector: 'app-root',
-  imports: [ReactiveFormsModule, DragDropModule, CommonModule, LongPressDirective, StopwatchComponent, ModalComponent, FormsModule],
+  imports: [ReactiveFormsModule, DragDropModule, CommonModule, LongPressDirective, StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent],
   standalone: true,
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
@@ -45,12 +46,7 @@ export class AppComponent {
   playerForm!: FormGroup;
   hideRating = false;
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
-  winTeamOptions = computed(() => this.originalTeamNames().filter((name) => {
-    return name !== this.selectedLoseTeam();
-  }))
-  loseTeamOptions = computed(() => this.originalTeamNames().filter((name) => {
-      return name !== this.selectedWonTeam();
-  }))
+
   teams = {
     teamA: {
       players: [] as Player [],
@@ -74,12 +70,7 @@ export class AppComponent {
   modalPosition = { x: 0, y: 0 };
   setGoalModalData!: { team: string; player: Player };
 
-  isTeamWinModalVisible = false;
-
-  selectedWonTeam = signal(null);
-  selectedLoseTeam = signal(null);
-
-  selectedEndGameStatus: WritableSignal<null | 'draw' | 'decided'> = signal(null);
+  isTeamWinModalVisible = signal(false);
 
   @ViewChild('nameField') nameField!: ElementRef;
 
@@ -144,7 +135,7 @@ export class AppComponent {
     this.hideRating = !this.hideRating;
   }
 
-  openModal(event: {mouseEvent: MouseEvent, player: Player, team: string}) {
+  openSetGoalModal(event: {mouseEvent: MouseEvent, player: Player, team: string}) {
     this.modalPosition = { x: event.mouseEvent.clientX, y: event.mouseEvent.clientY };
     this.setGoalModalData = {
       player: event.player, team: event.team
@@ -152,7 +143,7 @@ export class AppComponent {
     this.isSetGoalModalVisible = true;
   }
 
-  closeModal() {
+  closeSetGoalModal() {
     this.isSetGoalModalVisible = false;
   }
 
@@ -174,34 +165,27 @@ export class AppComponent {
 
   // team win modal
   showTeamWinModal() {
-    this.isTeamWinModalVisible = true;
+    this.isTeamWinModalVisible.set(true);
   }
 
   closeTeamWinModal() {
-    this.resetTeamWinModalData();
+    this.isTeamWinModalVisible.set(false);
   }
 
-  EndGame() {
-      // @ts-ignore
-      this.teams[this.selectedWonTeam()].players = this.teams[this.selectedWonTeam()].players.map
-      ((player: Player) =>
-        (this.selectedEndGameStatus() === 'decided' ?
-          {...player, wins: player.wins+1, games: player.games+1} : {...player, draws: player.draws+1, games: player.games+1})
-      )
-      // @ts-ignore
-      this.teams[this.selectedLoseTeam()].players = this.teams[this.selectedLoseTeam()].players.map
-      ((player: Player) =>
-        (this.selectedEndGameStatus() === 'decided' ?
-          {...player, loses: player.loses+1, games: player.games+1} : {...player, draws: player.draws+1, games: player.games+1})
-      )
-
-    this.resetTeamWinModalData();
+  endGame(gameDetails: GameDetails) {
+    // @ts-ignore
+    this.teams[gameDetails.winner].players = this.teams[gameDetails.winner].players.map
+    ((player: Player) =>
+      (gameDetails.gameStatus === 'decided' ?
+        {...player, wins: player.wins+1, games: player.games+1} : {...player, draws: player.draws+1, games: player.games+1})
+    )
+    // @ts-ignore
+    this.teams[gameDetails.loser].players = this.teams[gameDetails.loser].players.map
+    ((player: Player) =>
+      (gameDetails.gameStatus === 'decided' ?
+        {...player, loses: player.loses+1, games: player.games+1} : {...player, draws: player.draws+1, games: player.games+1})
+    )
+    this.closeTeamWinModal();
   }
 
-  private resetTeamWinModalData() {
-    this.selectedWonTeam.set(null);
-    this.selectedLoseTeam.set(null);
-    this.selectedEndGameStatus.set(null);
-    this.isTeamWinModalVisible = false;
-  }
 }

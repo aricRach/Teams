@@ -1,0 +1,41 @@
+<div class="game-details">
+  <h2>Please fill game details: </h2>
+  <div>
+    <label for="'gameStatus'"> Game status</label>
+    <select id="'gameStatus'" [(ngModel)]="selectedEndGameStatus">
+      <option [value]="'decided'">decided</option>
+      <option [value]="'draw'">draw</option>
+    </select>
+  </div>
+
+  @if(selectedEndGameStatus()) {
+    <div>
+      @if(selectedEndGameStatus() === 'decided') {
+        <label for="'firstTeam'">Winner:</label>
+      } @else {
+        <label for="'firstTeam'">Select first team:</label>
+      }
+      <select id="'firstTeam'" [(ngModel)]="selectedWonTeam">
+        @for(team of winTeamOptions(); track team) {
+          <option [value]="team">{{team}}</option>
+        }
+      </select>
+    </div>
+
+    <div>
+      @if(selectedEndGameStatus() === 'decided') {
+        <label for="'secondTeam'">Loser:</label>
+      } @else {
+
+        <label for="'secondTeam'">Select second team</label>
+      }
+      <select id="'secondTeam'" [(ngModel)]="selectedLoseTeam">
+        @for(team of loseTeamOptions(); track team) {
+          <option [value]="team">{{team}}</option>
+        }
+      </select>
+    </div>
+
+    <button [disabled]="isSubmitButtonDisabled()" (click)="EndGame()">submit</button>
+  }
+    </div>

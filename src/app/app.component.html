@@ -28,10 +28,10 @@
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamA.players; track item) {
         @if(hideRating) {
-          <div appLongPress (longPress)="openModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
+          <div appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
 
         } @else {
-          <div appLongPress (longPress)="openModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
+          <div appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
         }
       }
     </div>
@@ -50,10 +50,10 @@
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamB.players; track item) {
         @if(hideRating) {
-          <div class="box" appLongPress (longPress)="openModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
+          <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
 
         } @else {
-          <div class="box" appLongPress (longPress)="openModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
+          <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
         }
       }
     </div>
@@ -72,9 +72,9 @@
         (cdkDropListDropped)="drop($event)">
         @for (item of teams.teamC.players; track item) {
           @if(hideRating) {
-            <div class="box" appLongPress (longPress)="openModal($event)" [data]="{player: item, team: 'teamC'}"cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
+            <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
           } @else {
-            <div class="box" appLongPress (longPress)="openModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
+            <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
           }
         }
       </div>
@@ -114,55 +114,14 @@
   <div>{{setGoalModalData.player.goals}}</div>
   <button (click)="setGoals(true)">+</button>
   <button (click)="setGoals(false)">-</button>
-  <button (click)="closeModal()">close</button>
+  <button (click)="closeSetGoalModal()">close</button>
 </div>
 
 
 <app-stopwatch (timeEndEvent)="showTeamWinModal()"></app-stopwatch>
 
-@if(isTeamWinModalVisible) {
+@if(isTeamWinModalVisible()) {
   <app-modal (close)="closeTeamWinModal()">
-    <div class="game-details">
-    <h2>Please fill game details: </h2>
-    <div>
-      <label for="'gameStatus'"> Game status</label>
-    <select id="'gameStatus'" [(ngModel)]="selectedEndGameStatus">
-      <option [value]="'decided'">decided</option>
-      <option [value]="'draw'">draw</option>
-    </select>
-    </div>
-
-    @if(selectedEndGameStatus()) {
-      <div>
-        @if(selectedEndGameStatus() === 'decided') {
-         <label for="'firstTeam'">Winner:</label>
-        } @else {
-          <label for="'firstTeam'">Select first team:</label>
-        }
-        <select id="'firstTeam'" [(ngModel)]="selectedWonTeam">
-          @for(team of winTeamOptions(); track team) {
-            <option [value]="team">{{team}}</option>
-          }
-        </select>
-      </div>
-
-      <div>
-        @if(selectedEndGameStatus() === 'decided') {
-          <label for="'secondTeam'">Loser:</label>
-        } @else {
-
-          <label for="'secondTeam'">Select second team</label>
-        }
-        <select id="'secondTeam'" [(ngModel)]="selectedLoseTeam">
-          @for(team of loseTeamOptions(); track team) {
-            <option [value]="team">{{team}}</option>
-          }
-        </select>
-      </div>
-
-      <button (click)="EndGame()">submit</button>
-    }
-    </div>
-
+    <app-game-details (endGame)="endGame($event)" [originalTeamNames]="originalTeamNames()"></app-game-details>
   </app-modal>
 }
