@@ -140,11 +140,15 @@ export class AppComponent {
     // }
   }
 
-  openSetGoalModal(event: {mouseEvent: MouseEvent, player: Player, team: string}) {
-    this.modalPosition = { x: event.mouseEvent.clientX, y: event.mouseEvent.clientY };
+  openSetGoalModal(event: { mouseEvent: MouseEvent | TouchEvent; player: any; team: string }): void {
+    const clientX = event.mouseEvent instanceof MouseEvent ? event.mouseEvent.clientX : (event.mouseEvent as TouchEvent).touches[0].clientX;
+    const clientY = event.mouseEvent instanceof MouseEvent ? event.mouseEvent.clientY : (event.mouseEvent as TouchEvent).touches[0].clientY;
+
+    this.modalPosition = { x: clientX, y: clientY };
     this.setGoalModalData = {
-      player: event.player, team: event.team
-    }
+      player: event.player,
+      team: event.team
+    };
     this.isSetGoalModalVisible = true;
   }
 
