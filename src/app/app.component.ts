@@ -44,7 +44,7 @@ import {GameDetails, GameDetailsComponent} from './game-details/game-details.com
 export class AppComponent {
 
   playerForm!: FormGroup;
-  hideRating = signal(true);
+  isAdminMode = signal(false);
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
 
   teams = {
@@ -73,7 +73,7 @@ export class AppComponent {
   isTeamWinModalVisible = signal(false);
 
   @ViewChild('nameField') nameField!: ElementRef;
-  protected isCodeModalVisible = signal(false);
+  protected isAdminCodeModalVisible = signal(false);
 
 
   drop(event: CdkDragDrop<any>) {
@@ -133,7 +133,7 @@ export class AppComponent {
   }
 
   toggleShowHideRating() {
-    this.isCodeModalVisible.set(true);
+    this.isAdminCodeModalVisible.set(true);
     // if(this.code === 2626) {
     //   this.hideRating = !this.hideRating;
 
@@ -182,6 +182,10 @@ export class AppComponent {
     this.isTeamWinModalVisible.set(false);
   }
 
+  closeAdminCodeModal() {
+    this.isAdminCodeModalVisible.set(false);
+  }
+
   endGame(gameDetails: GameDetails) {
     // @ts-ignore
     this.teams[gameDetails.winner].players = this.teams[gameDetails.winner].players.map
@@ -199,9 +203,9 @@ export class AppComponent {
   }
 
   codeModalSubmitted() {
-    this.isCodeModalVisible.set(false);
+    this.isAdminCodeModalVisible.set(false);
     if(this.code === '2626') {
-      this.hideRating.set(!this.hideRating());
+      this.isAdminMode.set(!this.isAdminMode());
     }
     this.code = '';
   }

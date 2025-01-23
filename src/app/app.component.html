@@ -3,21 +3,22 @@
 
 <div class="in-row">
 <button class="mrg" (click)="load()">load previous saved status</button>
-<button class="mrg" (click)="toggleShowHideRating()">show/hide ratings</button>
+<button class="mrg" (click)="toggleShowHideRating()">Toggle Admin Mode</button>
 </div>
 
 <div>
-  <h2>Add Player</h2>
-  <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
-    <input #nameField formControlName="name" placeholder="Player Name">
-    <input formControlName="rating" type="number" placeholder="Rating">
-    <button type="submit">Add Player</button>
-  </form>
-
+  @if(isAdminMode()) {
+    <h2>Add Player</h2>
+    <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
+      <input #nameField formControlName="name" placeholder="Player Name">
+      <input formControlName="rating" type="number" placeholder="Rating">
+      <button type="submit">Add Player</button>
+    </form>
+  }
   <div class="all-teams-container">
   <div class="list-container">
     <h2>A</h2>
-    @if(!hideRating()) {
+    @if(isAdminMode()) {
       <h5>{{teams.teamA.totalRating}}</h5>
     }
     <div
@@ -29,7 +30,7 @@
       class="list"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamA.players; track item) {
-        @if(hideRating()) {
+        @if(!isAdminMode()) {
           <div appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
 
         } @else {
@@ -41,7 +42,7 @@
 
   <div class="list-container">
     <h2>B</h2>
-    @if(!hideRating()) {
+    @if(isAdminMode()) {
       <h5>{{teams.teamB.totalRating}}</h5>
     }
     <div
@@ -53,7 +54,7 @@
       class="list"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamB.players; track item) {
-        @if(hideRating()) {
+        @if(!isAdminMode()) {
           <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
 
         } @else {
@@ -65,7 +66,7 @@
 
     <div class="list-container">
       <h2>C</h2>
-      @if(!hideRating()) {
+      @if(isAdminMode()) {
         <h5>{{teams.teamC.totalRating}}</h5>
       }
       <div
@@ -77,7 +78,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of teams.teamC.players; track item) {
-          @if(hideRating()) {
+          @if(!isAdminMode()) {
             <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
           } @else {
             <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
@@ -97,7 +98,7 @@
       class="box available-player"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.allPlayers.players; track item; let idx = $index) {
-        @if(hideRating()) {
+        @if(!isAdminMode()) {
           <div class="box" cdkDrag>{{item.name}}</div>
 
         } @else {
@@ -113,14 +114,16 @@
 
 
 <div
-  class="modal"
+  class="set-goal-modal"
   *ngIf="isSetGoalModalVisible"
   [ngStyle]="{'top.px': modalPosition.y, 'left.px': modalPosition.x}">
 
-  <div>{{setGoalModalData.player.goals}}</div>
+  <div>Goals: {{setGoalModalData.player.goals}}</div>
+  <div class="goal-set-container">
   <button (click)="setGoals(true)">+</button>
   <button (click)="setGoals(false)">-</button>
-  <button (click)="closeSetGoalModal()">close</button>
+  <button (click)="closeSetGoalModal()">set</button>
+  </div>
 </div>
 
 
@@ -132,8 +135,8 @@
   </app-modal>
 }
 
-@if(isCodeModalVisible()) {
-  <app-modal [showCloseButton]="false" (submit)="codeModalSubmitted()" (close)="closeTeamWinModal()">
+@if(isAdminCodeModalVisible()) {
+  <app-modal [showCloseButton]="false" (submit)="codeModalSubmitted()" (close)="closeAdminCodeModal()">
     <input placeholder="code" [(ngModel)]="code">
   </app-modal>
 }
