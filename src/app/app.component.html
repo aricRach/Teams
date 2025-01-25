@@ -30,12 +30,7 @@
       class="list"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamA.players; track item) {
-        @if(!isAdminMode()) {
-          <div appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
-
-        } @else {
-          <div appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
-        }
+          <div appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{getPlayerView(item)}}</div>
       }
     </div>
     </div>
@@ -54,12 +49,7 @@
       class="list"
       (cdkDropListDropped)="drop($event)">
       @for (item of teams.teamB.players; track item) {
-        @if(!isAdminMode()) {
-          <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
-
-        } @else {
-          <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
-        }
+          <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{getPlayerView(item)}}</div>
       }
     </div>
     </div>
@@ -78,11 +68,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of teams.teamC.players; track item) {
-          @if(!isAdminMode()) {
-            <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{item.name}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
-          } @else {
-            <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{item.name}} - {{item.rating}} - goals: {{item.goals}} - wins: {{item.wins}} - loses: {{item.loses}} - games: {{item.games}}</div>
-          }
+            <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{getPlayerView(item)}}</div>
         }
       </div>
     </div>
@@ -118,7 +104,7 @@
   *ngIf="isSetGoalModalVisible"
   [ngStyle]="{'top.px': modalPosition.y, 'left.px': modalPosition.x}">
 
-  <div>Goals: {{setGoalModalData.player.goals}}</div>
+  <div>Goals: {{getGoalModalDataByPlayer()}}</div>
   <div class="goal-set-container">
   <button (click)="setGoals(true)">+</button>
   <button (click)="setGoals(false)">-</button>
