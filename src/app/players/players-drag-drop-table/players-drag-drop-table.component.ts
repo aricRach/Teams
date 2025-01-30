@@ -1,13 +1,9 @@
 import {
   Component,
-  computed,
   inject,
   input,
   linkedSignal,
-  OnChanges,
-  OnInit,
   signal,
-  SimpleChanges
 } from '@angular/core';
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
@@ -48,8 +44,6 @@ export class PlayersDragDropTableComponent {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      console.log(event.previousContainer);
-
       transferArrayItem(
         event.previousContainer.data,
         event.container.data,
@@ -86,8 +80,19 @@ export class PlayersDragDropTableComponent {
     this.isSetGoalModalVisible.set(true);
   }
 
-  setGoals(addGoal: boolean) {
+  setGoalModalClicked(addGoal: boolean) {
+    let goals = this.getGoalModalDataByPlayer();
+    if (addGoal) {
+      goals++;
+    } else if (goals > 0) {
+      goals--;
+    }
+    this.getGoalModalDataByPlayer.set(goals);
+  }
+
+  setGoals() {
     const teamName = this.setGoalModalData().team;
+    const goals = this.getGoalModalDataByPlayer();
     // @ts-ignore
     const team = { ...this.playersService.teams()[teamName] }; // Clone the team
     const playerIndex = team.players.findIndex((player: Player) => player.name === this.setGoalModalData().player.name);
@@ -98,19 +103,14 @@ export class PlayersDragDropTableComponent {
       const stats = { ...player.statistics };
       const dateStats = { ...stats[this.currentDate] };
 
-      if (addGoal) {
-        dateStats.goals++;
-      } else if (dateStats.goals > 0) {
-        dateStats.goals--;
-      }
+      dateStats.goals = goals;
 
       stats[this.currentDate] = dateStats;
       player.statistics = stats;
       players[playerIndex] = player;
       team.players = players;
-      // this.setGoalModalData.update(data => data.player.statistics[this.currentDate].goals = dateStats.goals);
       this.playersService.teams.set({ ...this.playersService.teams(), [teamName]: team });
-      this.getGoalModalDataByPlayer.set(dateStats.goals);
+      this.closeSetGoalModal();
     }
   }
 
