@@ -1,0 +1,95 @@
+<div>
+
+  <div class="all-teams-container">
+    <div class="list-container">
+      <h2>A</h2>
+      @if(isAdminMode()) {
+        <h5>{{playersService.teams().teamA.totalRating}}</h5>
+      }
+      <div
+        id="teamA"
+        cdkDropList
+        #teamAList="cdkDropList"
+        [cdkDropListData]="playersService.teams().teamA.players"
+        [cdkDropListConnectedTo]="[teamBList, playersList, teamCList]"
+        class="list"
+        (cdkDropListDropped)="drop($event)">
+        @for (item of playersService.teams().teamA.players; track item) {
+          <app-player-view [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag></app-player-view>
+        }
+      </div>
+    </div>
+
+    <div class="list-container">
+      <h2>B</h2>
+      @if(isAdminMode()) {
+        <h5>{{playersService.teams().teamB.totalRating}}</h5>
+      }
+      <div
+        id="teamB"
+        cdkDropList
+        #teamBList="cdkDropList"
+        [cdkDropListData]="playersService.teams().teamB.players"
+        [cdkDropListConnectedTo]="[teamAList, playersList, teamCList]"
+        class="list"
+        (cdkDropListDropped)="drop($event)">
+        @for (item of playersService.teams().teamB.players; track item) {
+          <app-player-view [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" class="box" cdkDrag></app-player-view>
+        }
+      </div>
+    </div>
+
+    <div class="list-container">
+      <h2>C</h2>
+      @if(isAdminMode()) {
+        <h5>{{playersService.teams().teamC.totalRating}}</h5>
+      }
+      <div
+        cdkDropList
+        id="teamC"
+        #teamCList="cdkDropList"
+        [cdkDropListData]="playersService.teams().teamC.players"
+        [cdkDropListConnectedTo]="[teamAList, teamBList, playersList]"
+        class="list"
+        (cdkDropListDropped)="drop($event)">
+        @for (item of playersService.teams().teamC.players; track item) {
+          <app-player-view [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" class="box" cdkDrag></app-player-view>
+        }
+      </div>
+    </div>
+  </div>
+
+  <h2>Players</h2>
+  <div
+    cdkDropList
+    id="allPlayers"
+    #playersList="cdkDropList"
+    [cdkDropListData]="playersService.teams().allPlayers.players"
+    [cdkDropListConnectedTo]="[teamAList, teamBList, teamCList]"
+    class="box available-player"
+    (cdkDropListDropped)="drop($event)">
+    @for (item of playersService.teams().allPlayers.players; track item; let idx = $index) {
+      @if(!isAdminMode()) {
+        <div class="box" cdkDrag>{{item.name}}</div>
+
+      } @else {
+        <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
+      }
+      <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>
+    }
+  </div>
+
+</div>
+
+<div
+  class="set-goal-modal"
+  *ngIf="isSetGoalModalVisible()"
+  [ngStyle]="{'top.px': modalPosition.y, 'left.px': modalPosition.x}">
+
+  <div>Goals: {{getGoalModalDataByPlayer()}}</div>
+  <div class="goal-set-container">
+    <button (click)="setGoals(true)">+</button>
+    <button (click)="setGoals(false)">-</button>
+    <button (click)="closeSetGoalModal()">set</button>
+  </div>
+</div>

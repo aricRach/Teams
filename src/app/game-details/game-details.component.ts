@@ -4,8 +4,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 export interface GameDetails {
   gameStatus: GameStatus | null
-  winner: string | null,
-  loser: string | null
+  winner: string,
+  loser: string
 }
 
 export enum GameStatus {
@@ -33,8 +33,8 @@ export class GameDetailsComponent {
     return name !== this.selectedWonTeam();
   }))
 
-  selectedWonTeam = signal(null);
-  selectedLoseTeam = signal(null);
+  selectedWonTeam = signal('');
+  selectedLoseTeam = signal('');
 
   selectedEndGameStatus: WritableSignal<null | GameStatus> = signal(null);
 
@@ -50,8 +50,8 @@ export class GameDetailsComponent {
   }
 
   private resetTeamWinModalData() {
-    this.selectedWonTeam.set(null);
-    this.selectedLoseTeam.set(null);
+    this.selectedWonTeam.set('');
+    this.selectedLoseTeam.set('');
     this.selectedEndGameStatus.set(null);
   }
 

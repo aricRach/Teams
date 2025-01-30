@@ -6,111 +6,18 @@
 <button class="mrg" (click)="toggleShowHideRating()">Toggle Admin Mode</button>
 </div>
 
-<div>
-  @if(isAdminMode()) {
-    <h2>Add Player</h2>
-    <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
-      <input #nameField formControlName="name" placeholder="Player Name">
-      <input formControlName="rating" type="number" placeholder="Rating">
-      <button type="submit">Add Player</button>
-    </form>
-  }
-  <div class="all-teams-container">
-  <div class="list-container">
-    <h2>A</h2>
-    @if(isAdminMode()) {
-      <h5>{{teams.teamA.totalRating}}</h5>
-    }
-    <div
-      id="teamA"
-      cdkDropList
-      #teamAList="cdkDropList"
-      [cdkDropListData]="teams.teamA.players"
-      [cdkDropListConnectedTo]="[teamBList, playersList, teamCList]"
-      class="list"
-      (cdkDropListDropped)="drop($event)">
-      @for (item of teams.teamA.players; track item) {
-          <div appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag>{{getPlayerView(item)}}</div>
-      }
-    </div>
-    </div>
-
-  <div class="list-container">
-    <h2>B</h2>
-    @if(isAdminMode()) {
-      <h5>{{teams.teamB.totalRating}}</h5>
-    }
-    <div
-      id="teamB"
-      cdkDropList
-      #teamBList="cdkDropList"
-      [cdkDropListData]="teams.teamB.players"
-      [cdkDropListConnectedTo]="[teamAList, playersList, teamCList]"
-      class="list"
-      (cdkDropListDropped)="drop($event)">
-      @for (item of teams.teamB.players; track item) {
-          <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" cdkDrag>{{getPlayerView(item)}}</div>
-      }
-    </div>
-    </div>
-
-    <div class="list-container">
-      <h2>C</h2>
-      @if(isAdminMode()) {
-        <h5>{{teams.teamC.totalRating}}</h5>
-      }
-      <div
-        cdkDropList
-        id="teamC"
-        #teamCList="cdkDropList"
-        [cdkDropListData]="teams.teamC.players"
-        [cdkDropListConnectedTo]="[teamAList, teamBList, playersList]"
-        class="list"
-        (cdkDropListDropped)="drop($event)">
-        @for (item of teams.teamC.players; track item) {
-            <div class="box" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" cdkDrag>{{getPlayerView(item)}}</div>
-        }
-      </div>
-    </div>
-    </div>
-
-    <h2>Players</h2>
-    <div
-      cdkDropList
-      id="allPlayers"
-      #playersList="cdkDropList"
-      [cdkDropListData]="teams.allPlayers.players"
-      [cdkDropListConnectedTo]="[teamAList, teamBList, teamCList]"
-      class="box available-player"
-      (cdkDropListDropped)="drop($event)">
-      @for (item of teams.allPlayers.players; track item; let idx = $index) {
-        @if(!isAdminMode()) {
-          <div class="box" cdkDrag>{{item.name}}</div>
-
-        } @else {
-          <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
-        }
-          <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>
-      }
-    </div>
-
-    </div>
-
+<app-players-drag-drop-table [isAdminMode]="isAdminMode()"></app-players-drag-drop-table>
+@if(isAdminMode()) {
+  <h2>Add Player</h2>
+  <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
+    <input #nameField formControlName="name" placeholder="Player Name">
+    <input formControlName="rating" type="number" placeholder="Rating">
+    <button type="submit">Add Player</button>
+  </form>
+}
 <button (click)="save()"> save </button>
 
 
-<div
-  class="set-goal-modal"
-  *ngIf="isSetGoalModalVisible"
-  [ngStyle]="{'top.px': modalPosition.y, 'left.px': modalPosition.x}">
-
-  <div>Goals: {{getGoalModalDataByPlayer()}}</div>
-  <div class="goal-set-container">
-  <button (click)="setGoals(true)">+</button>
-  <button (click)="setGoals(false)">-</button>
-  <button (click)="closeSetGoalModal()">set</button>
-  </div>
-</div>
 
 
 <app-stopwatch (timeEndEvent)="showTeamWinModal()"></app-stopwatch>
