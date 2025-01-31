@@ -14,7 +14,7 @@
   @if(isAdminMode()) {
   <div class="gap in-row">
   <button>Load Global</button>
-  <button>Save Global</button>
+  <button (click)="saveGlobal()">Save Global</button>
   </div>
   }
 
@@ -46,7 +46,3 @@
     <input placeholder="code" [(ngModel)]="code">
   </app-modal>
 }
-
-
-
-<button (click)="saveAll()">aricccccc</button>

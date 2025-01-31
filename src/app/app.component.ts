@@ -169,7 +169,7 @@ export class AppComponent implements OnInit{
     // this.addPlayerFirebase().then(() => console.log('done'));
   }
 
-  saveAll() {
+  saveGlobal() {
     this.playersService.setPlayersIntoDataBase();
   }
 }
