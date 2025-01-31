@@ -15,15 +15,20 @@ export class PlayersApiService {
 
     for (const player of players) {
       try {
-        // Query Firestore for existing player by name
-        const q = query(playersCollection, where('name', '==', player.name));
+        // Normalize player's name to lowercase
+        const normalizedPlayerName = player.name.toLowerCase();
+
+        // Query Firestore for existing player by normalized name (case insensitive)
+        const q = query(playersCollection, where('name', '==', normalizedPlayerName));
         const querySnapshot = await getDocs(q);
 
-        if (!querySnapshot.empty) { // Player exists, update the first matching document
+        if (!querySnapshot.empty) {
+          // Player exists, update the first matching document
           const playerDoc = doc(this.firestore, 'players', querySnapshot.docs[0].id);
           await setDoc(playerDoc, player, { merge: true }); // Merge: Update existing fields, keep old ones
-        } else { // Player does not exist, add new
-          await addDoc(playersCollection, player);
+        } else {
+          // Player does not exist, add new
+          await addDoc(playersCollection, { ...player, name: normalizedPlayerName });
         }
       } catch (error) {
         console.error(`❌ Error processing player "${player.name}":`, error);

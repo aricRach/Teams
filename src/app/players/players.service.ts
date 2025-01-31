@@ -82,7 +82,7 @@ export class PlayersService {
 
   addNewPlayer(newPlayer: Player) {
     const allPlayersArray = this.flattenPlayers();
-    const isPlayerExist = allPlayersArray.some(player => player.name === newPlayer.name);
+    const isPlayerExist = allPlayersArray.some(player => player.name.toLowerCase() === newPlayer.name.toLowerCase());
     if(isPlayerExist) {
       alert(`❌ player with name: ${newPlayer.name} already exist`);
       return;
