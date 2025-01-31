@@ -17,6 +17,7 @@
         "build": {
           "builder": "@ngx-env/builder:browser",
           "options": {
+            "main": "src/main.ts",
             "outputPath": "dist/teams",
             "index": "src/index.html",
             "browser": "src/main.ts",
