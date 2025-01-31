@@ -2,10 +2,10 @@ import {Component, ElementRef, inject, OnInit, signal, ViewChild} from '@angular
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {StopwatchComponent} from './stopwatch/stopwatch.component';
-import {ModalComponent} from './modal/modal.component';
+import {ModalComponent} from '../modals/modal/modal.component';
 import {GameDetails, GameDetailsComponent} from './game-details/game-details.component';
 import {PlayersService} from './players/players.service';
-import {currentDate, formatDateToString} from './utils/date-utils';
+import {currentDate} from './utils/date-utils';
 import {PlayersDragDropTableComponent} from './players/players-drag-drop-table/players-drag-drop-table.component';
 
 export interface Player {
