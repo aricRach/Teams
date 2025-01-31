@@ -15,12 +15,11 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@ngx-env/builder",
+          "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "main": "src/main.ts",
             "outputPath": "dist/teams",
             "index": "src/index.html",
-            "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
             ],
