@@ -15,7 +15,7 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@ngx-env/builder:browser",
+          "builder": "@ngx-env/builder",
           "options": {
             "main": "src/main.ts",
             "outputPath": "dist/teams",
