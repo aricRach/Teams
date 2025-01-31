@@ -1,10 +1,14 @@
-import {Injectable, signal} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {Player} from '../app.component';
+import {PlayersApiService} from './players-api.service';
+import {currentDate} from '../utils/date-utils';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlayersService {
+
+  playersApiService = inject(PlayersApiService);
 
   teams = signal ({
     teamA: {
@@ -51,5 +55,51 @@ export class PlayersService {
 
     return teams;
   }
-  constructor() { }
+
+  setPlayersIntoDataBase() {
+    console.log(this.teams());
+    this.playersApiService.savePlayers(this.flattenPlayers());
+  }
+
+  private flattenPlayers(): Player[] {
+    const playersArray: Player[] = [];
+
+    Object.keys(this.teams()).forEach(team => {
+      // @ts-ignore
+      if (this.teams()[team].players && Array.isArray(this.teams()[team].players)) {
+        // @ts-ignore
+        this.teams()[team].players.forEach((player: any) => {
+          playersArray.push({
+            ...player,
+            team: team, // Add team name for reference
+          });
+        });
+      }
+    });
+
+    return playersArray;
+  }
+
+  addNewPlayer(newPlayer: Player) {
+    const allPlayersArray = this.flattenPlayers();
+    const isPlayerExist = allPlayersArray.some(player => player.name === newPlayer.name);
+    if(isPlayerExist) {
+      alert(`❌ player with name: ${newPlayer.name} already exist`);
+      return;
+    }
+      this.teams.update((teams: any) => {
+        teams.allPlayers.players.push({
+          name: newPlayer.name, rating: newPlayer.rating, statistics: {
+            [currentDate]: {
+              goals: 0,
+              wins: 0,
+              loses: 0,
+              games: 0,
+              draws: 0,
+            }
+          }
+        })
+        return teams
+      })
+    }
 }

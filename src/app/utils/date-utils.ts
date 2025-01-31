@@ -5,3 +5,5 @@
 
   return `${day}-${month}-${year}`;
 }
+
+export const currentDate = formatDateToString(new Date());

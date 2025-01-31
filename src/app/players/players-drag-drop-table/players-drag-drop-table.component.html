@@ -1,5 +1,13 @@
 <div>
 
+  <div class="center">
+  @if(showStatistics()) {
+    <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
+  } @else {
+    <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
+  }
+  </div>
+
   <div class="all-teams-container">
     <div class="list-container">
       <h2>A</h2>
@@ -15,7 +23,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of playersService.teams().teamA.players; track item) {
-          <app-player-view [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag></app-player-view>
+          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag></app-player-view>
         }
       </div>
     </div>
@@ -34,7 +42,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of playersService.teams().teamB.players; track item) {
-          <app-player-view [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" class="box" cdkDrag></app-player-view>
+          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" class="box" cdkDrag></app-player-view>
         }
       </div>
     </div>
@@ -53,7 +61,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of playersService.teams().teamC.players; track item) {
-          <app-player-view [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" class="box" cdkDrag></app-player-view>
+          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appLongPress (longPress)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" class="box" cdkDrag></app-player-view>
         }
       </div>
     </div>

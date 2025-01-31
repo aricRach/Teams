@@ -5,7 +5,7 @@ import {StopwatchComponent} from './stopwatch/stopwatch.component';
 import {ModalComponent} from './modal/modal.component';
 import {GameDetails, GameDetailsComponent} from './game-details/game-details.component';
 import {PlayersService} from './players/players.service';
-import {formatDateToString} from './utils/date-utils';
+import {currentDate, formatDateToString} from './utils/date-utils';
 import {PlayersDragDropTableComponent} from './players/players-drag-drop-table/players-drag-drop-table.component';
 
 export interface Player {
@@ -43,9 +43,7 @@ export interface GoalModalEvent {
 })
 
 // todo: separate to components.
-// todo: add state.
 // todo: add table for statistics
-// todo: set goals just after clicking set.
 // todo: when drag and drop and then save and load there are duplicates
 
 export class AppComponent implements OnInit{
@@ -70,21 +68,7 @@ export class AppComponent implements OnInit{
   addPlayer() {
     const {name, rating} = this.playerForm.value;
     if (name && rating > 0) {
-      this.playersService.teams.update((teams: any) => {
-        teams.allPlayers.players.push({
-          name, rating, statistics: {
-            [this.currentDate]: {
-              goals: 0,
-              wins: 0,
-              loses: 0,
-              games: 0,
-              draws: 0,
-            }
-          }
-        })
-        return teams
-      })
-
+      this.playersService.addNewPlayer({name, rating} as Player);
       this.playerForm.reset();
       this.nameField.nativeElement.focus();
     }
@@ -98,7 +82,7 @@ export class AppComponent implements OnInit{
     const savedTeams = localStorage.getItem('teams');
     if(savedTeams) {
       const teamsObj = JSON.parse(savedTeams);
-      this.playersService.teams.set({...this.playersService.updateStatisticsWithDefaults(teamsObj, this.currentDate)});
+      this.playersService.teams.set({...this.playersService.updateStatisticsWithDefaults(teamsObj, currentDate)});
     }
   }
 
@@ -119,13 +103,7 @@ export class AppComponent implements OnInit{
     this.isAdminCodeModalVisible.set(false);
   }
 
-  get currentDate() {
-    return formatDateToString(new Date())
-  }
-
   endGame(gameDetails: GameDetails) {
-    const currentDate = this.currentDate;
-
     // Update winners' stats
     // @ts-ignore
     const winners = this.playersService.teams()[gameDetails.winner].players.map((player: Player) => {
@@ -191,24 +169,7 @@ export class AppComponent implements OnInit{
     // this.addPlayerFirebase().then(() => console.log('done'));
   }
 
-  addPlayerFirebase() {
-    // return this.playersApiService.addPlayer({
-    //   name: 'yois',
-    //   rating: 9,
-    //   statistics: {
-    //     "2024-01-01": {
-    //       goals: 9,
-    //       wins: 5,
-    //       draws: 9,
-    //       games: 9
-    //     },
-    //     "2024-02-01": {
-    //       goals: 9,
-    //       wins: 5,
-    //       draws: 9,
-    //       games: 9
-    //     },
-    //   }
-    // })
+  saveAll() {
+    this.playersService.setPlayersIntoDataBase();
   }
 }

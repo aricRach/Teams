@@ -1,9 +1,23 @@
 
-<h1 class="center">Teams</h1>
+<div class="in-row center gap">
+  <h1 >Teams</h1>
+  <button class="action-btn" (click)="toggleShowHideRating()">Toggle Admin Mode</button>
+</div>
 
-<div class="in-row">
-<button class="mrg" (click)="load()">load previous saved status</button>
-<button class="mrg" (click)="toggleShowHideRating()">Toggle Admin Mode</button>
+
+<div class="space-between save-buttons gap">
+  <div class="gap in-row">
+<button (click)="load()">Load local data</button>
+<button (click)="save()">Save local data </button>
+  </div>
+
+  @if(isAdminMode()) {
+  <div class="gap in-row">
+  <button>Load Global</button>
+  <button>Save Global</button>
+  </div>
+  }
+
 </div>
 
 <app-players-drag-drop-table [isAdminMode]="isAdminMode()"></app-players-drag-drop-table>
@@ -15,7 +29,6 @@
     <button type="submit">Add Player</button>
   </form>
 }
-<button (click)="save()"> save </button>
 
 
 
@@ -33,3 +46,7 @@
     <input placeholder="code" [(ngModel)]="code">
   </app-modal>
 }
+
+
+
+<button (click)="saveAll()">aricccccc</button>

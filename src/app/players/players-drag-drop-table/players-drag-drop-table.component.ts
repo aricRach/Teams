@@ -9,7 +9,7 @@ import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@
 import {CommonModule} from '@angular/common';
 import {LongPressDirective} from '../../directives/long-press.directive';
 import {GoalModalEvent, Player} from '../../app.component';
-import {formatDateToString} from '../../utils/date-utils';
+import {currentDate, formatDateToString} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
 import {PlayersService} from '../players.service';
 
@@ -27,10 +27,16 @@ export class PlayersDragDropTableComponent {
 
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;
   getGoalModalDataByPlayer = linkedSignal(() =>
-    this.setGoalModalData().player.statistics[this.currentDate]?.goals || 0)
+    this.setGoalModalData().player.statistics[currentDate]?.goals || 0)
   isSetGoalModalVisible = signal(false);
 
   modalPosition = { x: 0, y: 0 };
+
+  showStatistics = signal(false);
+
+  toggleShowStatistics() {
+    this.showStatistics.set(!this.showStatistics());
+  }
 
   closeSetGoalModal() {
     this.isSetGoalModalVisible.set(false);
@@ -101,11 +107,11 @@ export class PlayersDragDropTableComponent {
       const players = [...team.players];
       const player = { ...players[playerIndex] };
       const stats = { ...player.statistics };
-      const dateStats = { ...stats[this.currentDate] };
+      const dateStats = { ...stats[currentDate] };
 
       dateStats.goals = goals;
 
-      stats[this.currentDate] = dateStats;
+      stats[currentDate] = dateStats;
       player.statistics = stats;
       players[playerIndex] = player;
       team.players = players;
@@ -113,9 +119,4 @@ export class PlayersDragDropTableComponent {
       this.closeSetGoalModal();
     }
   }
-
-  get currentDate() {
-    return formatDateToString(new Date())
-  }
-
 }

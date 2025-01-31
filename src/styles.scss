@@ -11,4 +11,14 @@
 .center {
   display: flex;
   justify-content: center;
+  align-items: center;
+}
+
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
+
+.gap {
+  gap: 5px;
 }

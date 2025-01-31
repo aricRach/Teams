@@ -1,7 +1,6 @@
-import {Component, computed, inject, input, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, computed, input} from '@angular/core';
 import {Player} from '../../app.component';
-import {formatDateToString} from '../../utils/date-utils';
-import {PlayersService} from '../players.service';
+import {currentDate} from '../../utils/date-utils';
 
 @Component({
   selector: 'app-player-view',
@@ -14,14 +13,12 @@ export class PlayerViewComponent {
 
   isAdminMode = input.required();
   player = input.required<Player>();
+  showStatistics = input.required<boolean>();
 
-  get currentDate() {
-    return formatDateToString(new Date())
-  }
 
   playerView = computed(() => {
-    const stats = this.player().statistics[this.currentDate] ? this.player().statistics[this.currentDate] : null;
-    if(!stats) {
+    const stats = this.player().statistics[currentDate] ? this.player().statistics[currentDate] : null;
+    if(!stats || !this.showStatistics()) {
       return !this.isAdminMode() ? this.player().name : this.player().name + ' - rating - ' + this.player().rating;
     }
     return !this.isAdminMode() ?
