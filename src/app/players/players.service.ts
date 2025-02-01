@@ -28,7 +28,7 @@ export class PlayersService {
       totalRating: 0,
     }
   }
-  teams = signal({...this.skeleton})
+  teams = signal(structuredClone(this.skeleton));
 
   setData(value: any) {
     this.teams.set(value);
@@ -105,9 +105,9 @@ export class PlayersService {
     }
 
     getAllPlayersFromDatabase() {
-       this.playersApiService.getAllPlayers().then((allPlayers) => {
+       this.playersApiService.getAllPlayers().subscribe((allPlayers) => {
 
-        const teams = {...this.skeleton};
+        const teams = structuredClone(this.skeleton);
 
         for (const player of allPlayers) {
           // @ts-ignore

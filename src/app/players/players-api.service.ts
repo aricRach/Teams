@@ -1,5 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, doc, getDocs, query, setDoc, where, addDoc } from '@angular/fire/firestore';
+import {
+  Firestore,
+  collection,
+  doc,
+  getDocs,
+  query,
+  setDoc,
+  where,
+  addDoc,
+  collectionData
+} from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -36,27 +46,9 @@ export class PlayersApiService {
     }
   }
 
-  async getAllPlayers() {
+  getAllPlayers() {
     const playersCollection = collection(this.firestore, 'players'); // Reference to 'players' collection
-
-    try {
-      const querySnapshot = await getDocs(playersCollection);  // Fetch all documents
-      const players = [] as any;
-
-      querySnapshot.forEach((doc) => {
-        // Log the document data to see what is being fetched
-        const docData = doc.data();
-        if (doc.exists()) {
-          // If data exists, push the document's data along with the document ID
-          players.push({ id: doc.id, ...docData });
-        } else {
-          console.log(`Document with ID  has no data.`);
-        }
-      });
-      return players;
-    } catch (error) {
-      console.error("Error getting documents:", error);
-    }
+      return collectionData(playersCollection, { idField: "id" });  // Fetch all documents
   }
 
 }
