@@ -92,7 +92,7 @@
 <div
   class="set-goal-modal"
   *ngIf="isSetGoalModalVisible()"
-  [ngStyle]="{'top.px': modalPosition.y, 'left.px': modalPosition.x}">
+  [ngStyle]="{'top.px': modalPosition().y, 'left.px': modalPosition().x}">
 
   <div>Goals: {{getGoalModalDataByPlayer()}}</div>
   <div class="goal-set-container">

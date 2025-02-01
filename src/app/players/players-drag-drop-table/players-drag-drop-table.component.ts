@@ -30,7 +30,7 @@ export class PlayersDragDropTableComponent {
     this.setGoalModalData().player.statistics[currentDate]?.goals || 0)
   isSetGoalModalVisible = signal(false);
 
-  modalPosition = { x: 0, y: 0 };
+  modalPosition = signal({ x: 0, y: 0 });
 
   showStatistics = signal(false);
 
@@ -78,7 +78,7 @@ export class PlayersDragDropTableComponent {
     const clientX = event.mouseEvent instanceof MouseEvent ? event.mouseEvent.clientX : (event.mouseEvent as TouchEvent).touches[0].clientX;
     const clientY = event.mouseEvent instanceof MouseEvent ? event.mouseEvent.clientY : (event.mouseEvent as TouchEvent).touches[0].clientY;
 
-    this.modalPosition = { x: clientX, y: clientY };
+    this.modalPosition.set({ x: clientX, y: clientY });
     this.setGoalModalData.set({
       player: event.player,
       team: event.team
