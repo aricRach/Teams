@@ -10,7 +10,7 @@ export class PlayersService {
 
   playersApiService = inject(PlayersApiService);
 
-  teams = signal ({
+  skeleton = {
     teamA: {
       players: [] as Player [],
       totalRating: 0
@@ -27,7 +27,8 @@ export class PlayersService {
       players: [] as Player [],
       totalRating: 0,
     }
-  })
+  }
+  teams = signal({...this.skeleton})
 
   setData(value: any) {
     this.teams.set(value);
@@ -101,5 +102,20 @@ export class PlayersService {
         })
         return teams
       })
+    }
+
+    getAllPlayersFromDatabase() {
+       this.playersApiService.getAllPlayers().then((allPlayers) => {
+
+        const teams = {...this.skeleton};
+
+        for (const player of allPlayers) {
+          // @ts-ignore
+          teams[player.team].players.push(player);
+          // @ts-ignore
+          teams[player.team].totalRating += player.rating;
+        }
+         this.teams.set(teams);
+       })
     }
 }

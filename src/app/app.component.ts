@@ -165,11 +165,15 @@ export class AppComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    // this.playersApiService.getPlayers().subscribe(val => console.log(val))
+    // this.playersService.getAllPlayersFromDatabase();
     // this.addPlayerFirebase().then(() => console.log('done'));
   }
 
   saveGlobal() {
     this.playersService.setPlayersIntoDataBase();
+  }
+
+  loadGlobal() {
+    this.playersService.getAllPlayersFromDatabase();
   }
 }
