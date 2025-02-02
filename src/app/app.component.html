@@ -20,7 +20,9 @@
 
 </div>
 
-<app-players-drag-drop-table [isAdminMode]="isAdminMode()"></app-players-drag-drop-table>
+<app-players-drag-drop-table [isGameOn]="isGameOn()" [isAdminMode]="isAdminMode()"></app-players-drag-drop-table>
+
+
 @if(isAdminMode()) {
   <h2>Add Player</h2>
   <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
@@ -33,7 +35,7 @@
 
 
 
-<app-stopwatch (timeEndEvent)="showTeamWinModal()"></app-stopwatch>
+<app-stopwatch (timeStartEvent)="onGameStartEvent()" (timeStoppedEvent)="onGameStopEvent()" (timeEndEvent)="showTeamWinModal()"></app-stopwatch>
 
 @if(isTeamWinModalVisible()) {
   <app-modal [showCloseIcon]="true" [showSubmitButton]="false" [showCloseButton]="false" (close)="closeTeamWinModal()">

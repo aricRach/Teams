@@ -23,6 +23,8 @@ import {PlayersService} from '../players.service';
 export class PlayersDragDropTableComponent {
 
   isAdminMode = input.required();
+  isGameOn = input.required();
+
   playersService = inject(PlayersService);
 
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;

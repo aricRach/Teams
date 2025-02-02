@@ -52,7 +52,7 @@ export class AppComponent implements OnInit{
   isAdminMode = signal(false);
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
   playersService = inject(PlayersService);
-
+  isGameOn = signal(false);
   isTeamWinModalVisible = signal(false);
 
   @ViewChild('nameField') nameField!: ElementRef;
@@ -72,6 +72,14 @@ export class AppComponent implements OnInit{
       this.playerForm.reset();
       this.nameField.nativeElement.focus();
     }
+  }
+
+  onGameStartEvent() {
+    this.isGameOn.set(true);
+  }
+
+  onGameStopEvent() {
+    this.isGameOn.set(false);
   }
 
   save() {

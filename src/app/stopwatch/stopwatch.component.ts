@@ -16,12 +16,15 @@ export class StopwatchComponent {
   running = false;
 
   timeEndEvent = output();
+  timeStartEvent = output();
+  timeStoppedEvent = output();
 
   start(): void {
     if (!this.running) {
       this.running = true;
       this.startTime = Date.now() - this.pausedTime; // Adjust startTime to include paused time
       this.interval = setInterval(() => this.updateTime(), 1000);
+      this.timeStartEvent.emit();
     }
   }
 
@@ -30,6 +33,7 @@ export class StopwatchComponent {
       this.running = false;
       clearInterval(this.interval);
       this.pausedTime = this.time; // Save elapsed time
+      this.timeStoppedEvent.emit();
     }
   }
 
