@@ -34,7 +34,7 @@ export class PlayersService {
     this.teams.set(value);
   }
 
-  updateStatisticsWithDefaults(teams: any, date: string) {
+  updateStatisticsWithDefaults(teams: any) {
     const defaultStatistics = {
       goals: 0,
       wins: 0,
@@ -49,7 +49,7 @@ export class PlayersService {
       if (team.players && Array.isArray(team.players)) {
         team.players.forEach((player: any) => {
           player.statistics = player.statistics || {};
-          player.statistics[date] = player.statistics[date] || { ...defaultStatistics };
+          player.statistics[currentDate] = player.statistics[currentDate] || { ...defaultStatistics };
         });
       }
     });
@@ -115,7 +115,7 @@ export class PlayersService {
           // @ts-ignore
           teams[player.team].totalRating += player.rating;
         }
-         this.teams.set(teams);
+         this.teams.set(this.updateStatisticsWithDefaults(teams));
        })
     }
 }

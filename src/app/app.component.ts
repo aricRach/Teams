@@ -90,7 +90,7 @@ export class AppComponent implements OnInit{
     const savedTeams = localStorage.getItem('teams');
     if(savedTeams) {
       const teamsObj = JSON.parse(savedTeams);
-      this.playersService.teams.set({...this.playersService.updateStatisticsWithDefaults(teamsObj, currentDate)});
+      this.playersService.teams.set({...this.playersService.updateStatisticsWithDefaults(teamsObj)});
     }
   }
 
