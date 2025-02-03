@@ -76,11 +76,11 @@ export class PlayersDragDropTableComponent {
     })
   }
 
-  openSetGoalModal(event: { mouseEvent: MouseEvent | TouchEvent; player: any; team: string }): void {
-    const clientX = event.mouseEvent instanceof MouseEvent ? event.mouseEvent.clientX : (event.mouseEvent as TouchEvent).touches[0].clientX;
-    const clientY = event.mouseEvent instanceof MouseEvent ? event.mouseEvent.clientY : (event.mouseEvent as TouchEvent).touches[0].clientY;
+  openSetGoalModal(event: { position: {pageX: number, pageY: number}; player: any; team: string }): void {
+    const pageX = event.position.pageX;
+    const pageY = event.position.pageY;
 
-    this.modalPosition.set({ x: clientX, y: clientY });
+    this.modalPosition.set({ x: pageX, y: pageY });
     this.setGoalModalData.set({
       player: event.player,
       team: event.team
