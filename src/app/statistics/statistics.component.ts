@@ -1,5 +1,5 @@
 import {Component, inject, OnInit, signal} from '@angular/core';
-import {GridComponent, GridRow} from '../../../../ui-elements/dist/ui';
+import {GridComponent, GridRow} from 'ui';
 import {PlayersService} from '../players/players.service';
 import {Player} from '../players/models/player.model';
 
