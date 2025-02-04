@@ -1,5 +1,4 @@
 import {Component, computed, input, output, signal, WritableSignal} from '@angular/core';
-import { Player } from '../app.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 export interface GameDetails {

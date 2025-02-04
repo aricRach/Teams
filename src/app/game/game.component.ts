@@ -1,21 +1,25 @@
-import {Component} from '@angular/core';
-import {RouterOutlet} from '@angular/router';
-import {HeaderComponent} from './header/header.component';
-
+import {Component, ElementRef, inject, signal, ViewChild} from '@angular/core';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {PlayersService} from '../players/players.service';
+import {GameDetails, GameDetailsComponent} from '../game-details/game-details.component';
+import {currentDate} from '../utils/date-utils';
+import {CommonModule} from '@angular/common';
+import {PlayersDragDropTableComponent} from '../players/players-drag-drop-table/players-drag-drop-table.component';
+import {StopwatchComponent} from '../stopwatch/stopwatch.component';
+import {ModalComponent} from '../../modals/modal/modal.component';
+import {Player} from '../players/models/player.model';
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent],
+  selector: 'app-game',
+  imports: [ReactiveFormsModule, CommonModule, PlayersDragDropTableComponent,
+    StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent],
+  templateUrl: './game.component.html',
   standalone: true,
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  styleUrl: './game.component.scss'
 })
-
-
-export class AppComponent {
-
+export class GameComponent {
   playerForm!: FormGroup;
-  isAdminMode = signal(false);
+  isAdminMode = signal(true);
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
   playersService = inject(PlayersService);
   isGameOn = signal(false);

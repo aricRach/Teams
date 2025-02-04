@@ -8,7 +8,7 @@ import {
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {LongPressDirective} from '../../directives/long-press.directive';
-import {GoalModalEvent, Player} from '../../app.component';
+import {GoalModalEvent, Player} from '../models/player.model';
 import {currentDate, formatDateToString} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
 import {PlayersService} from '../players.service';

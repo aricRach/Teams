@@ -1,7 +1,7 @@
 import {inject, Injectable, signal} from '@angular/core';
-import {Player} from '../app.component';
 import {PlayersApiService} from './players-api.service';
 import {currentDate} from '../utils/date-utils';
+import {Player} from './models/player.model';
 
 @Injectable({
   providedIn: 'root'

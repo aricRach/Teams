@@ -1,6 +1,6 @@
 import {Component, computed, input} from '@angular/core';
-import {Player} from '../../app.component';
 import {currentDate} from '../../utils/date-utils';
+import {Player} from '../models/player.model';
 
 @Component({
   selector: 'app-player-view',

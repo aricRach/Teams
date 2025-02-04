@@ -1,0 +1,51 @@
+
+<div class="in-row center gap">
+  <h1 >Teams</h1>
+  <button class="action-btn" (click)="toggleShowHideRating()">Toggle Admin Mode</button>
+</div>
+
+
+<div class="space-between save-buttons gap">
+  <div class="gap in-row">
+    <button (click)="load()">Load local data</button>
+    <button (click)="save()">Save local data </button>
+  </div>
+
+  @if(isAdminMode()) {
+    <div class="gap in-row">
+      <button (click)="loadGlobal()">Load Global</button>
+      <button class="hide" (click)="saveGlobal()">Save Global</button>
+    </div>
+  }
+
+</div>
+
+<app-players-drag-drop-table [isGameOn]="isGameOn()" [isAdminMode]="isAdminMode()"></app-players-drag-drop-table>
+
+
+@if(isAdminMode()) {
+  <h2>Add Player</h2>
+  <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
+    <input #nameField formControlName="name" placeholder="Player Name">
+    <input formControlName="rating" type="number" placeholder="Rating">
+    <button type="submit">Add Player</button>
+  </form>
+}
+
+
+
+
+<app-stopwatch (timeStartEvent)="onGameStartEvent()" (timeStoppedEvent)="onGameStopEvent()" (timeEndEvent)="showTeamWinModal()"></app-stopwatch>
+
+@if(isTeamWinModalVisible()) {
+  <app-modal [showCloseIcon]="true" [showSubmitButton]="false" [showCloseButton]="false" (close)="closeTeamWinModal()">
+    <app-game-details (endGame)="endGame($event)" [originalTeamNames]="originalTeamNames()"></app-game-details>
+  </app-modal>
+}
+
+@if(isAdminCodeModalVisible()) {
+  <app-modal [showCloseButton]="false" (submit)="codeModalSubmitted()" (close)="closeAdminCodeModal()">
+    <input placeholder="code" [(ngModel)]="code">
+  </app-modal>
+}
+
