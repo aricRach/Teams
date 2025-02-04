@@ -62,7 +62,7 @@ export class PlayersService {
     this.playersApiService.savePlayers(this.flattenPlayers());
   }
 
-  private flattenPlayers(): Player[] {
+  flattenPlayers(): Player[] {
     const playersArray: Player[] = [];
 
     Object.keys(this.teams()).forEach(team => {
