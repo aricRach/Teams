@@ -1,14 +1,31 @@
 import { Routes } from '@angular/router';
 import {StatisticsComponent} from './statistics/statistics.component';
 import {GameComponent} from './game/game.component';
+import {FunnyPageComponent} from './funny-page/funny-page.component';
+import {MainPageComponent} from './main-page/main-page.component';
 
 export const routes: Routes = [
   {
     path: '',
-    component: GameComponent,
+    component: FunnyPageComponent,
   },
   {
-    path: 'statistics',
-    component: StatisticsComponent,
-  }
+    path: 'home',
+    component: MainPageComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'game'
+      },
+      {
+        path: 'game',
+        component: GameComponent,
+      },
+      {
+        path: 'statistics',
+        component: StatisticsComponent,
+      }
+    ]
+  },
 ];

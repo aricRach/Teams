@@ -19,13 +19,13 @@ export class HeaderComponent {
       action: MenuAction.NAVIGATE,
       alias: 'Game',
       show: true,
-      link: '/'
+      link: '/home/game'
     },
     {
       action: MenuAction.NAVIGATE,
       alias: 'Statistics',
       show: true,
-      link: '/statistics'
+      link: '/home/statistics'
     }
   ]
 
