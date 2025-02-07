@@ -30,6 +30,6 @@ export class HeaderComponent {
   ]
 
   login() {
-    this.userService.googleLogin();
+    // this.userService.googleLogin();
   }
 }
