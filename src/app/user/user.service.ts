@@ -16,7 +16,7 @@ export class UserService {
 
   constructor(@Inject(PLATFORM_ID) private platformId: object) {}
 
-  /** ✅ Lazy Initialization (Only Runs When Needed) */
+  /** Lazy Initialization (Only Runs When Needed) */
   private ensureFirebaseInitialized() {
     if (!this.firebaseApp && isPlatformBrowser(this.platformId)) {
       this.firebaseApp = initializeApp(environment.firebase);
@@ -29,7 +29,7 @@ export class UserService {
   }
 
   googleLogin() {
-    this.ensureFirebaseInitialized(); // ✅ Initialize Firebase only if not already initialized
+    this.ensureFirebaseInitialized(); // Initialize Firebase only if not already initialized
     if (!this.auth) {
       console.error("Firebase Auth is not available (Possibly SSR mode).");
       return;
