@@ -5,16 +5,17 @@ import {FunnyPageComponent} from './funny-page/funny-page.component';
 import {MainPageComponent} from './main-page/main-page.component';
 
 export const routes: Routes = [
+  // {
+  //   path: '',
+  //   component: GameComponent,
+  // },
   {
     path: '',
-    component: GameComponent,
-  },
-  {
-    path: 'home',
     component: MainPageComponent,
     children: [
       {
         path: '',
+        pathMatch: 'full',
         component: GameComponent
       },
       {
