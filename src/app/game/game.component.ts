@@ -19,7 +19,7 @@ import {Player} from '../players/models/player.model';
 })
 export class GameComponent {
   playerForm!: FormGroup;
-  isAdminMode = signal(true);
+  isAdminMode = signal(false);
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
   playersService = inject(PlayersService);
   isGameOn = signal(false);

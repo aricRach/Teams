@@ -13,7 +13,7 @@ import {Player} from '../players/models/player.model';
   standalone: true,
   styleUrl: './statistics.component.scss'
 })
-export class StatisticsComponent implements OnInit{
+export class StatisticsComponent implements OnInit {
 
   playersService = inject(PlayersService);
 
@@ -33,52 +33,79 @@ export class StatisticsComponent implements OnInit{
       isSortDisabled: false
     },
     {
+      alias: 'wins',
+      property: 'wins',
+      isFilterDisabled: false,
+      isSortDisabled: false
+    },
+    {
       alias: 'games',
       property: 'games',
       isFilterDisabled: false,
       isSortDisabled: false
-    }
+    },
   ])
 
   dataRows = signal([] as GridRow[])
   actions = signal([])
   config = signal({
-    numberOfColumns: 3
+    numberOfColumns: 4
   })
 
-  overAllStatistics: (GridRow | null)[] = [];
-
+  overAllStatistics: (GridRow | null)[] | null = null;
 
   setOverallStatisticsData() {
     if(!this.overAllStatistics) {
+
+    let maxGoals = -1;
     this.overAllStatistics = this.playersService.flattenPlayers()
       .map((player: Player) => {
-        const { goals, games, hasPlayed } = Object.values(player.statistics).reduce(
+        const {goals, games, hasPlayed, wins} = Object.values(player.statistics).reduce(
           (acc, stat) => {
             if (stat.games > 0) {
               acc.hasPlayed = true;
               acc.goals += stat.goals;
+              acc.wins += stat.wins;
               acc.games += stat.games;
             }
             return acc;
           },
-          { hasPlayed: false, goals: 0, games: 0 }
+          {
+            hasPlayed: false, goals: 0, wins: 0, games: 0,
+          }
         );
+        if (goals > maxGoals) {
+          maxGoals = goals;
+        }
         return hasPlayed
           ? {
-            name: { value: player.name },
-            goals: { value: goals },
-            games: { value: games }
+            name: {value: player.name}, //
+            goals: {value: goals},
+            wins: {value: wins},
+            games: {value: games},
           }
           : null;
       })
-      .filter(Boolean);
+      .filter(Boolean)
+    this.dataRows.set(this.addPlayerWinnerIcon(this.overAllStatistics, maxGoals) as GridRow[])
     }
-    this.dataRows.set(this.overAllStatistics as GridRow[])
   }
+
   ngOnInit(): void {
     this.setOverallStatisticsData();
     this.getAllStatisticsDateOptions();
+  }
+
+  addPlayerWinnerIcon(stats: (GridRow | null)[], maxGoals: number) {
+    return stats.map((playerStat) => {
+      if (!playerStat) {
+        return null;
+      }
+      if(playerStat['goals'].value === maxGoals) {
+        return {...playerStat, name: {value: `👑 ${playerStat['name'].value}`}};
+      }
+      return playerStat;
+    })
   }
 
   private getAllStatisticsDateOptions() {
@@ -93,20 +120,32 @@ export class StatisticsComponent implements OnInit{
       ))]
   );
   }
-
   onDateSelected(event: Event) {
     const date = (event.target as HTMLSelectElement).value;
     if(date === this.selectAllLabel()) {
       this.setOverallStatisticsData();
     } else {
-        const dataByDate = this.playersService.flattenPlayers().map((player: Player) =>
-          player.statistics[date] && player.statistics[date].games > 0 ? {
-              name: {value: player.name},
-              goals: { value: player.statistics[date].goals },
-              games: { value: player.statistics[date].games },
-            } : null
-        ).filter(Boolean);
-        this.dataRows.set(dataByDate as GridRow[]);
+      let maxGoals = -1;
+      const dataByDate = this.playersService.flattenPlayers().map((player: Player) => {
+          if(player.statistics[date] && player.statistics[date].games > 0) {
+            const name = player.name;
+            const goals = player.statistics[date].goals;
+            const wins = player.statistics[date].wins
+            const games = player.statistics[date].games;
+            if (goals > maxGoals) {
+              maxGoals = goals;
+            }
+            return {
+              name: {value: name},
+              goals: { value: goals },
+              wins: { value: wins },
+              games: { value: games },
+            }
+          }
+          return null;
+        })
+        .filter(Boolean);
+        this.dataRows.set(this.addPlayerWinnerIcon(dataByDate, maxGoals) as GridRow[]);
     }
   }
 }

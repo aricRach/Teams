@@ -81,6 +81,7 @@
     class="box available-player"
     (cdkDropListDropped)="drop($event)">
     @for (item of playersService.teams().allPlayers.players; track item; let idx = $index) {
+      <div class="player">
       @if(!isAdminMode()) {
         <div class="box" cdkDrag>{{item.name}}</div>
 
@@ -88,6 +89,7 @@
         <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
       }
       <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>
+      </div>
     }
   </div>
 

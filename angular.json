@@ -31,7 +31,8 @@
                 "glob": "**/*",
                 "input": "public"
               },
-              "src/assets/env.js"
+              "src/assets/env.js",
+              "src/assets"
             ],
             "styles": [
               "src/styles.scss",

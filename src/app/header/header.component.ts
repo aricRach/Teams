@@ -1,5 +1,6 @@
-import {Component, Signal, signal} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {MenuAction, MenuItem, NavigationBarComponent} from 'ui'
+import {UserService} from '../user/user.service';
 
 @Component({
   selector: 'app-header',
@@ -9,7 +10,9 @@ import {MenuAction, MenuItem, NavigationBarComponent} from 'ui'
   styleUrl: './header.component.scss'
 })
 export class HeaderComponent {
-  //
+
+
+  userService = inject(UserService);
   title = 'Rach';
   navItems: MenuItem[] = [
     {
@@ -25,4 +28,8 @@ export class HeaderComponent {
       link: '/statistics'
     }
   ]
+
+  login() {
+    this.userService.googleLogin();
+  }
 }
