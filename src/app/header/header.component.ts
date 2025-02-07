@@ -5,6 +5,7 @@ import {UserService} from '../user/user.service';
 @Component({
   selector: 'app-header',
   imports: [NavigationBarComponent],
+  providers: [UserService],
   templateUrl: './header.component.html',
   standalone: true,
   styleUrl: './header.component.scss'
@@ -30,6 +31,6 @@ export class HeaderComponent {
   ]
 
   login() {
-    this.userService.googleLogin();
+    // this.userService.googleLogin();
   }
 }
