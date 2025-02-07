@@ -1,9 +1,9 @@
 import {Injectable, signal} from '@angular/core';
 import {getAuth, GoogleAuthProvider, signInWithPopup} from 'firebase/auth';
 
-@Injectable({
-  providedIn: 'root'
-})
+// @Injectable({
+//   providedIn: 'root'
+// })
 export class UserService {
 
   private orgName!: string;
