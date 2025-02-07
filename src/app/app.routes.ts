@@ -15,8 +15,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        pathMatch: 'full',
-        redirectTo: 'game'
+        component: GameComponent
       },
       {
         path: 'game',
