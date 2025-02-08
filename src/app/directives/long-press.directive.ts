@@ -15,6 +15,7 @@ export class LongPressDirective {
   @HostListener('mousedown', ['$event'])
   @HostListener('touchstart', ['$event'])
   onPressStart(event: MouseEvent | TouchEvent): void {
+    event.preventDefault();
     if (this.isPressing) return; // Prevent duplicate triggers
     this.isPressing = true;
 
