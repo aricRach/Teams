@@ -2,6 +2,7 @@ import {inject, Injectable, signal} from '@angular/core';
 import {PlayersApiService} from './players-api.service';
 import {currentDate} from '../utils/date-utils';
 import {Player} from './models/player.model';
+import {take} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -105,7 +106,9 @@ export class PlayersService {
     }
 
     getAllPlayersFromDatabase() {
-       this.playersApiService.getAllPlayers().subscribe((allPlayers) => {
+       this.playersApiService.getAllPlayers().pipe(
+         take(1)
+       ).subscribe((allPlayers) => {
 
         const teams = structuredClone(this.skeleton);
 
