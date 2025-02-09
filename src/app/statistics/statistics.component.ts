@@ -113,7 +113,9 @@ export class StatisticsComponent implements OnInit {
             Object.entries(player.statistics) // Convert to array of [date, stats]
               .filter(([_, stats]) => stats.games > 0) // Keep only dates where games > 0
               .map(([date, _]) => date) // Extract only the date
-          )
+          ).sort((d1, d2) =>
+          d1.split('-').reverse().join('')!.localeCompare(d2.split('-').reverse().join(''))
+        )
       ))]
   );
   }
