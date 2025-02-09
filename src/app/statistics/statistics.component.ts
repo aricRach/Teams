@@ -55,8 +55,6 @@ export class StatisticsComponent implements OnInit {
   overAllStatistics: (GridRow | null)[] | null = null;
 
   setOverallStatisticsData() {
-    if(!this.overAllStatistics) {
-
     let maxGoals = -1;
     this.overAllStatistics = this.playersService.flattenPlayers()
       .map((player: Player) => {
@@ -88,7 +86,6 @@ export class StatisticsComponent implements OnInit {
       })
       .filter(Boolean)
     this.dataRows.set(this.addPlayerWinnerIcon(this.overAllStatistics, maxGoals) as GridRow[])
-    }
   }
 
   ngOnInit(): void {
