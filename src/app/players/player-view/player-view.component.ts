@@ -22,8 +22,15 @@ export class PlayerViewComponent {
       return !this.isAdminMode() ? this.player().name : this.player().name + ' - rating - ' + this.player().rating;
     }
     return !this.isAdminMode() ?
-      `${this.player().name} - goals: ${stats.goals} - wins: ${stats.wins} - loses: ${stats.loses} -games: ${stats.games}`
-      : `${this.player().name} - rating ${this.player().rating} - goals: ${stats.goals} - wins: ${stats.wins} - loses: ${stats.loses} -games: ${stats.games}`
+      `${this.player().name} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} -games: ${this.getDisplayValue(stats.games)}`
+      : `${this.player().name} - rating ${this.player().rating} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} -games: ${this.getDisplayValue(stats.games)}`
   })
+
+  getDisplayValue(value: number) {
+    if(value) {
+      return  value;
+    }
+    return value === 0 ? '0' : '';
+  }
 
 }

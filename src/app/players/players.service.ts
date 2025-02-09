@@ -35,28 +35,28 @@ export class PlayersService {
     this.teams.set(value);
   }
 
-  updateStatisticsWithDefaults(teams: any) {
-    const defaultStatistics = {
-      goals: 0,
-      wins: 0,
-      loses: 0,
-      games: 0,
-      draws: 0,
-    };
-
-    Object.keys(teams).forEach(teamKey => {
-      const team = teams[teamKey];
-
-      if (team.players && Array.isArray(team.players)) {
-        team.players.forEach((player: any) => {
-          player.statistics = player.statistics || {};
-          player.statistics[currentDate] = player.statistics[currentDate] || { ...defaultStatistics };
-        });
-      }
-    });
-
-    return teams;
-  }
+  // updateStatisticsWithDefaults(teams: any) {
+  //   const defaultStatistics = {
+  //     goals: 0,
+  //     wins: 0,
+  //     loses: 0,
+  //     games: 0,
+  //     draws: 0,
+  //   };
+  //
+  //   Object.keys(teams).forEach(teamKey => {
+  //     const team = teams[teamKey];
+  //
+  //     if (team.players && Array.isArray(team.players)) {
+  //       team.players.forEach((player: any) => {
+  //         player.statistics = player.statistics || {};
+  //         player.statistics[currentDate] = player.statistics[currentDate] || { ...defaultStatistics };
+  //       });
+  //     }
+  //   });
+  //
+  //   return teams;
+  // }
 
   setPlayersIntoDataBase() {
     console.log(this.teams());
@@ -118,7 +118,7 @@ export class PlayersService {
           // @ts-ignore
           teams[player.team].totalRating += player.rating;
         }
-         this.teams.set(this.updateStatisticsWithDefaults(teams));
+         this.teams.set(teams);
        })
     }
 }

@@ -60,7 +60,7 @@ export class GameComponent {
     const savedTeams = localStorage.getItem('teams');
     if(savedTeams) {
       const teamsObj = JSON.parse(savedTeams);
-      this.playersService.teams.set({...this.playersService.updateStatisticsWithDefaults(teamsObj)});
+      this.playersService.teams.set({...teamsObj});
     }
   }
 
@@ -93,6 +93,8 @@ export class GameComponent {
           wins: (currentStats.wins || 0) + (gameDetails.gameStatus === 'decided' ? 1 : 0),
           games: (currentStats.games || 0) + 1,
           draws: (currentStats.draws || 0) + (gameDetails.gameStatus === 'decided' ? 0 : 1),
+          goals: (currentStats.goals || 0),
+          loses: (currentStats.loses || 0),
         },
       };
 
@@ -113,6 +115,8 @@ export class GameComponent {
           loses: (currentStats.loses || 0) + (gameDetails.gameStatus === 'decided' ? 1 : 0),
           games: (currentStats.games || 0) + 1,
           draws: (currentStats.draws || 0) + (gameDetails.gameStatus === 'decided' ? 0 : 1),
+          wins: (currentStats.wins || 0),
+          goals: (currentStats.goals || 0)
         },
       };
 
