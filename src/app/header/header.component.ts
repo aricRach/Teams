@@ -1,6 +1,7 @@
-import {Component, inject} from '@angular/core';
-import {MenuAction, MenuItem, NavigationBarComponent} from 'ui'
+import {Component, computed, inject} from '@angular/core';
+import {MenuAction, NavigationBarComponent} from 'ui'
 import {UserService} from '../user/user.service';
+import {PlayersService} from '../players/players.service';
 
 @Component({
   selector: 'app-header',
@@ -12,25 +13,20 @@ import {UserService} from '../user/user.service';
 })
 export class HeaderComponent {
 
-
-  userService = inject(UserService);
+  playersService = inject(PlayersService);
   title = 'Rach';
-  navItems: MenuItem[] = [
+  navItems = computed(() => [
     {
       action: MenuAction.NAVIGATE,
       alias: 'Game',
-      show: true,
+      show: this.playersService.isAdmin(),
       link: '/home/game'
     },
     {
       action: MenuAction.NAVIGATE,
       alias: 'Statistics',
-      show: true,
+      show: !!this.playersService.selectedGroup(),
       link: '/home/statistics'
     }
-  ]
-
-  login() {
-    this.userService.googleLogin();
-  }
+  ])
 }

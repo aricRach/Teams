@@ -1,0 +1,20 @@
+<div class="select-group-container">
+<div class="column-center">
+
+<h3>Select group</h3>
+
+  <div class="gap in-row">
+<select [(ngModel)]="selectedGroup">
+  @for(group of groups(); track group.name; let i=$index) {
+    <option [ngValue]="group">
+      {{ group.name }}
+    </option>
+  }
+</select>
+
+@if(selectedGroup) {
+  <button class="action-btn" (click)="setSelectedGroup()">Continue</button>
+}
+  </div>
+</div>
+</div>

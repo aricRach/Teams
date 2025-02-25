@@ -1,17 +1,36 @@
 import { Routes } from '@angular/router';
 import {StatisticsComponent} from './statistics/statistics.component';
 import {GameComponent} from './game/game.component';
-import {FunnyPageComponent} from './funny-page/funny-page.component';
 import {MainPageComponent} from './main-page/main-page.component';
+import {SelectGroupComponent} from './select-group/select-group.component';
+import {getGroupPlayersResolver} from './resolvers/get-group-players.resolver';
+import {SignInComponent} from './user/sign-in/sign-in.component';
+import {getUserGroupsResolver} from './resolvers/get-user-groups.resolver';
+import {groupAdminGuard} from './guards/group-admin.guard';
+import {AuthGuard} from '@angular/fire/auth-guard';
+import {authRoutesGuard} from './guards/auth-routes.guard';
 
 export const routes: Routes = [
   {
     path: '',
-    component: FunnyPageComponent,
+    component: SignInComponent,
+    canActivate: [authRoutesGuard]
+
+  },
+  {
+    path: 'select-group',
+    component: SelectGroupComponent,
+    resolve: {
+      groups: getUserGroupsResolver
+    },
+    canActivate: [AuthGuard],
   },
   {
     path: 'home',
     component: MainPageComponent,
+    resolve: {
+      allPlayers: getGroupPlayersResolver
+    },
     children: [
       {
         path: '',
@@ -21,6 +40,7 @@ export const routes: Routes = [
       {
         path: 'game',
         component: GameComponent,
+        canActivate: [groupAdminGuard]
       },
       {
         path: 'statistics',

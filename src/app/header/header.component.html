@@ -1,8 +1,4 @@
 <div class="in-row space-between">
-<app-navigation-bar [showMenuInSmallScreens]="false" [navItems]="navItems" [title]="title"></app-navigation-bar>
-
-<div class="login-button" (click)="login()">
-  <img alt="login" src="assets/icons/google.svg" height="50" width="50">
-</div>
+<app-navigation-bar [redirectBrandLink]="'/select-group'" [showMenuInSmallScreens]="false" [navItems]="navItems()" [title]="title"></app-navigation-bar>
 
 </div>

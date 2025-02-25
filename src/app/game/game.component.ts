@@ -53,11 +53,11 @@ export class GameComponent {
   }
 
   save() {
-    localStorage.setItem('teams', JSON.stringify(this.playersService.teams()));
+    localStorage.setItem(`teams-${this.playersService.selectedGroup().id}`, JSON.stringify(this.playersService.teams()));
   }
 
   load() {
-    const savedTeams = localStorage.getItem('teams');
+    const savedTeams = localStorage.getItem(`teams-${this.playersService.selectedGroup().id}`);
     if(savedTeams) {
       const teamsObj = JSON.parse(savedTeams);
       this.playersService.teams.set({...teamsObj});
@@ -155,7 +155,4 @@ export class GameComponent {
     this.playersService.setPlayersIntoDataBase();
   }
 
-  loadGlobal() {
-    this.playersService.getAllPlayersFromDatabase();
-  }
 }
