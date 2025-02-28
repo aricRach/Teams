@@ -1,5 +1,5 @@
 import {
-  Component,
+  Component, HostListener,
   inject,
   input,
   linkedSignal,
@@ -119,6 +119,16 @@ export class PlayersDragDropTableComponent {
       team.players = players;
       this.playersService.teams.set({ ...this.playersService.teams(), [teamName]: team });
       this.closeSetGoalModal();
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.isSetGoalModalVisible()) {
+      const modal = document.querySelector('.set-goal-modal');
+      if (modal && !modal.contains(event.target as Node)) {
+        this.isSetGoalModalVisible.set(false);
+      }
     }
   }
 }
