@@ -7,60 +7,54 @@ import { Directive, ElementRef, EventEmitter, HostListener, input, output, Rende
 export class DoubleClickDirective {
   data = input.required<{ player: any; team: string }>();
   doubleClickDisabled = input();
-  doubleClicked = output<{ position: { pageX: number; pageY: number }; player: any; team: string }>();
+  doubleClicked = output<{ position: { pageX: number, pageY: number }; player: any; team: string }>();
 
-  private clickTimeout: any;
-  private clickCount = 0;
-  private doubleClickDelay = 400;
+  private lastClickTime = 0;
+  private doubleClickThreshold = 300; // Time threshold for double click (in ms)
 
   constructor(private el: ElementRef, private renderer: Renderer2) {
     this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
   }
 
   @HostListener('touchstart', ['$event'])
-  onTouchStart(event: TouchEvent): void {
-    event.preventDefault(); // Prevents selection & long-press issues
-  }
-
   @HostListener('mousedown', ['$event'])
-  onMouseDown(event: MouseEvent): void {
-    event.preventDefault(); // Prevents text selection
-    this.handleClick(event);
+  onTouchOrClick(event: MouseEvent | TouchEvent): void {
+    event.preventDefault(); // Prevents selection & long-press issues
   }
 
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent): void {
     const touch = event.changedTouches[0]; // Get the final touch position
-    this.handleClick(touch);
+    this.detectDoubleClick(touch);
   }
 
-  private handleClick(event: MouseEvent | Touch): void {
+  @HostListener('mouseup', ['$event'])
+  onMouseUp(event: MouseEvent): void {
+    this.detectDoubleClick(event);
+  }
+
+  private detectDoubleClick(event: MouseEvent | Touch): void {
     if (this.doubleClickDisabled()) {
       return;
     }
 
-    this.clickCount++;
+    const now = Date.now();
+    const timeSinceLastClick = now - this.lastClickTime;
 
-    if (this.clickCount === 1) {
-      this.clickTimeout = setTimeout(() => {
-        this.clickCount = 0;
-      }, this.doubleClickDelay);
-    } else if (this.clickCount === 2) {
-      clearTimeout(this.clickTimeout);
-
-      // Ensure correct coordinates on mobile and desktop
-      const position = {
-        pageX: event.pageX || event.clientX, // Fallback if pageX is undefined
-        pageY: event.pageY || event.clientY // Fallback if pageY is undefined
-      };
-
+    if (timeSinceLastClick < this.doubleClickThreshold) {
+      // A valid double click detected
       this.doubleClicked.emit({
         player: this.data().player,
         team: this.data().team,
-        position
+        position: {
+          pageX: event.pageX || event.clientX, // Fallback if needed
+          pageY: event.pageY || event.clientY
+        }
       });
-
-      this.clickCount = 0;
+      this.lastClickTime = 0; // Reset
+    } else {
+      // Not a double click, update timestamp
+      this.lastClickTime = now;
     }
   }
 }
