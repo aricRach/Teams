@@ -10,7 +10,8 @@ export class DoubleClickDirective {
   doubleClicked = output<{ position: { pageX: number, pageY: number }; player: any; team: string }>();
 
   private lastClickTime = 0;
-  private doubleClickThreshold = 300; // Time threshold for double click (in ms)
+  private doubleClickThreshold = 300; // Time in ms to detect double click
+  private lastTapEvent: MouseEvent | Touch | null = null; // Store last event to track position
 
   constructor(private el: ElementRef, private renderer: Renderer2) {
     this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
@@ -18,8 +19,8 @@ export class DoubleClickDirective {
 
   @HostListener('touchstart', ['$event'])
   @HostListener('mousedown', ['$event'])
-  onTouchOrClick(event: MouseEvent | TouchEvent): void {
-    event.preventDefault(); // Prevents selection & long-press issues
+  preventSelection(event: MouseEvent | TouchEvent): void {
+    event.preventDefault(); // Prevents long-press selection issues
   }
 
   @HostListener('touchend', ['$event'])
@@ -41,20 +42,22 @@ export class DoubleClickDirective {
     const now = Date.now();
     const timeSinceLastClick = now - this.lastClickTime;
 
-    if (timeSinceLastClick < this.doubleClickThreshold) {
-      // A valid double click detected
+    if (timeSinceLastClick < this.doubleClickThreshold && this.lastTapEvent) {
+      // A valid double-click detected
       this.doubleClicked.emit({
         player: this.data().player,
         team: this.data().team,
         position: {
-          pageX: event.pageX || event.clientX, // Fallback if needed
-          pageY: event.pageY || event.clientY
+          pageX: this.lastTapEvent.pageX || this.lastTapEvent.clientX,
+          pageY: this.lastTapEvent.pageY || this.lastTapEvent.clientY
         }
       });
-      this.lastClickTime = 0; // Reset
+      this.lastClickTime = 0; // Reset time tracking
+      this.lastTapEvent = null; // Clear event
     } else {
-      // Not a double click, update timestamp
+      // First tap: store time and event, but don't trigger anything yet
       this.lastClickTime = now;
+      this.lastTapEvent = event;
     }
   }
 }
