@@ -1,17 +1,16 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
+import {SpinnerService} from './spinner.service';
+import {SpinnerComponent} from '../../../ui-elements/dist/ui';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, SpinnerComponent],
   standalone: true,
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 
-export class AppComponent implements OnInit{
-  ngOnInit(): void {
-    console.log((window as any)['env']?.NG_APP_USER_ADMIN)
-  }
-
+export class AppComponent{
+  spinnerService = inject(SpinnerService);
 }
