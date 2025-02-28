@@ -11,7 +11,7 @@ export class DoubleClickDirective {
 
   private clickTimeout: any;
   private clickCount = 0;
-  private doubleClickDelay = 300;
+  private doubleClickDelay = 400;
 
   constructor(private el: ElementRef, private renderer: Renderer2) {
     this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
