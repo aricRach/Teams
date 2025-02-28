@@ -1,12 +1,12 @@
-import {Directive, EventEmitter, HostListener, input, output, Output} from '@angular/core';
+import { Directive, EventEmitter, HostListener, input, output } from '@angular/core';
 
 @Directive({
   standalone: true,
   selector: '[appLongPress]'
 })
 export class LongPressDirective {
-  data = input.required<{ player: any; team: string }>(); // Strongly typed input for player and team data
-  longPress = output<{ position: {pageX: number, pageY: number}; player: any; team: string }>();
+  data = input.required<{ player: any; team: string }>();
+  longPress = output<{ position: { pageX: number, pageY: number }; player: any; team: string }>();
 
   private timeout: any;
   private isPressing = false;
@@ -15,22 +15,20 @@ export class LongPressDirective {
   @HostListener('mousedown', ['$event'])
   @HostListener('touchstart', ['$event'])
   onPressStart(event: MouseEvent | TouchEvent): void {
-    event.preventDefault();
-    if (this.isPressing) return; // Prevent duplicate triggers
-    this.isPressing = true;
+    event.preventDefault(); // Prevents text selection
+    event.stopPropagation(); // Prevents event bubbling issues
+    if (this.isPressing) return;
 
+    this.isPressing = true;
     const { pageX, pageY } = this.getEventCoordinates(event);
 
     this.timeout = setTimeout(() => {
       this.longPress.emit({
         player: this.data().player,
         team: this.data().team,
-        position: {
-          pageX: pageX,
-          pageY: pageY
-        }
+        position: { pageX, pageY }
       });
-      this.isPressing = false; // Reset pressing state after emitting
+      this.isPressing = false;
     }, this.pressDuration);
   }
 
@@ -43,7 +41,6 @@ export class LongPressDirective {
     }
   }
 
-
   @HostListener('mouseup')
   @HostListener('mouseleave')
   @HostListener('touchend')
@@ -52,8 +49,13 @@ export class LongPressDirective {
     this.clearPress();
   }
 
+  @HostListener('contextmenu', ['$event'])
+  onContextMenu(event: Event): void {
+    event.preventDefault(); // Prevents right-click menu from appearing
+  }
+
   private clearPress(): void {
     this.isPressing = false;
-    clearTimeout(this.timeout); // Cancel the timeout
+    clearTimeout(this.timeout);
   }
 }
