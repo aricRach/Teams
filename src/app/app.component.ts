@@ -1,7 +1,7 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {SpinnerService} from './spinner.service';
-import {SpinnerComponent} from '../../../ui-elements/dist/ui';
+import {SpinnerComponent} from 'ui';
 
 @Component({
   selector: 'app-root',
