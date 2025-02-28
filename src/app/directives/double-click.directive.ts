@@ -9,55 +9,56 @@ export class DoubleClickDirective {
   doubleClickDisabled = input();
   doubleClicked = output<{ position: { pageX: number, pageY: number }; player: any; team: string }>();
 
-  private lastClickTime = 0;
-  private doubleClickThreshold = 300; // Time in ms to detect double click
-  private lastTapEvent: MouseEvent | Touch | null = null; // Store last event to track position
+  private lastTapTime = 0;
+  private doubleClickThreshold = 300; // Max time between taps (ms)
+  private lastTapPos = { pageX: 0, pageY: 0 };
+  private moveThreshold = 30; // **🔹 Fixed: Prevents single tap misfires**
 
   constructor(private el: ElementRef, private renderer: Renderer2) {
-    this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none');
+    this.renderer.setStyle(this.el.nativeElement, 'user-select', 'none'); // Prevents text selection
   }
 
-  @HostListener('touchstart', ['$event'])
-  @HostListener('mousedown', ['$event'])
-  preventSelection(event: MouseEvent | TouchEvent): void {
-    event.preventDefault(); // Prevents long-press selection issues
+  // ✅ **For Desktop:** Use native `dblclick`
+  @HostListener('dblclick', ['$event'])
+  onDoubleClick(event: MouseEvent): void {
+    if (this.doubleClickDisabled()) return;
+
+    event.preventDefault();
+    this.doubleClicked.emit({
+      player: this.data().player,
+      team: this.data().team,
+      position: { pageX: event.pageX, pageY: event.pageY }
+    });
   }
 
+  // ✅ **For Mobile:** Custom double-tap detection
   @HostListener('touchend', ['$event'])
   onTouchEnd(event: TouchEvent): void {
-    const touch = event.changedTouches[0]; // Get the final touch position
-    this.detectDoubleClick(touch);
-  }
+    if (this.doubleClickDisabled()) return;
 
-  @HostListener('mouseup', ['$event'])
-  onMouseUp(event: MouseEvent): void {
-    this.detectDoubleClick(event);
-  }
-
-  private detectDoubleClick(event: MouseEvent | Touch): void {
-    if (this.doubleClickDisabled()) {
-      return;
-    }
-
+    const touch = event.changedTouches[0]; // Get the correct tap position
     const now = Date.now();
-    const timeSinceLastClick = now - this.lastClickTime;
+    const timeSinceLastTap = now - this.lastTapTime;
 
-    if (timeSinceLastClick < this.doubleClickThreshold && this.lastTapEvent) {
-      // A valid double-click detected
+    // ✅ **🔹 Improved: Prevents accidental single tap misfires**
+    if (
+      timeSinceLastTap < this.doubleClickThreshold &&
+      Math.abs(touch.pageX - this.lastTapPos.pageX) < this.moveThreshold &&
+      Math.abs(touch.pageY - this.lastTapPos.pageY) < this.moveThreshold
+    ) {
+      // ✅ **Valid double tap detected**
       this.doubleClicked.emit({
         player: this.data().player,
         team: this.data().team,
-        position: {
-          pageX: this.lastTapEvent.pageX || this.lastTapEvent.clientX,
-          pageY: this.lastTapEvent.pageY || this.lastTapEvent.clientY
-        }
+        position: { pageX: this.lastTapPos.pageX, pageY: this.lastTapPos.pageY }
       });
-      this.lastClickTime = 0; // Reset time tracking
-      this.lastTapEvent = null; // Clear event
+
+      // Reset to prevent triple taps
+      this.lastTapTime = 0;
     } else {
-      // First tap: store time and event, but don't trigger anything yet
-      this.lastClickTime = now;
-      this.lastTapEvent = event;
+      // First tap: Store time and position
+      this.lastTapTime = now;
+      this.lastTapPos = { pageX: touch.pageX, pageY: touch.pageY };
     }
   }
 }
