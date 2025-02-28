@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
-import {LongPressDirective} from '../../directives/long-press.directive';
+import {DoubleClickDirective} from '../../directives/double-click.directive';
 import {GoalModalEvent, Player} from '../models/player.model';
 import {currentDate, formatDateToString} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
@@ -15,7 +15,7 @@ import {PlayersService} from '../players.service';
 
 @Component({
   selector: 'app-players-drag-drop-table',
-  imports: [DragDropModule, CommonModule, LongPressDirective, PlayerViewComponent],
+  imports: [DragDropModule, CommonModule, DoubleClickDirective, PlayerViewComponent],
   standalone: true,
   templateUrl: './players-drag-drop-table.component.html',
   styleUrl: './players-drag-drop-table.component.scss'
