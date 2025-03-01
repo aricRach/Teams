@@ -76,14 +76,14 @@ export class PlayersDragDropTableComponent {
     })
   }
 
-  openSetGoalModal(event: { position: {pageX: number, pageY: number}; player: any; team: string }): void {
+  openSetGoalModal(event: { position: {pageX: number, pageY: number}}, data: {player: any; team: string}): void {
     const pageX = event.position.pageX;
     const pageY = event.position.pageY;
 
     this.modalPosition.set({ x: pageX, y: pageY });
     this.setGoalModalData.set({
-      player: event.player,
-      team: event.team
+      player: data.player,
+      team: data.team
     });
     this.isSetGoalModalVisible.set(true);
   }

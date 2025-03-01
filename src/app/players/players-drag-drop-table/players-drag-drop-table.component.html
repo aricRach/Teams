@@ -24,7 +24,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of playersService.teams().teamA.players; track item) {
-          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event)" [data]="{player: item, team: 'teamA'}" class="box" cdkDrag></app-player-view>
+          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamA'})" class="box" cdkDrag></app-player-view>
         }
       </div>
     </div>
@@ -44,7 +44,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of playersService.teams().teamB.players; track item) {
-          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event)" [data]="{player: item, team: 'teamB'}" class="box" cdkDrag></app-player-view>
+          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamB'})" class="box" cdkDrag></app-player-view>
         }
       </div>
     </div>
@@ -64,7 +64,7 @@
         class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of playersService.teams().teamC.players; track item) {
-          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event)" [data]="{player: item, team: 'teamC'}" class="box" cdkDrag></app-player-view>
+          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamC'})" class="box" cdkDrag></app-player-view>
         }
       </div>
     </div>

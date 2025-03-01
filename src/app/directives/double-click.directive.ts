@@ -5,9 +5,8 @@ import { Directive, ElementRef, EventEmitter, HostListener, input, output, Rende
   selector: '[appDoubleClick]'
 })
 export class DoubleClickDirective {
-  data = input.required<{ player: any; team: string }>();
   doubleClickDisabled = input();
-  doubleClicked = output<{ position: { pageX: number, pageY: number }; player: any; team: string }>();
+  doubleClicked = output<{ position: { pageX: number, pageY: number }}>();
 
   private lastTapTime = 0;
   private doubleClickThreshold = 300; // Max time between taps
@@ -24,8 +23,6 @@ export class DoubleClickDirective {
 
     event.preventDefault();
     this.doubleClicked.emit({
-      player: this.data().player,
-      team: this.data().team,
       position: { pageX: event.pageX, pageY: event.pageY }
     });
   }
@@ -46,8 +43,6 @@ export class DoubleClickDirective {
       Math.abs(touch.pageY - this.lastTapPos.pageY) < this.moveThreshold
     ) {
       this.doubleClicked.emit({
-        player: this.data().player,
-        team: this.data().team,
         position: { pageX: this.lastTapPos.pageX, pageY: this.lastTapPos.pageY }
       });
       this.lastTapTime = 0;
