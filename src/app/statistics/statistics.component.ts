@@ -99,7 +99,7 @@ export class StatisticsComponent implements OnInit {
         return null;
       }
       if(playerStat['goals'].value === maxGoals) {
-        return {...playerStat, name: {value: `👑 ${playerStat['name'].value}`}};
+        return {...playerStat, name: {value: `${playerStat['name'].value} 👑`}};
       }
       return playerStat;
     })
