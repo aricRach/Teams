@@ -3,6 +3,8 @@ import {PlayersApiService} from './players-api.service';
 import {currentDate} from '../utils/date-utils';
 import {Player} from './models/player.model';
 import {of, take, tap} from 'rxjs';
+import {SpinnerService} from '../spinner.service';
+import {PopupsService} from 'ui';
 
 @Injectable({
   providedIn: 'root'
@@ -10,6 +12,8 @@ import {of, take, tap} from 'rxjs';
 export class PlayersService {
 
   playersApiService = inject(PlayersApiService);
+  spinnerService = inject(SpinnerService);
+  popoutService = inject(PopupsService);
   // @ts-ignore
   selectedGroup = signal<null | any>(null);
   userGroups = signal<null | any[]>(null);
@@ -35,7 +39,7 @@ export class PlayersService {
   teams = signal(structuredClone(this.skeleton));
   private teamsFromApi: any = {};
 
-  setData(value: any) {
+  setTeams(value: any) {
     this.teams.set(value);
   }
 
@@ -48,41 +52,23 @@ export class PlayersService {
     }));
   }
 
-  // updateStatisticsWithDefaults(teams: any) {
-  //   const defaultStatistics = {
-  //     goals: 0,
-  //     wins: 0,
-  //     loses: 0,
-  //     games: 0,
-  //     draws: 0,
-  //   };
-  //
-  //   Object.keys(teams).forEach(teamKey => {
-  //     const team = teams[teamKey];
-  //
-  //     if (team.players && Array.isArray(team.players)) {
-  //       team.players.forEach((player: any) => {
-  //         player.statistics = player.statistics || {};
-  //         player.statistics[currentDate] = player.statistics[currentDate] || { ...defaultStatistics };
-  //       });
-  //     }
-  //   });
-  //
-  //   return teams;
-  // }
-
-  setPlayersIntoDataBase() {
-    this.playersApiService.addOrUpdatePlayers(this.selectedGroup().id, this.flattenPlayers());
+  setPlayersIntoDataBase(specificTeams?: any) {
+    this.spinnerService.setIsLoading(true);
+    this.playersApiService.addOrUpdatePlayers(this.selectedGroup().id, this.flattenPlayers(specificTeams)).then(
+      () => this.popoutService.addSuccessPopOut('Data was saved successfully.'),
+    ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
+      () =>  this.spinnerService.setIsLoading(false)
+    );
   }
 
-  flattenPlayers(): Player[] {
+  flattenPlayers(specificTeams?: any): Player[] {
     const playersArray: Player[] = [];
-
-    Object.keys(this.teams()).forEach(team => {
+    const teams = specificTeams || this.teams()
+    Object.keys(teams).forEach(team => {
       // @ts-ignore
-      if (this.teams()[team].players && Array.isArray(this.teams()[team].players)) {
+      if (teams[team].players && Array.isArray(teams[team].players)) {
         // @ts-ignore
-        this.teams()[team].players.forEach((player: any) => {
+        teams[team].players.forEach((player: any) => {
           playersArray.push({
             ...player,
             team: team, // Add team name for reference
@@ -139,4 +125,12 @@ export class PlayersService {
         })
        )
     }
+
+  updatePlayer(player: any) {
+    this.spinnerService.setIsLoading(true);
+    this.playersApiService.updatePlayerStats(this.selectedGroup().id, player.name, player )
+      .then(() => this.popoutService.addSuccessPopOut(`${player.name} goals updated successfully.`))
+      .catch(() => this.popoutService.addErrorPopOut(`cant save goals for ${player.name}, please try later`))
+      .finally(() => this.spinnerService.setIsLoading(false));
+  }
 }

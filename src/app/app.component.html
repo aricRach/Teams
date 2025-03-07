@@ -1,5 +1,8 @@
 @if(spinnerService.getIsLoading()()) {
   <app-spinner></app-spinner>
-} @else {
-  <router-outlet></router-outlet>
 }
+<div [ngClass]="{hidden:spinnerService.getIsLoading()()}">
+  <router-outlet></router-outlet>
+</div>
+<lib-popups [customStyle]="{top: '1.5rem', 'right': '1.5rem'}"></lib-popups>
+

@@ -60,7 +60,7 @@ export class GameComponent {
     const savedTeams = localStorage.getItem(`teams-${this.playersService.selectedGroup().id}`);
     if(savedTeams) {
       const teamsObj = JSON.parse(savedTeams);
-      this.playersService.teams.set({...teamsObj});
+      this.playersService.setTeams({...teamsObj});
     }
   }
 
@@ -127,7 +127,7 @@ export class GameComponent {
     });
 
     // Update the teams
-    this.playersService.teams.set({
+    this.playersService.setTeams({
       ...this.playersService.teams(),
       // @ts-ignore
       [gameDetails.winner]: { ...this.playersService.teams()[gameDetails.winner], players: winners },
@@ -136,6 +136,10 @@ export class GameComponent {
     });
 
     this.isTeamWinModalVisible.set(false);
+    // save specific teams that played not good enough if i didnt clicked save global. because it is not saved my players moved from team to another team.
+    // it saved only the statistics.
+    // this.playersService.setPlayersIntoDataBase({[gameDetails.winner]: {players: winners}, [gameDetails.loser]: {players: losers}})
+    this.playersService.setPlayersIntoDataBase();
   }
 
   codeModalSubmitted() {

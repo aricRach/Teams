@@ -58,7 +58,6 @@ export class PlayersDragDropTableComponent {
         event.previousIndex,
         event.currentIndex,
       );
-      // @ts-ignore
       this.playersService.teams.update((teams => {
         // @ts-ignore
         teams[event.previousContainer.id].totalRating = this.calculateRating(event.previousContainer.data)
@@ -117,7 +116,8 @@ export class PlayersDragDropTableComponent {
       player.statistics = stats;
       players[playerIndex] = player;
       team.players = players;
-      this.playersService.teams.set({ ...this.playersService.teams(), [teamName]: team });
+      this.playersService.setTeams({ ...this.playersService.teams(), [teamName]: team });
+      this.playersService.updatePlayer(player);
       this.closeSetGoalModal();
     }
   }

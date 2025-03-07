@@ -8,9 +8,11 @@ import {environment} from '../environments/environment';
 import {DatePipe} from '@angular/common';
 import {provideAuth} from '@angular/fire/auth';
 import {getAuth} from 'firebase/auth';
+import {PopupsService} from 'ui';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    PopupsService,
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, withComponentInputBinding(), withHashLocation()),
       provideFirebaseApp(() => initializeApp(environment.firebase)),

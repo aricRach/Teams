@@ -8,7 +8,7 @@ import {
   setDoc,
   where,
   addDoc,
-  collectionData, getDoc, or
+  collectionData, getDoc, or, updateDoc, writeBatch
 } from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
 import {Observable} from 'rxjs';
@@ -128,22 +128,11 @@ export class PlayersApiService {
       return false;
     }
 
-    // Ensure only the group creator can add or update players
-    const groupData = groupSnap.data();
-    if (groupData?.['createdBy'] !== user.email) {
-      console.error("Only the group admin can modify players");
-      return false;
-    }
-
-    // Reference to the players subcollection
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-
+    const batch = writeBatch(this.firestore);
 
     for (const player of players) {
-
-      // Normalize player's name to lowercase
       const normalizedPlayerName = player.name.toLowerCase();
-
       const q = query(playersRef, where("name", "==", normalizedPlayerName));
       const querySnapshot = await getDocs(q);
 
@@ -159,9 +148,11 @@ export class PlayersApiService {
         console.log(`Adding new player "${player.name}" to group "${groupId}".`);
       }
 
-      // Use setDoc with { merge: true } to either update or create
-      await setDoc(playerDocRef, {...player, name: normalizedPlayerName}, { merge: true });
+      batch.set(playerDocRef, { ...player, name: normalizedPlayerName }, { merge: true });
     }
+
+    await batch.commit();
+    console.log("✅ All players added/updated successfully!");
 
     return true;
   }
@@ -197,6 +188,22 @@ export class PlayersApiService {
     const groupsCollection = collection(this.firestore, 'groups');
     const q = query(groupsCollection, or( where("createdBy", "==", user.email), where("admins", "array-contains", user.email), where("members", "array-contains", user.email) ))
     return collectionData(q, { idField: "id" });
+  }
+
+  async updatePlayerStats(groupId: string, playerName: string, updatedStats: any) {
+    const user = this.auth.currentUser;
+    if (!user) {
+      return Promise.reject();
+    }
+    const playersRef = collection(this.firestore, `groups/${groupId}/players`);
+    const q = query(playersRef, where("name", "==", playerName.toLowerCase()));
+    const querySnapshot = await getDocs(q);
+
+    if (querySnapshot.empty) {
+      return Promise.reject();
+    }
+    const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${querySnapshot.docs[0].id}`);
+    return updateDoc(playerDocRef, updatedStats);
   }
 }
 
