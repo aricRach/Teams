@@ -14,7 +14,7 @@ import {PlayersService} from '../players/players.service';
 export class HeaderComponent {
 
   playersService = inject(PlayersService);
-  title = 'Rach';
+  title = computed(() => this.playersService.selectedGroup()?.name || 'TeamsRach');
   navItems = computed(() => [
     {
       action: MenuAction.NAVIGATE,
