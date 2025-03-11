@@ -22,6 +22,8 @@
   max-width: 500px;
   text-align: center;
   position: relative;
+  overflow-y: auto;
+  max-height: 500px;
 }
 
 .close-icon {

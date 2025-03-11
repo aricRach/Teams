@@ -12,6 +12,7 @@ import {GoalModalEvent, Player} from '../models/player.model';
 import {currentDate, formatDateToString} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
 import {PlayersService} from '../players.service';
+import {AuditTrailService} from '../../audit-trail/services/audit-trail.service';
 
 @Component({
   selector: 'app-players-drag-drop-table',
@@ -26,6 +27,7 @@ export class PlayersDragDropTableComponent {
   isGameOn = input.required();
 
   playersService = inject(PlayersService);
+  auditTrailService = inject(AuditTrailService);
 
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;
   getGoalModalDataByPlayer = linkedSignal(() =>
@@ -109,7 +111,7 @@ export class PlayersDragDropTableComponent {
       const player = { ...players[playerIndex] };
       const stats = { ...player.statistics };
       const dateStats = { ...stats[currentDate] };
-
+      const prevGoals = dateStats.goals;
       dateStats.goals = goals;
 
       stats[currentDate] = dateStats;
@@ -117,7 +119,9 @@ export class PlayersDragDropTableComponent {
       players[playerIndex] = player;
       team.players = players;
       this.playersService.setTeams({ ...this.playersService.teams(), [teamName]: team });
-      this.playersService.updatePlayer(player);
+      this.playersService.updatePlayer(player).then(() => {
+        this.auditTrailService.addAuditTrail(`goals set for ${player.name} ${prevGoals || 0} -> ${dateStats.goals}`)
+      });
       this.closeSetGoalModal();
     }
   }

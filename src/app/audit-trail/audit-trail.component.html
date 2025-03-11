@@ -1,0 +1,13 @@
+<div class="audit-trail-container">
+  <h3>Actions History</h3>
+  @if(auditTrailService.getAuditTrail().length) {
+    <ul>
+      <li *ngFor="let log of auditTrailService.getAuditTrail()">
+        <span>{{ log.actionDetails }}</span>
+        <span class="date">{{ log.date }}</span>
+      </li>
+    </ul>
+  } @else {
+    <p>No actions were logged in this session.</p>
+  }
+</div>

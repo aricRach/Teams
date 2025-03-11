@@ -16,7 +16,7 @@ export class UserService {
   private spinnerService = inject(SpinnerService);
   popoutService = inject(PopupsService);
   provider = new GoogleAuthProvider();
-  // user = signal<any>(null);
+  user = signal<any>(null);
   router = inject(Router);
 
   constructor(@Inject(PLATFORM_ID) private platformId: object) {}
@@ -36,6 +36,7 @@ export class UserService {
       return;
     }
     if(this.auth.currentUser) {
+      this.user.set(this.auth.currentUser);
       this.router.navigate(['/select-group']).then(() => {
         // @ts-ignore
         this.popoutService.addSuccessPopOut(`welcome ${this.auth.currentUser.displayName}`)

@@ -8,25 +8,29 @@ import {PlayersDragDropTableComponent} from '../players/players-drag-drop-table/
 import {StopwatchComponent} from '../stopwatch/stopwatch.component';
 import {ModalComponent} from '../../modals/modal/modal.component';
 import {Player} from '../players/models/player.model';
+import {AuditTrailService} from '../audit-trail/services/audit-trail.service';
+import {AuditTrailComponent} from '../audit-trail/audit-trail.component';
 
 @Component({
   selector: 'app-game',
   imports: [ReactiveFormsModule, CommonModule, PlayersDragDropTableComponent,
-    StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent],
+    StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent, AuditTrailComponent],
   templateUrl: './game.component.html',
   standalone: true,
   styleUrl: './game.component.scss'
 })
 export class GameComponent {
   playerForm!: FormGroup;
+  playersService = inject(PlayersService);
+  auditTrailService = inject(AuditTrailService);
   isAdminMode = signal(false);
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
-  playersService = inject(PlayersService);
   isGameOn = signal(false);
   isTeamWinModalVisible = signal(false);
 
   @ViewChild('nameField') nameField!: ElementRef;
   protected isAdminCodeModalVisible = signal(false);
+  protected isAuditTrailModalVisible = signal(false);
 
   constructor(private fb: FormBuilder) {
     this.playerForm = this.fb.group({
@@ -79,6 +83,10 @@ export class GameComponent {
 
   closeAdminCodeModal() {
     this.isAdminCodeModalVisible.set(false);
+  }
+
+  closeAuditTrailModal() {
+    this.isAuditTrailModalVisible.set(false);
   }
 
   endGame(gameDetails: GameDetails) {
@@ -139,7 +147,13 @@ export class GameComponent {
     // save specific teams that played not good enough if i didnt clicked save global. because it is not saved my players moved from team to another team.
     // it saved only the statistics.
     // this.playersService.setPlayersIntoDataBase({[gameDetails.winner]: {players: winners}, [gameDetails.loser]: {players: losers}})
-    this.playersService.setPlayersIntoDataBase();
+    this.playersService.setPlayersIntoDataBase().then(() => {
+      if(gameDetails.gameStatus === 'decided') {
+        this.auditTrailService.addAuditTrail(`winner: ${gameDetails.winner} - loser: ${gameDetails.loser}`)
+      } else {
+        this.auditTrailService.addAuditTrail(`draw: ${gameDetails.winner} - ${gameDetails.loser}`)
+      }
+    });
   }
 
   codeModalSubmitted() {

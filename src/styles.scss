@@ -30,5 +30,11 @@
   display: none;
 }
 
+.button-icon {
+  cursor: pointer;
+  background-color: white;
+  border: none;
+}
+
 html, body { height: 90vh; }
 body { margin: 0; padding: 20px; font-family: Roboto, "Helvetica Neue", sans-serif; }

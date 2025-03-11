@@ -48,13 +48,13 @@ export class PlayersService {
       return of(this.userGroups());
     }
     return this.playersApiService.getUserCreatedGroups().pipe(take(1), tap((groups) => {
-      this.userGroups.set(groups)
+      this.userGroups.set(groups);
     }));
   }
 
   setPlayersIntoDataBase(specificTeams?: any) {
     this.spinnerService.setIsLoading(true);
-    this.playersApiService.addOrUpdatePlayers(this.selectedGroup().id, this.flattenPlayers(specificTeams)).then(
+    return this.playersApiService.addOrUpdatePlayers(this.selectedGroup().id, this.flattenPlayers(specificTeams)).then(
       () => this.popoutService.addSuccessPopOut('Data was saved successfully.'),
     ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
       () =>  this.spinnerService.setIsLoading(false)
@@ -128,7 +128,7 @@ export class PlayersService {
 
   updatePlayer(player: any) {
     this.spinnerService.setIsLoading(true);
-    this.playersApiService.updatePlayerStats(this.selectedGroup().id, player.name, player )
+    return this.playersApiService.updatePlayerStats(this.selectedGroup().id, player.name, player )
       .then(() => this.popoutService.addSuccessPopOut(`${player.name} goals updated successfully.`))
       .catch(() => this.popoutService.addErrorPopOut(`cant save goals for ${player.name}, please try later`))
       .finally(() => this.spinnerService.setIsLoading(false));

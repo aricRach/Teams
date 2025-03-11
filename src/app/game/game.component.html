@@ -11,6 +11,11 @@
     <button (click)="save()">Save local data </button>
   </div>
 
+
+  <button class="button-icon" (click)="isAuditTrailModalVisible.set(true)">
+    <img alt="login" src="assets/icons/audit-trail.svg" height="30" width="30">
+  </button>
+
   @if(isAdminMode()) {
     <div class="gap in-row">
       <button (click)="saveGlobal()">Save Global</button>
@@ -45,6 +50,12 @@
 @if(isAdminCodeModalVisible()) {
   <app-modal [showCloseButton]="false" (submit)="codeModalSubmitted()" (close)="closeAdminCodeModal()">
     <input placeholder="code" [(ngModel)]="code">
+  </app-modal>
+}
+
+@if(isAuditTrailModalVisible()) {
+  <app-modal [showSubmitButton]="false" (close)="closeAuditTrailModal()">
+    <app-audit-trail></app-audit-trail>
   </app-modal>
 }
 
