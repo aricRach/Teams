@@ -1,10 +1,14 @@
 <div>
 
-  <div class="center statistics-button">
+
+  <div class="center gap statistics-button">
   @if(showStatistics()) {
     <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
   } @else {
     <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
+  }
+  @if(this.isAdminMode()) {
+    <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
   }
   </div>
 
@@ -107,3 +111,10 @@
     <button (click)="setGoals()">set</button>
   </div>
 </div>
+
+
+@if(makeBalancedTeamsModalVisible()) {
+  <app-modal (submit)="closeAuditTrailModal(true)" (close)="closeAuditTrailModal(false)">
+    <div>Are you sure you want to change teams?</div>
+  </app-modal>
+}

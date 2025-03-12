@@ -6,22 +6,20 @@
 
 
 <div class="space-between save-buttons gap">
-  <div class="gap in-row">
-    <button (click)="load()">Load local data</button>
-    <button (click)="save()">Save local data </button>
-  </div>
+  @if(isAdminMode()) {
+    <div>
+      <button (click)="load()">Load local data</button>
+      <button (click)="save()">Save local data </button>
+    </div>
 
+      <button (click)="saveGlobal()">Save Global</button>
+  }
+</div>
 
+<div class="audit-trail-button">
   <button class="button-icon" (click)="isAuditTrailModalVisible.set(true)">
     <img alt="login" src="assets/icons/audit-trail.svg" height="30" width="30">
   </button>
-
-  @if(isAdminMode()) {
-    <div class="gap in-row">
-      <button (click)="saveGlobal()">Save Global</button>
-    </div>
-  }
-
 </div>
 
 <app-players-drag-drop-table [isGameOn]="isGameOn()" [isAdminMode]="isAdminMode()"></app-players-drag-drop-table>
@@ -35,9 +33,6 @@
     <button type="submit">Add Player</button>
   </form>
 }
-
-
-
 
 <app-stopwatch (timeStartEvent)="onGameStartEvent()" (timeStoppedEvent)="onGameStopEvent()" (timeEndEvent)="showTeamWinModal()"></app-stopwatch>
 
@@ -58,4 +53,3 @@
     <app-audit-trail></app-audit-trail>
   </app-modal>
 }
-

@@ -5,6 +5,7 @@ import {Player} from './models/player.model';
 import {of, take, tap} from 'rxjs';
 import {SpinnerService} from '../spinner.service';
 import {PopupsService} from 'ui';
+import {skeleton} from './consts/teams-skeleton';
 
 @Injectable({
   providedIn: 'root'
@@ -18,25 +19,7 @@ export class PlayersService {
   selectedGroup = signal<null | any>(null);
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
-  skeleton = {
-    teamA: {
-      players: [] as Player [],
-      totalRating: 0
-    },
-    teamB: {
-      players: [] as Player [],
-      totalRating: 0,
-    },
-    teamC: {
-      players: [] as Player [],
-      totalRating: 0,
-    },
-    allPlayers: {
-      players: [] as Player [],
-      totalRating: 0,
-    }
-  }
-  teams = signal(structuredClone(this.skeleton));
+  teams = signal(structuredClone(skeleton));
   private teamsFromApi: any = {};
 
   setTeams(value: any) {
@@ -112,7 +95,7 @@ export class PlayersService {
       return this.playersApiService.getAllPlayers(this.selectedGroup().id).pipe(
          take(1),
         tap((allPlayers) => {
-          const teams = structuredClone(this.skeleton);
+          const teams = structuredClone(skeleton);
 
           for (const player of allPlayers) {
             // @ts-ignore

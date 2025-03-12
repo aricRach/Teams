@@ -9,14 +9,16 @@ import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@
 import {CommonModule} from '@angular/common';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
 import {GoalModalEvent, Player} from '../models/player.model';
-import {currentDate, formatDateToString} from '../../utils/date-utils';
+import {currentDate} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
 import {PlayersService} from '../players.service';
 import {AuditTrailService} from '../../audit-trail/services/audit-trail.service';
+import {shuffleArray} from '../../utils/array-utils';
+import {ModalComponent} from '../../../modals/modal/modal.component';
 
 @Component({
   selector: 'app-players-drag-drop-table',
-  imports: [DragDropModule, CommonModule, DoubleClickDirective, PlayerViewComponent],
+  imports: [DragDropModule, CommonModule, DoubleClickDirective, PlayerViewComponent, ModalComponent],
   standalone: true,
   templateUrl: './players-drag-drop-table.component.html',
   styleUrl: './players-drag-drop-table.component.scss'
@@ -30,6 +32,7 @@ export class PlayersDragDropTableComponent {
   auditTrailService = inject(AuditTrailService);
 
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;
+  makeBalancedTeamsModalVisible = signal(false);
   getGoalModalDataByPlayer = linkedSignal(() =>
     this.setGoalModalData().player.statistics[currentDate]?.goals || 0)
   isSetGoalModalVisible = signal(false);
@@ -134,5 +137,52 @@ export class PlayersDragDropTableComponent {
         this.isSetGoalModalVisible.set(false);
       }
     }
+  }
+
+  makeBalancedTeams() {
+    const players = this.playersService.flattenPlayers({teamA: this.playersService.teams().teamA, teamB: this.playersService.teams().teamB, teamC: this.playersService.teams().teamC});
+    const shuffledPlayers = shuffleArray(players);
+    shuffledPlayers.sort((a, b) => b.rating - a.rating);
+
+    const teamA: Player[] = [];
+    const teamB: Player[] = [];
+    const teamC: Player[] = [];
+    let sumA = 0, sumB =0, sumC = 0;
+    shuffledPlayers.forEach((player, index) => {
+      if (index % 3 === 0) {
+        teamA.push(player);
+        sumA+=player.rating
+      } else if (index % 3 === 1) {
+        teamB.push(player);
+        sumB+=player.rating
+      } else {
+        teamC.push(player);
+        sumC+=player.rating
+
+      }
+    });
+    this.playersService.teams.update(teams => {
+      teams.teamA = {
+        players: teamA,
+        totalRating: sumA
+      }
+      teams.teamB = {
+        players: teamB,
+        totalRating: sumB
+      }
+        teams.teamC = {
+          players: teamC,
+          totalRating: sumC
+        }
+      return teams;
+    })
+    return { teamA, teamB, teamC };
+  }
+
+  closeAuditTrailModal(confirm : boolean) {
+    if(confirm) {
+      this.makeBalancedTeams();
+    }
+    this.makeBalancedTeamsModalVisible.set(false);
   }
 }

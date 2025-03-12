@@ -5,11 +5,13 @@
     @if(showCloseIcon()) {
       <button class="close-icon" (click)="closeModal()">×</button>
     }
-    @if(showCloseButton()) {
-      <button (click)="closeModal()">close</button>
-    }
+    <div class="modal-buttons gap">
     @if(showSubmitButton()) {
       <button (click)="submitModal()">submit</button>
     }
+    @if(showCloseButton()) {
+      <button (click)="closeModal()">close</button>
+    }
+    </div>
   </div>
 </div>
