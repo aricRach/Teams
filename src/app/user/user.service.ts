@@ -46,6 +46,7 @@ export class UserService {
       this.spinnerService.setIsLoading(true);
       signInWithPopup(this.auth, this.provider)
         .then((result) => {
+          this.user.set(result.user);
           this.router.navigate(['/select-group']).then(() => this.spinnerService.setIsLoading(false));
         })
         .catch((error) => {
