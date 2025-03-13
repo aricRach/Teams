@@ -1,8 +1,8 @@
 <div class="audit-trail-container">
   <h3>Actions History</h3>
-  @if(auditTrailService.getAuditTrail().length) {
+  @if(auditTrailService.auditTrail().length) {
     <ul>
-      <li *ngFor="let log of auditTrailService.getAuditTrail()">
+      <li *ngFor="let log of auditTrailService.auditTrail()">
         <span>{{ log.actionDetails }}</span>
         <span class="date">{{ log.date }}</span>
       </li>
