@@ -1,5 +1,5 @@
 import {
-  Component, HostListener,
+  Component, computed, HostListener,
   inject,
   input,
   linkedSignal,
@@ -15,6 +15,7 @@ import {PlayersService} from '../players.service';
 import {AuditTrailService} from '../../audit-trail/services/audit-trail.service';
 import {shuffleArray} from '../../utils/array-utils';
 import {ModalComponent} from '../../../modals/modal/modal.component';
+import {AdminControlService} from '../../user/admin-control.service';
 
 @Component({
   selector: 'app-players-drag-drop-table',
@@ -25,10 +26,10 @@ import {ModalComponent} from '../../../modals/modal/modal.component';
 })
 export class PlayersDragDropTableComponent {
 
-  isAdminMode = input.required();
   isGameOn = input.required();
 
   playersService = inject(PlayersService);
+  adminControlService = inject(AdminControlService);
   auditTrailService = inject(AuditTrailService);
 
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;
@@ -45,6 +46,8 @@ export class PlayersDragDropTableComponent {
       teamB: this.calculateRating(this.playersService.teams().teamB.players),
       teamC: this.calculateRating(this.playersService.teams().teamC.players),
   })
+
+  isAdminMode = computed(() => this.adminControlService.adminControl().isAdminMode);
   toggleShowStatistics() {
     this.showStatistics.set(!this.showStatistics());
   }

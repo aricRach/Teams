@@ -2,6 +2,7 @@ import {Component, computed, inject} from '@angular/core';
 import {MenuAction, NavigationBarComponent} from 'ui'
 import {UserService} from '../user/user.service';
 import {PlayersService} from '../players/players.service';
+import {AdminControlService} from '../user/admin-control.service';
 
 @Component({
   selector: 'app-header',
@@ -14,6 +15,8 @@ import {PlayersService} from '../players/players.service';
 export class HeaderComponent {
 
   playersService = inject(PlayersService);
+  adminControlService = inject(AdminControlService);
+
   title = computed(() => this.playersService.selectedGroup()?.name || 'TeamsRach');
   navItems = computed(() => [
     {
@@ -31,7 +34,7 @@ export class HeaderComponent {
     {
       action: MenuAction.NAVIGATE,
       alias: 'Edit player',
-      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
+      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.adminControl().isAdminMode,
       link: '/home/edit-player'
     }
   ])

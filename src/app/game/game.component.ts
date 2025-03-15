@@ -10,6 +10,7 @@ import {ModalComponent} from '../../modals/modal/modal.component';
 import {Player} from '../players/models/player.model';
 import {AuditTrailService} from '../audit-trail/services/audit-trail.service';
 import {AuditTrailComponent} from '../audit-trail/audit-trail.component';
+import {AdminControlService} from '../user/admin-control.service';
 
 @Component({
   selector: 'app-game',
@@ -23,7 +24,7 @@ export class GameComponent {
   playerForm!: FormGroup;
   playersService = inject(PlayersService);
   auditTrailService = inject(AuditTrailService);
-  isAdminMode = signal(false);
+  adminControlService = inject(AdminControlService);
   originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
   isGameOn = signal(false);
   isTeamWinModalVisible = signal(false);
@@ -159,7 +160,7 @@ export class GameComponent {
   codeModalSubmitted() {
     this.isAdminCodeModalVisible.set(false);
     if(this.code === '2626') {
-      this.isAdminMode.set(!this.isAdminMode());
+      this.adminControlService.setIsAdmin(!this.adminControlService.adminControl().isAdminMode);
     }
     this.code = '';
   }
