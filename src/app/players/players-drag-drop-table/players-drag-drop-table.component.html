@@ -1,6 +1,4 @@
 <div>
-
-
   <div class="center gap statistics-button">
   @if(showStatistics()) {
     <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
@@ -16,7 +14,7 @@
     <div class="list-container">
       <h2>A</h2>
       @if(isAdminMode()) {
-        <h5>{{playersService.teams().teamA.totalRating}}</h5>
+        <h5>{{totalRatings().teamA}}</h5>
       }
       <div
         id="teamA"
@@ -36,7 +34,7 @@
     <div class="list-container">
       <h2>B</h2>
       @if(isAdminMode()) {
-        <h5>{{playersService.teams().teamB.totalRating}}</h5>
+        <h5>{{totalRatings().teamB}}</h5>
       }
       <div
         id="teamB"
@@ -56,7 +54,7 @@
     <div class="list-container">
       <h2>C</h2>
       @if(isAdminMode()) {
-        <h5>{{playersService.teams().teamC.totalRating}}</h5>
+        <h5>{{totalRatings().teamC}}</h5>
       }
       <div
         cdkDropList

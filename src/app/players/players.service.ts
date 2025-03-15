@@ -101,7 +101,7 @@ export class PlayersService {
             // @ts-ignore
             teams[player.team].players.push(player);
             // @ts-ignore
-            teams[player.team].totalRating += player.rating;
+            // teams[player.team].totalRating += player.rating;
           }
           this.teamsFromApi[this.selectedGroup().id] = teams;
           this.teams.set(teams);
@@ -109,11 +109,29 @@ export class PlayersService {
        )
     }
 
-  updatePlayer(player: any) {
+  updatePlayer(player: any, updateStats: boolean) {
     this.spinnerService.setIsLoading(true);
-    return this.playersApiService.updatePlayerStats(this.selectedGroup().id, player.name, player )
-      .then(() => this.popoutService.addSuccessPopOut(`${player.name} goals updated successfully.`))
-      .catch(() => this.popoutService.addErrorPopOut(`cant save goals for ${player.name}, please try later`))
+    return this.playersApiService.updatePlayerStats(this.selectedGroup().id, player.name, player, updateStats )
+      .then(() => {
+        this.popoutService.addSuccessPopOut(`${player.name} updated successfully.`);
+        this.teams.update((teams) => {
+          for (const teamKey in teams) {
+            // @ts-ignore
+            const team = teams[teamKey];
+            let foundPlayerIndex = team.players.findIndex((playerObj: Player) => playerObj.name.toLowerCase() === player.name.toLowerCase());
+
+            if (foundPlayerIndex > -1) {
+              team.players[foundPlayerIndex] = {...player}
+              // team.totalRating = team.players.reduce((totalRating: number, player: Player) => totalRating + player.rating, 0)
+              break;
+            }
+          }
+          return teams;
+        })
+      })
+      .catch(() => this.popoutService.addErrorPopOut(`cant save please try later`))
       .finally(() => this.spinnerService.setIsLoading(false));
   }
+
+
 }

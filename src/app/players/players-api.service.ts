@@ -1,14 +1,17 @@
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {
-  Firestore,
-  collection,
-  doc,
-  getDocs,
-  query,
-  setDoc,
-  where,
   addDoc,
-  collectionData, getDoc, or, updateDoc, writeBatch
+  collection,
+  collectionData,
+  doc,
+  Firestore,
+  getDoc,
+  getDocs,
+  or,
+  query,
+  updateDoc,
+  where,
+  writeBatch
 } from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
 import {Observable} from 'rxjs';
@@ -190,20 +193,29 @@ export class PlayersApiService {
     return collectionData(q, { idField: "id" });
   }
 
-  async updatePlayerStats(groupId: string, playerName: string, updatedStats: any) {
+  async updatePlayerStats(groupId: string, playerName: string, updatedPlayer: any, updateStats: boolean) {
+    const playerSnapshot = await this.getPlayerSnapshot(groupId, playerName);
+
+    if (playerSnapshot.empty) {
+      return Promise.reject();
+    }
+    const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${playerSnapshot.docs[0].id}`);
+    if(updateStats) {
+     return updateDoc(playerDocRef, updatedPlayer);
+    }
+    return updateDoc(playerDocRef, {
+      rating: updatedPlayer.rating
+    });
+  }
+
+  private async getPlayerSnapshot(groupId: string, playerName: string) {
     const user = this.auth.currentUser;
     if (!user) {
       return Promise.reject();
     }
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
     const q = query(playersRef, where("name", "==", playerName.toLowerCase()));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      return Promise.reject();
-    }
-    const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${querySnapshot.docs[0].id}`);
-    return updateDoc(playerDocRef, updatedStats);
+    return await getDocs(q);
   }
 }
 

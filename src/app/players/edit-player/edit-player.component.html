@@ -1,0 +1,13 @@
+<h3>Edit player</h3>
+
+<select [(ngModel)]="selectedPlayerOption" (change)="onChange()">
+  @for(player of allPlayersArray(); track player.name) {
+    <option>{{player.name}}</option>
+  }
+</select>
+
+<app-generic-form
+  [formFields]=controls()
+  [title]="''"
+  (formSubmit)="editPlayer($event)">
+</app-generic-form>

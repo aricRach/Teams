@@ -40,7 +40,11 @@ export class PlayersDragDropTableComponent {
   modalPosition = signal({ x: 0, y: 0 });
 
   showStatistics = signal(false);
-
+  totalRatings = signal({
+      teamA: this.calculateRating(this.playersService.teams().teamA.players),
+      teamB: this.calculateRating(this.playersService.teams().teamB.players),
+      teamC: this.calculateRating(this.playersService.teams().teamC.players),
+  })
   toggleShowStatistics() {
     this.showStatistics.set(!this.showStatistics());
   }
@@ -63,13 +67,11 @@ export class PlayersDragDropTableComponent {
         event.previousIndex,
         event.currentIndex,
       );
-      this.playersService.teams.update((teams => {
-        // @ts-ignore
-        teams[event.previousContainer.id].totalRating = this.calculateRating(event.previousContainer.data)
-        // @ts-ignore
-        teams[event.container.id].totalRating = this.calculateRating(event.container.data)
-        return teams
-      }));
+        this.totalRatings.set({
+           teamA: this.calculateRating(this.playersService.teams().teamA.players),
+           teamB: this.calculateRating(this.playersService.teams().teamB.players),
+           teamC: this.calculateRating(this.playersService.teams().teamC.players),
+        })
     }
   }
 
@@ -122,7 +124,7 @@ export class PlayersDragDropTableComponent {
       players[playerIndex] = player;
       team.players = players;
       this.playersService.setTeams({ ...this.playersService.teams(), [teamName]: team });
-      this.playersService.updatePlayer(player).then(() => {
+      this.playersService.updatePlayer(player, true).then(() => {
         this.auditTrailService.addAuditTrail(`goals set for ${player.name} ${prevGoals || 0} -> ${dateStats.goals}`)
       });
       this.closeSetGoalModal();
@@ -164,15 +166,15 @@ export class PlayersDragDropTableComponent {
     this.playersService.teams.update(teams => {
       teams.teamA = {
         players: teamA,
-        totalRating: sumA
+        // totalRating: sumA
       }
       teams.teamB = {
         players: teamB,
-        totalRating: sumB
+        // totalRating: sumB
       }
         teams.teamC = {
           players: teamC,
-          totalRating: sumC
+          // totalRating: sumC
         }
       return teams;
     })

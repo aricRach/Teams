@@ -27,6 +27,12 @@ export class HeaderComponent {
       alias: 'Statistics',
       show: !!this.playersService.selectedGroup(),
       link: '/home/statistics'
+    },
+    {
+      action: MenuAction.NAVIGATE,
+      alias: 'Edit player',
+      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
+      link: '/home/edit-player'
     }
   ])
 }

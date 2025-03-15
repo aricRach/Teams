@@ -9,6 +9,7 @@ import {getUserGroupsResolver} from './resolvers/get-user-groups.resolver';
 import {groupAdminGuard} from './guards/group-admin.guard';
 import {AuthGuard} from '@angular/fire/auth-guard';
 import {authRoutesGuard} from './guards/auth-routes.guard';
+import {EditPlayerComponent} from './players/edit-player/edit-player.component';
 
 export const routes: Routes = [
   {
@@ -45,6 +46,11 @@ export const routes: Routes = [
       {
         path: 'statistics',
         component: StatisticsComponent,
+      },
+      {
+        path: 'edit-player',
+        component: EditPlayerComponent,
+        canActivate: [groupAdminGuard]
       }
     ]
   },
