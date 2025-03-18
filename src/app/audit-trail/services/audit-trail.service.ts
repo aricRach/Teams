@@ -31,7 +31,7 @@ export class AuditTrailService {
 
   addAuditTrail(actionDetails: string) {
     const userActions = [...this.auditTrail()];
-    userActions.unshift({actionDetails: actionDetails, date: currentDateTime(), user: this.userService.user().displayName});
+    userActions.unshift({actionDetails: actionDetails, date: currentDateTime(), user: this.userService.user()?.displayName});
     this.userActions.set(userActions);
     localStorage.setItem(`teams-audit-${this.playersService.selectedGroup().id}`, JSON.stringify(this.userActions()));
 

@@ -10,6 +10,7 @@ import {groupAdminGuard} from './guards/group-admin.guard';
 import {AuthGuard} from '@angular/fire/auth-guard';
 import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './players/edit-player/edit-player.component';
+import {RatePlayersComponent} from './players/rate-players/rate-players.component';
 
 export const routes: Routes = [
   {
@@ -51,7 +52,11 @@ export const routes: Routes = [
         path: 'edit-player',
         component: EditPlayerComponent,
         canActivate: [groupAdminGuard]
-      }
+      },
+      // {
+      //   path: 'rate-players',
+      //   component: RatePlayersComponent,
+      // },
     ]
   },
 ];

@@ -8,7 +8,7 @@ import {
   getDoc,
   getDocs,
   or,
-  query,
+  query, setDoc,
   updateDoc,
   where,
   writeBatch
@@ -216,6 +216,16 @@ export class PlayersApiService {
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
     const q = query(playersRef, where("name", "==", playerName.toLowerCase()));
     return await getDocs(q);
+  }
+
+  async submitRatings(ratingData: Record<string, number>, groupId: string) {
+    const user = this.auth.currentUser;
+    if (!user) {
+      return Promise.reject();
+    }
+
+    const ratingDocRef = doc(this.firestore, `groups/${groupId}/ratings/${user.email}`);
+    return await setDoc(ratingDocRef, ratingData, { merge: true });
   }
 }
 

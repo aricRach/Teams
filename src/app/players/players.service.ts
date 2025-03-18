@@ -20,7 +20,6 @@ export class PlayersService {
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
   teams = signal(structuredClone(skeleton));
-  private teamsFromApi: any = {};
 
   setTeams(value: any) {
     this.teams.set(value);
@@ -87,11 +86,6 @@ export class PlayersService {
     }
 
     getAllPlayersFromDatabase() {
-    const cachedTeams = this.teamsFromApi[this.selectedGroup().id]
-       if(cachedTeams) {
-         this.teams.set(cachedTeams);
-         return of(cachedTeams);
-       }
       return this.playersApiService.getAllPlayers(this.selectedGroup().id).pipe(
          take(1),
         tap((allPlayers) => {
@@ -103,7 +97,6 @@ export class PlayersService {
             // @ts-ignore
             // teams[player.team].totalRating += player.rating;
           }
-          this.teamsFromApi[this.selectedGroup().id] = teams;
           this.teams.set(teams);
         })
        )
@@ -133,5 +126,11 @@ export class PlayersService {
       .finally(() => this.spinnerService.setIsLoading(false));
   }
 
-
+  async submitRatings(ratingData: Record<string, number>) {
+   this.spinnerService.setIsLoading(true);
+   return this.playersApiService.submitRatings(ratingData, this.selectedGroup().id).then(() => {
+     this.popoutService.addSuccessPopOut(`rating were successfully updated.`);
+   }).catch(() => this.popoutService.addErrorPopOut(`cant save please try later`))
+     .finally(() => this.spinnerService.setIsLoading(false));
+  }
 }
