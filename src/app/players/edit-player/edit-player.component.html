@@ -1,13 +1,20 @@
+<div class="center edit-player-header">
 <h3>Edit player</h3>
 
-<select [(ngModel)]="selectedPlayerOption" (change)="onChange()">
+<select [(ngModel)]="selectedPlayerOption" (change)="onChangePlayer()">
   @for(player of allPlayersArray(); track player.name) {
     <option>{{player.name}}</option>
   }
 </select>
+</div>
 
 <app-generic-form
   [formFields]=controls()
-  [title]="''"
   (formSubmit)="editPlayer($event)">
+</app-generic-form>
+
+<app-generic-form
+  [formFields]=gameControls()
+  [title]="editStatisticsFormTitle()"
+  (formSubmit)="editLastStatistics($event)">
 </app-generic-form>
