@@ -177,7 +177,7 @@ export class PlayersDragDropTableComponent {
     return { teamA, teamB, teamC };
   }
 
-  closeAuditTrailModal(confirm : boolean) {
+   setBalancedTeamsModal(confirm : boolean) {
     if(confirm) {
       this.makeBalancedTeams();
     }

@@ -112,7 +112,7 @@
 
 
 @if(makeBalancedTeamsModalVisible()) {
-  <app-modal (submit)="closeAuditTrailModal(true)" (close)="closeAuditTrailModal(false)">
+  <app-modal (submit)="setBalancedTeamsModal(true)" (close)="setBalancedTeamsModal(false)">
     <div>Are you sure you want to change teams?</div>
   </app-modal>
 }

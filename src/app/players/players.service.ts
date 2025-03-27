@@ -88,8 +88,8 @@ export class PlayersService {
 
     }
 
-    getAllPlayersFromDatabase() {
-      return this.playersApiService.getAllPlayers(this.selectedGroup().id).pipe(
+    getAllActivePlayers() {
+      return this.playersApiService.getAllActivePlayers(this.selectedGroup().id).pipe(
          take(1),
         tap((allPlayers) => {
           const teams = structuredClone(skeleton);
@@ -134,15 +134,38 @@ export class PlayersService {
      .finally(() => this.spinnerService.setIsLoading(false));
   }
 
-  // rebuildTeams(): any {
-  //   const teams = structuredClone(skeleton)
-  //   const playersArray = this.flattenPlayers();
-  //   playersArray.forEach(player => {
-  //     const teamName = player.team;
-  //     teams[teamName].players.push({ ...structuredClone(player) });
-  //   });
-  //   return teams;
-  // }
+  setPlayerActiveStatus(player: Player, isActive: boolean) {
+    this.spinnerService.setIsLoading(true)
+   return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.name, isActive).then(() => {
+     this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`);
+     if(isActive) { // if you want to make the player active you need to fetch again.
+       debugger
+       this.getAllActivePlayers();
+       return;
+     }
+     debugger
+     if(!isActive) { // if you want to remove delete it from the specific team.
+       debugger
+        this.teams.update((teams) => {
+          for (const teamKey in teams) {
+            // @ts-ignore
+            const team = teams[teamKey];
+            let foundPlayerIndex = team.players.findIndex(
+              (playerObj: Player) => playerObj.name.toLowerCase() === player.name.toLowerCase()
+            );
+            if (foundPlayerIndex > -1) {
+                team.players.splice(foundPlayerIndex, 1);
+              break;
+            }
+          }
+          return { ...teams };
+        });
+      }
+   }).catch(() => {
+     this.popoutService.addErrorPopOut(`please try again later`);
+   })
+     .finally(() => this.spinnerService.setIsLoading(false));
+  }
 
   getTeams(): any {
    return structuredClone(this.teams())

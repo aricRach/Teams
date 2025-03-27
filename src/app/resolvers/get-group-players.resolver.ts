@@ -14,7 +14,7 @@ export const getGroupPlayersResolver: ResolveFn<any> = (route, state) => {
     return;
   }
   spinnerService.setIsLoading(true);
-  return playersService.getAllPlayersFromDatabase().pipe(finalize(() => {
+  return playersService.getAllActivePlayers().pipe(finalize(() => {
     spinnerService.setIsLoading(false);
   }),);
 };

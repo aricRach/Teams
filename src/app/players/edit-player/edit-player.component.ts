@@ -5,7 +5,8 @@ import {
   FormField,
   GenericFormComponent,
   genericValidators,
-  subInputType
+  subInputType,
+  ModalsService
 } from 'ui';
 import {FormGroup, FormsModule} from '@angular/forms';
 import {convertFormValuesToNumbers} from '../../utils/form-utils';
@@ -22,6 +23,7 @@ import {convertFormValuesToNumbers} from '../../utils/form-utils';
 export class EditPlayerComponent {
 
   playersService = inject(PlayersService);
+  modalsService = inject(ModalsService);
   controls = computed<FormField[]>(() => this.buildEditPlayerDetailsFields());
   gameControls = computed<FormField[]>(() => this.buildEditGameStatsFields())
   allPlayersArray = computed(() => [...this.playersService.flattenPlayers()]);
@@ -144,5 +146,15 @@ export class EditPlayerComponent {
     const updatedPlayer = this.selectedPlayer();
     updatedPlayer.statistics[this.lastDayPlayedStatistics().date] = convertFormValuesToNumbers(formValues);
     this.playersService.updatePlayer(updatedPlayer, true).then();
+  }
+
+  deletePlayer() {
+    this.modalsService.openConfirmModal({
+      description: `Are you sure you want to delete ${this.selectedPlayer().name}?`,
+    }).afterClosed().subscribe((result) => {
+      if(result) {
+        this.playersService.setPlayerActiveStatus(this.selectedPlayer(), false).then(() => this.selectedPlayer.set(null))
+      }
+    });
   }
 }

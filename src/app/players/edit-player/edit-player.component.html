@@ -1,11 +1,13 @@
 <div class="center edit-player-header">
 <h3>Edit player</h3>
-
 <select [(ngModel)]="selectedPlayerOption" (change)="onChangePlayer()">
   @for(player of allPlayersArray(); track player.name) {
     <option>{{player.name}}</option>
   }
 </select>
+  @if(selectedPlayer()) {
+    <button class="delete-btn active-btn alert-btn" (click)="deletePlayer()">Delete Player</button>
+  }
 </div>
 
 <app-generic-form
@@ -18,3 +20,5 @@
   [title]="editStatisticsFormTitle()"
   (formSubmit)="editLastStatistics($event)">
 </app-generic-form>
+
+

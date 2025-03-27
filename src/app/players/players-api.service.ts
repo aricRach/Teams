@@ -27,9 +27,11 @@ export class PlayersApiService {
 
   constructor() {}
 
-  getAllPlayers(groupId: string) {
-    const playersCollection = collection(this.firestore, `groups/${groupId}/players`);
-    return collectionData(playersCollection, { idField: "id" })
+  getAllActivePlayers(groupId: string) {
+    const playersRef = collection(this.firestore, `groups/${groupId}/players`);
+    const activePlayersQuery = query(playersRef, where('isActive', '!=', false));
+
+    return collectionData(activePlayersQuery, { idField: "id" }); // Fetch only active players with Firestore ID
   }
 
   /**
@@ -135,27 +137,6 @@ export class PlayersApiService {
     return true;
   }
 
-  //   const playersCollection = collection(this.firestore, 'players');
-  //     return collectionData(playersCollection, { idField: "id" });
-  // }
-  // async getAllPlayers(groupId = 'rach') {
-  //   const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-  //
-  //   try {
-  //     const querySnapshot = await getDocs(playersRef);
-  //     const players = querySnapshot.docs.map(doc => ({
-  //       id: doc.id, // Include document ID if needed
-  //       ...doc.data()
-  //     }));
-  //
-  //     console.log(`Players in group "${groupId}":`, players);
-  //     return players;
-  //   } catch (error) {
-  //     console.error("Error fetching players:", error);
-  //     return [];
-  //   }
-  // }
-
   getUserCreatedGroups(): Observable<any[]> {
     const user = this.auth.currentUser;
     if (!user) {
@@ -201,6 +182,12 @@ export class PlayersApiService {
 
     const ratingDocRef = doc(this.firestore, `groups/${groupId}/ratings/${user.email}`);
     return await setDoc(ratingDocRef, ratingData, { merge: true });
+  }
+
+  async setPlayerActiveStatus(groupId: string, playerName: string, isActive: boolean) {
+    const playerSnapshot = await this.getPlayerSnapshot(groupId, playerName);
+    const playerRef = doc(this.firestore, `groups/${groupId}/players/${playerSnapshot.docs[0].id}`);
+    return updateDoc(playerRef, {isActive});
   }
 }
 
