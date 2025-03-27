@@ -15,6 +15,7 @@ import {
 } from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
 import {Observable} from 'rxjs';
+import {Player} from './models/player.model';
 
 @Injectable({
   providedIn: 'root'
@@ -62,14 +63,7 @@ export class PlayersApiService {
     }
   }
 
-  /**
-   * Add a player to a specific group.
-   * Only the group creator can add players.
-   * @param groupId ID of the group.
-   * @param playerName Name of the player.
-   * @returns Promise resolving to success/failure.
-   */
-  async addPlayerToGroup(groupId: string, playerName: string): Promise<boolean> {
+  async addPlayerToGroup(groupId: string, player: Player): Promise<boolean> {
     const user = this.auth.currentUser;
     if (!user) {
       console.error("User not authenticated");
@@ -84,35 +78,16 @@ export class PlayersApiService {
       return false;
     }
 
-    // Ensure only the group creator can add players
-    const groupData = groupSnap.data();
-    if (groupData?.['createdBy'] !== user.email) {
-      console.error("Only the group admin can add players");
-      return false;
-    }
-
-    // 🔍 Check if a player with the same name already exists
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-    const q = query(playersRef, where("name", "==", playerName));
+    const q = query(playersRef, where("name", "==", player.name));
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      console.error(`Player with name "${playerName}" already exists in group "${groupId}".`);
+      console.error(`Player with name "${player.name}" already exists in group "${groupId}".`);
       return false;
     }
-
-    // ✅ Add player if no duplicate is found
-    const playerData = {
-      name: playerName,
-      stats: {
-        goals: 0,
-        games: 0,
-        wins: 0
-      }
-    };
-
-    await addDoc(playersRef, playerData);
-    console.log(`Player "${playerName}" added to group "${groupId}"`);
+    await addDoc(playersRef, player);
+    console.log(`Player "${player.name}" added to group "${groupId}"`);
     return true;
   }
 

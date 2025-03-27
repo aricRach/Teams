@@ -58,7 +58,7 @@ export class GameComponent {
   }
 
   save() {
-    localStorage.setItem(`teams-${this.playersService.selectedGroup().id}`, JSON.stringify(this.playersService.teams()));
+    localStorage.setItem(`teams-${this.playersService.selectedGroup().id}`, JSON.stringify(this.playersService.getTeams()));
   }
 
   load() {
@@ -91,9 +91,9 @@ export class GameComponent {
   }
 
   endGame(gameDetails: GameDetails) {
-    // Update winners' stats
+    const teams = this.playersService.getTeams();
     // @ts-ignore
-    const winners = this.playersService.teams()[gameDetails.winner].players.map((player: Player) => {
+    const winners = teams[gameDetails.winner].players.map((player: Player) => {
       const currentStats = player.statistics[currentDate] || {};
       const updatedStatistics = {
         ...player.statistics,
@@ -113,9 +113,8 @@ export class GameComponent {
       };
     });
 
-    // Update losers' stats
     // @ts-ignore
-    const losers = this.playersService.teams()[gameDetails.loser].players.map((player: Player) => {
+    const losers = teams[gameDetails.loser].players.map((player: Player) => {
       const currentStats = player.statistics[currentDate] || {};
       const updatedStatistics = {
         ...player.statistics,
@@ -137,11 +136,11 @@ export class GameComponent {
 
     // Update the teams
     this.playersService.setTeams({
-      ...this.playersService.teams(),
+      ...teams,
       // @ts-ignore
-      [gameDetails.winner]: { ...this.playersService.teams()[gameDetails.winner], players: winners },
+      [gameDetails.winner]: { ...teams[gameDetails.winner], players: winners },
       // @ts-ignore
-      [gameDetails.loser]: { ...this.playersService.teams()[gameDetails.loser], players: losers },
+      [gameDetails.loser]: { ...teams[gameDetails.loser], players: losers },
     });
 
     this.isTeamWinModalVisible.set(false);

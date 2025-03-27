@@ -21,11 +21,11 @@
         cdkDropList
         #teamAList="cdkDropList"
         [cdkDropListDisabled]="isGameOn()"
-        [cdkDropListData]="playersService.teams().teamA.players"
+        [cdkDropListData]="clonedTeams()?.teamA?.players"
         [cdkDropListConnectedTo]="[teamBList, playersList, teamCList]"
         class="list"
         (cdkDropListDropped)="drop($event)">
-        @for (item of playersService.teams().teamA.players; track item) {
+        @for (item of clonedTeams()?.teamA?.players; track item) {
           <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamA'})" class="box" cdkDrag></app-player-view>
         }
       </div>
@@ -41,11 +41,11 @@
         cdkDropList
         #teamBList="cdkDropList"
         [cdkDropListDisabled]="isGameOn()"
-        [cdkDropListData]="playersService.teams().teamB.players"
+        [cdkDropListData]="clonedTeams()?.teamB?.players"
         [cdkDropListConnectedTo]="[teamAList, playersList, teamCList]"
         class="list"
         (cdkDropListDropped)="drop($event)">
-        @for (item of playersService.teams().teamB.players; track item) {
+        @for (item of clonedTeams()?.teamB?.players; track item) {
           <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamB'})" class="box" cdkDrag></app-player-view>
         }
       </div>
@@ -61,11 +61,11 @@
         id="teamC"
         #teamCList="cdkDropList"
         [cdkDropListDisabled]="isGameOn()"
-        [cdkDropListData]="playersService.teams().teamC.players"
+        [cdkDropListData]="clonedTeams()?.teamC?.players"
         [cdkDropListConnectedTo]="[teamAList, teamBList, playersList]"
         class="list"
         (cdkDropListDropped)="drop($event)">
-        @for (item of playersService.teams().teamC.players; track item) {
+        @for (item of clonedTeams()?.teamC?.players; track item) {
           <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamC'})" class="box" cdkDrag></app-player-view>
         }
       </div>
@@ -78,11 +78,11 @@
     id="allPlayers"
     #playersList="cdkDropList"
     [cdkDropListDisabled]="isGameOn()"
-    [cdkDropListData]="playersService.teams().allPlayers.players"
+    [cdkDropListData]="clonedTeams()?.allPlayers?.players"
     [cdkDropListConnectedTo]="[teamAList, teamBList, teamCList]"
     class="box available-player"
     (cdkDropListDropped)="drop($event)">
-    @for (item of playersService.teams().allPlayers.players; track item; let idx = $index) {
+    @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
       <div class="player">
       @if(!isAdminMode()) {
         <div class="box" cdkDrag>{{item.name}}</div>

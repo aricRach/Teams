@@ -24,7 +24,7 @@ export class EditPlayerComponent {
   playersService = inject(PlayersService);
   controls = computed<FormField[]>(() => this.buildEditPlayerDetailsFields());
   gameControls = computed<FormField[]>(() => this.buildEditGameStatsFields())
-  allPlayersArray = computed(() => this.playersService.flattenPlayers());
+  allPlayersArray = computed(() => [...this.playersService.flattenPlayers()]);
   selectedPlayerOption = '';
   selectedPlayer = signal<any>(null);
   lastDayPlayedStatistics = computed(() => {
@@ -36,20 +36,13 @@ export class EditPlayerComponent {
   shouldDisabledFields = computed(() => !this.selectedPlayer())
 
   editPlayer(playerDetails: FormGroup<any>) {
-
     const details = playerDetails.getRawValue();
     details.rating = Number(details.rating)
-    this.playersService.updatePlayer({...this.selectedPlayer(), ...details}, false).then(() => {
-      this.playersService.teams.update((teams) => {
-        const name = this.selectedPlayer().name;
-        return teams;
-      })
-    });
+    this.playersService.updatePlayer({...this.selectedPlayer(), ...details}, false).then()
   }
 
   onChangePlayer() {
-    this.selectedPlayer.set(this.selectedPlayerOption);
-    this.selectedPlayer.set(this.playersService.flattenPlayers().filter((p => p.name === this.selectedPlayerOption))[0]);
+    this.selectedPlayer.set(this.allPlayersArray().filter((p => p.name === this.selectedPlayerOption))[0]);
   }
 
   getLastDayStatistics(playerData: any): any {
@@ -148,9 +141,8 @@ export class EditPlayerComponent {
 
   editLastStatistics(lastStatisticsForm: FormGroup<any>) {
     const formValues = lastStatisticsForm.getRawValue();
-    const convertedValues = convertFormValuesToNumbers(formValues);
-    const x = this.selectedPlayer();
-    x.statistics[this.lastDayPlayedStatistics().date] = convertedValues; // todo: it changed the state as side effect it what i need but need to fix it.
-    this.playersService.updatePlayer(x, true).then();
+    const updatedPlayer = this.selectedPlayer();
+    updatedPlayer.statistics[this.lastDayPlayedStatistics().date] = convertFormValuesToNumbers(formValues);
+    this.playersService.updatePlayer(updatedPlayer, true).then();
   }
 }

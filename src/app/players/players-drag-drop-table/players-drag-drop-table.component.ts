@@ -32,6 +32,7 @@ export class PlayersDragDropTableComponent {
   adminControlService = inject(AdminControlService);
   auditTrailService = inject(AuditTrailService);
 
+  clonedTeams = computed(() => structuredClone(this.playersService.computedTeams()));
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;
   makeBalancedTeamsModalVisible = signal(false);
   getGoalModalDataByPlayer = linkedSignal(() =>
@@ -41,10 +42,13 @@ export class PlayersDragDropTableComponent {
   modalPosition = signal({ x: 0, y: 0 });
 
   showStatistics = signal(false);
-  totalRatings = signal({
-      teamA: this.calculateRating(this.playersService.teams().teamA.players),
-      teamB: this.calculateRating(this.playersService.teams().teamB.players),
-      teamC: this.calculateRating(this.playersService.teams().teamC.players),
+  totalRatings = linkedSignal(() => {
+    const teams = this.clonedTeams();
+    return {
+      teamA: this.calculateRating(teams.teamA.players),
+      teamB: this.calculateRating(teams.teamB.players),
+      teamC: this.calculateRating(teams.teamC.players),
+    }
   })
 
   isAdminMode = computed(() => this.adminControlService.adminControl().isAdminMode);
@@ -61,6 +65,7 @@ export class PlayersDragDropTableComponent {
   }
 
   drop(event: CdkDragDrop<any>) {
+    const teams = this.clonedTeams();
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
@@ -70,19 +75,23 @@ export class PlayersDragDropTableComponent {
         event.previousIndex,
         event.currentIndex,
       );
-        this.totalRatings.set({
-           teamA: this.calculateRating(this.playersService.teams().teamA.players),
-           teamB: this.calculateRating(this.playersService.teams().teamB.players),
-           teamC: this.calculateRating(this.playersService.teams().teamC.players),
+      event.container.data.forEach((p: Player) => {
+        // @ts-ignore
+        p.team = event.container.id;
+      })
+      this.totalRatings.set({
+           teamA: this.calculateRating(teams.teamA.players),
+           teamB: this.calculateRating(teams.teamB.players),
+           teamC: this.calculateRating(teams.teamC.players),
         })
     }
+    this.playersService.setTeams(this.clonedTeams())
   }
 
   removeFromList(team: string, index: number) {
-    this.playersService.teams.update((teams: any) => {
-      teams[team]?.players.splice(index, 1);
-      return teams;
-    })
+    const allTeams = this.playersService.getTeams();
+    allTeams[team]?.players.splice(index, 1);
+    this.playersService.setTeams(allTeams);
   }
 
   openSetGoalModal(event: { position: {pageX: number, pageY: number}}, data: {player: any; team: string}): void {
@@ -110,25 +119,18 @@ export class PlayersDragDropTableComponent {
   setGoals() {
     const teamName = this.setGoalModalData().team;
     const goals = this.getGoalModalDataByPlayer();
-    // @ts-ignore
-    const team = { ...this.playersService.teams()[teamName] }; // Clone the team
+    const team = this.playersService.getTeams()[teamName];
     const playerIndex = team.players.findIndex((player: Player) => player.name === this.setGoalModalData().player.name);
 
     if (playerIndex >= 0) {
-      const players = [...team.players];
-      const player = { ...players[playerIndex] };
+      const player = team.players[playerIndex];
       const stats = { ...player.statistics };
-      const dateStats = { ...stats[currentDate] };
+      const dateStats = { ...stats[currentDate] }; // make sure even if its undefined it will be {}
       const prevGoals = dateStats.goals;
       dateStats.goals = goals;
-
-      stats[currentDate] = dateStats;
-      player.statistics = stats;
-      players[playerIndex] = player;
-      team.players = players;
-      this.playersService.setTeams({ ...this.playersService.teams(), [teamName]: team });
+      team.players[playerIndex].statistics[currentDate] = dateStats;
       this.playersService.updatePlayer(player, true).then(() => {
-        this.auditTrailService.addAuditTrail(`goals set for ${player.name} ${prevGoals || 0} -> ${dateStats.goals}`)
+        this.auditTrailService.addAuditTrail(`goals set for ${player.name} ${prevGoals || 0} -> ${goals}`)
       });
       this.closeSetGoalModal();
     }
@@ -145,7 +147,8 @@ export class PlayersDragDropTableComponent {
   }
 
   makeBalancedTeams() {
-    const players = this.playersService.flattenPlayers({teamA: this.playersService.teams().teamA, teamB: this.playersService.teams().teamB, teamC: this.playersService.teams().teamC});
+    const teams = this.clonedTeams();
+    const players = this.playersService.flattenPlayers({teamA: teams.teamA, teamB: teams.teamB, teamC: teams.teamC});
     const shuffledPlayers = shuffleArray(players);
     shuffledPlayers.sort((a, b) => b.rating - a.rating);
 
@@ -166,20 +169,10 @@ export class PlayersDragDropTableComponent {
 
       }
     });
-    this.playersService.teams.update(teams => {
-      teams.teamA = {
-        players: teamA,
-        // totalRating: sumA
-      }
-      teams.teamB = {
-        players: teamB,
-        // totalRating: sumB
-      }
-        teams.teamC = {
-          players: teamC,
-          // totalRating: sumC
-        }
-      return teams;
+    this.playersService.setTeams({...teams,
+      teamA: {players: teamA, totalRating: sumA},
+      teamB: {players: teamB, totalRating: sumB},
+      teamC: {players: teamC, totalRating: sumC},
     })
     return { teamA, teamB, teamC };
   }

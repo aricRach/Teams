@@ -1,7 +1,7 @@
-<div *ngIf="playersService.teams()" class="container">
+<div *ngIf="ratings()" class="container">
   <h2>Rate Players</h2>
   <form (ngSubmit)="submitRatings()">
-    <div *ngFor="let player of playersService.flattenPlayers()" class="player">
+    <div *ngFor="let player of allPlayers()" class="player">
       <span>{{ player.name }}</span>
       <select [formControl]="ratings()[player.name]" class="rating-select">
         <option *ngFor="let num of [1,2,3,4,5,6,7,8,9,10]" [value]="num">

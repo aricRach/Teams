@@ -1,4 +1,5 @@
 export interface Player {
+  team: 'teamA' | 'teamB' | 'teamC';
   name: string;
   rating: number;
   statistics: {
