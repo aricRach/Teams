@@ -11,6 +11,7 @@ import {AuthGuard} from '@angular/fire/auth-guard';
 import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './players/edit-player/edit-player.component';
 import {RatePlayersComponent} from './players/rate-players/rate-players.component';
+import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
 
 export const routes: Routes = [
   {
@@ -57,6 +58,10 @@ export const routes: Routes = [
       //   path: 'rate-players',
       //   component: RatePlayersComponent,
       // },
+      {
+        path: 'team-of-the-week',
+        component: TeamOfTheWeekComponent,
+      },
     ]
   },
 ];

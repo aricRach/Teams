@@ -2,6 +2,7 @@ import {Component, inject, OnInit, signal} from '@angular/core';
 import {GridComponent, GridRow} from 'ui';
 import {PlayersService} from '../players/players.service';
 import {Player} from '../players/models/player.model';
+import {TeamOfTheWeekService} from '../team-of-the-week/services/team-of-the-week.service';
 
 
 @Component({
@@ -16,6 +17,7 @@ import {Player} from '../players/models/player.model';
 export class StatisticsComponent implements OnInit {
 
   playersService = inject(PlayersService);
+  teamOfTheWeekService = inject(TeamOfTheWeekService);
 
   selectAllLabel = signal('Select All')
   allUniqueDates = signal([] as string[]);
@@ -53,6 +55,7 @@ export class StatisticsComponent implements OnInit {
   })
 
   overAllStatistics: (GridRow | null)[] | null = null;
+  selectedDate = signal(this.selectAllLabel())
 
   setOverallStatisticsData() {
     let maxGoals = -1;
@@ -121,6 +124,7 @@ export class StatisticsComponent implements OnInit {
   }
   onDateSelected(event: Event) {
     const date = (event.target as HTMLSelectElement).value;
+    this.selectedDate.set(date);
     if(date === this.selectAllLabel()) {
       this.setOverallStatisticsData();
     } else {
