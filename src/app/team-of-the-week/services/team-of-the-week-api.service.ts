@@ -3,7 +3,7 @@ import {HttpClient} from '@angular/common/http';
 import {environment} from '../../../environments/environment';
 import {PlayerWeekStates} from './team-of-the-week.service';
 import {doc, Firestore, getDoc, setDoc} from '@angular/fire/firestore';
-import {of, tap} from 'rxjs';
+import {firstValueFrom, from, map, Observable, of, switchMap, tap} from 'rxjs';
 import {PlayersService} from '../../players/players.service';
 
 @Injectable({
@@ -14,27 +14,41 @@ export class TeamOfTheWeekApiService {
   private firestore = inject(Firestore);
   playersService = inject(PlayersService);
   httpClient = inject(HttpClient);
-  baseUrl = 'https://teams-backend-getway.onrender.com/team-of-the-week';
+  baseUrl = 'http://localhost:3002/team-of-the-week';
 
   async generateAiTotw(
-    date: string, // e.g., '2024-04-05'
-    data: any[]
-  ): Promise<{ existed: boolean; data: any }> {
-    let totwAiData = {} as { existed: boolean; data: any };
-    const ref = doc(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamOfTheWeek/${date}`);
-    const snapshot = await getDoc(ref);
+    date: string,
+    players: any[]
+  ): Promise<any> {
+    const ref = doc(
+      this.firestore,
+      `groups/${this.playersService.selectedGroup().id}/teamOfTheWeek/${date}`
+    );
 
-    // if (snapshot.exists()) {
-    //   const existingData = snapshot.data();
-    //   return { existed: true, data: existingData };
-    // }
-    this.httpClient.post(this.baseUrl, data)
-      .pipe(tap(async (totwData: any) => {
-        totwAiData = totwData
-        console.log(totwAiData)
-        await setDoc(ref, totwData)
-      })).subscribe()
-    // @ts-ignore
-    return { existed: false, totwAiData };
+    try {
+      const snapshot = await getDoc(ref);
+      const snapshotData = snapshot.data();
+      if (snapshot.exists() && snapshotData && !snapshotData?.['shouldUpdate']) {
+        return snapshotData;
+      }
+
+      const totwData: any = await firstValueFrom(this.httpClient.post(this.baseUrl, players));
+
+      // Fire and forget
+      setDoc(ref, {...totwData.result, shouldUpdate: false}).catch(() => console.error('cant save'));
+
+      return { existed: false, data: totwData };
+    } catch (err) {
+      console.error('Error generating team of the week:', err);
+      throw err;
+    }
+  }
+
+  async markTotwDateNotUpdated(date: string) {
+    const ref = doc(
+      this.firestore,
+      `groups/${this.playersService.selectedGroup().id}/teamOfTheWeek/${date}`
+    );
+    await setDoc(ref, { shouldUpdate: true }, { merge: true });
   }
 }

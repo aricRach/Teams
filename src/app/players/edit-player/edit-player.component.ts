@@ -10,6 +10,7 @@ import {
 } from 'ui';
 import {FormGroup, FormsModule} from '@angular/forms';
 import {convertFormValuesToNumbers} from '../../utils/form-utils';
+import {TeamOfTheWeekApiService} from '../../team-of-the-week/services/team-of-the-week-api.service';
 
 @Component({
   selector: 'app-edit-player',
@@ -24,6 +25,7 @@ export class EditPlayerComponent {
 
   playersService = inject(PlayersService);
   modalsService = inject(ModalsService);
+  teamOfTheWeekApiService = inject(TeamOfTheWeekApiService);
   controls = computed<FormField[]>(() => this.buildEditPlayerDetailsFields());
   gameControls = computed<FormField[]>(() => this.buildEditGameStatsFields())
   allPlayersArray = computed(() => [...this.playersService.flattenPlayers()]);
@@ -145,7 +147,9 @@ export class EditPlayerComponent {
     const formValues = lastStatisticsForm.getRawValue();
     const updatedPlayer = this.selectedPlayer();
     updatedPlayer.statistics[this.lastDayPlayedStatistics().date] = convertFormValuesToNumbers(formValues);
-    this.playersService.updatePlayer(updatedPlayer, true).then();
+    this.playersService.updatePlayer(updatedPlayer, true).then(() => {
+      this.teamOfTheWeekApiService.markTotwDateNotUpdated(this.lastDayPlayedStatistics().date).then()
+    });
   }
 
   deletePlayer() {

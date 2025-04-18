@@ -1,14 +1,17 @@
 <div class="center gap">
 <h2>Players Statistics</h2>
-<select (change)="onDateSelected($event)">
-  @for(date of allUniqueDates(); track date) {
+<select (change)="statisticsService.setSelectedDate($event)">
+  @for(date of statisticsService.allUniqueDates(); track date) {
     <option [value]="date">{{date}}</option>
   }
 </select>
 </div>
 
-<div class="stats-grid">
-<app-grid
-  [changeToListInSmallScreens]="false"
-  [showPaginator]="false" [config]="config()" [columns]="columns()" [dataRows]="dataRows()" [actions]="actions()"></app-grid>
+<div class="center gap-10 statistic-links">
+  <a class="active-btn link-btn statistic-link" routerLink="table">Table</a>
+  <a class="active-btn link-btn statistic-link" routerLink="team-of-the-week">Team Of The Week</a>
 </div>
+
+
+<router-outlet></router-outlet>
+

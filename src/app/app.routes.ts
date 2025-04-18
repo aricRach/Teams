@@ -10,8 +10,8 @@ import {groupAdminGuard} from './guards/group-admin.guard';
 import {AuthGuard} from '@angular/fire/auth-guard';
 import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './players/edit-player/edit-player.component';
-import {RatePlayersComponent} from './players/rate-players/rate-players.component';
 import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
+import {PlayersStatisticsTableComponent} from './players-statistics-table/players-statistics-table.component';
 
 export const routes: Routes = [
   {
@@ -48,6 +48,16 @@ export const routes: Routes = [
       {
         path: 'statistics',
         component: StatisticsComponent,
+        children: [
+          {
+            path: 'table',
+            component: PlayersStatisticsTableComponent
+          },
+          {
+            path: 'team-of-the-week',
+            component: TeamOfTheWeekComponent
+          }
+        ]
       },
       {
         path: 'edit-player',
@@ -58,10 +68,10 @@ export const routes: Routes = [
       //   path: 'rate-players',
       //   component: RatePlayersComponent,
       // },
-      {
-        path: 'team-of-the-week',
-        component: TeamOfTheWeekComponent,
-      },
+      // {
+      //   path: 'team-of-the-week',
+      //   component: TeamOfTheWeekComponent,
+      // },
     ]
   },
 ];

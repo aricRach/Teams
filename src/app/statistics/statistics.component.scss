@@ -1,5 +1,7 @@
-.stats-grid {
-  display: flex;
-  justify-content: center;
-  padding: 10px;
+.statistic-links {
+  margin-bottom: 10px;
+  .statistic-link {
+    width: 145px;
+  }
+
 }

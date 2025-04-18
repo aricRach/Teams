@@ -1,0 +1,9 @@
+<div class="stats-grid">
+  <app-grid
+    [changeToListInSmallScreens]="false"
+    [showPaginator]="false"
+    [config]="playersStatisticsTableService.config()"
+    [columns]="playersStatisticsTableService.columns()"
+    [dataRows]="playersStatisticsTableService.dataRows()"
+    [actions]="playersStatisticsTableService.actions()"/>
+</div>
