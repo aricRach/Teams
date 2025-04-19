@@ -7,5 +7,6 @@ export const environment = {
     storageBucket: (window as any)['env']?.NG_APP_FIREBASE_STORAGE_BUCKET || '',
     messagingSenderId: (window as any)['env']?.NG_APP_FIREBASE_MESSAGING_SENDER_ID || '',
     appId: (window as any)['env']?.NG_APP_FIREBASE_APP_ID || ''
-  }
+  },
+  gatewayServiceBaseUrl: 'https://teams-backend-getway.onrender.com'
 };
