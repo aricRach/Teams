@@ -41,9 +41,9 @@ export class TeamOfTheWeekComponent {
     );
 
     return {
-      striker: sorted.filter((p: { position: string; }) => p.position === 'striker'),
-      midfielder: sorted.filter((p: { position: string; }) => p.position === 'midfielder'),
-      defender: sorted.filter((p: { position: string; }) => p.position === 'defender')
+      striker: sorted.filter((p: { position: string; }) => p.position.toLowerCase() === 'striker'),
+      midfielder: sorted.filter((p: { position: string; }) => p.position.toLowerCase() === 'midfielder'),
+      defender: sorted.filter((p: { position: string; }) => p.position.toLowerCase() === 'defender')
     };
   });
 
