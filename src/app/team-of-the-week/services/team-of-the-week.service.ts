@@ -3,6 +3,7 @@ import {PlayersService} from '../../players/players.service';
 import {TeamOfTheWeekApiService} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
 import {PopupsService} from 'ui';
+import {SpinnerService} from '../../spinner.service';
 
 
 export interface PlayerWeekStates {
@@ -22,6 +23,7 @@ export class TeamOfTheWeekService {
   statisticService = inject(StatisticsService);
   teamOfTheWeekApiService = inject(TeamOfTheWeekApiService);
   popupsService = inject(PopupsService);
+  spinnerService = inject(SpinnerService);
 
   totwResource = resource({
     request: () => ({date: this.statisticService.getSelectedDate()}),
@@ -42,9 +44,14 @@ export class TeamOfTheWeekService {
   getTeamOfTheWeek(date: string) {
     if(date  === this.statisticService.selectAllLabel()) {
       this.popupsService.addErrorPopOut('Please select a specific date');
+      return Promise.resolve(null);
+    } else {
+      this.spinnerService.setIsLoading(true);
+      const players = this.calculateWeekStates(date);
+      return this.teamOfTheWeekApiService.generateAiTotw(date, players).finally(() => {
+        this.spinnerService.setIsLoading(false)
+      });
     }
-    const players = this.calculateWeekStates(date);
-    console.log(players);
-    return this.teamOfTheWeekApiService.generateAiTotw(date, players);
+
   }
 }
