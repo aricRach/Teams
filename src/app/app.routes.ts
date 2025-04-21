@@ -50,6 +50,11 @@ export const routes: Routes = [
         component: StatisticsComponent,
         children: [
           {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'table'
+          },
+          {
             path: 'table',
             component: PlayersStatisticsTableComponent
           },
