@@ -8,5 +8,5 @@ export const environment = {
     messagingSenderId: (window as any)['env']?.NG_APP_FIREBASE_MESSAGING_SENDER_ID || '',
     appId: (window as any)['env']?.NG_APP_FIREBASE_APP_ID || ''
   },
-  gatewayServiceBaseUrl: 'https://teams-backend-getway.onrender.com'
+  gatewayServiceBaseUrl: 'https://teams-backend-ai-microservice.onrender.com'
 };
