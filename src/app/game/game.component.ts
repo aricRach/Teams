@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, signal, ViewChild} from '@angular/core';
+import {Component, computed, ElementRef, inject, signal, ViewChild} from '@angular/core';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {PlayersService} from '../players/players.service';
 import {GameDetails, GameDetailsComponent} from '../game-details/game-details.component';
@@ -25,7 +25,9 @@ export class GameComponent {
   playersService = inject(PlayersService);
   auditTrailService = inject(AuditTrailService);
   adminControlService = inject(AdminControlService);
-  originalTeamNames = signal(['teamA', 'teamB', 'teamC']);
+  readonly originalTeamNames = computed(() =>
+    Object.keys(this.playersService.getTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.playersService.numberOfTeams())
+  );
   isGameOn = signal(false);
   isTeamWinModalVisible = signal(false);
 

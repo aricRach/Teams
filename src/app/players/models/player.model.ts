@@ -1,5 +1,5 @@
 export interface Player {
-  team: 'teamA' | 'teamB' | 'teamC';
+  team: 'teamA' | 'teamB' | 'teamC' | 'teamD';
   name: string;
   rating: number;
   statistics: {

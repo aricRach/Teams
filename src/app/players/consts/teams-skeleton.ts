@@ -1,6 +1,9 @@
 import {Player} from '../models/player.model';
 
 export const skeleton = {
+  allPlayers: {
+    players: [] as Player [],
+  },
   teamA: {
     players: [] as Player [],
   },
@@ -10,7 +13,7 @@ export const skeleton = {
   teamC: {
     players: [] as Player [],
   },
-  allPlayers: {
+  teamD: {
     players: [] as Player [],
   }
 }

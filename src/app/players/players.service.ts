@@ -1,4 +1,4 @@
-import {computed, inject, Injectable, signal} from '@angular/core';
+import {computed, inject, Injectable, linkedSignal, signal} from '@angular/core';
 import {PlayersApiService} from './players-api.service';
 import {Player} from './models/player.model';
 import {of, take, tap} from 'rxjs';
@@ -16,14 +16,12 @@ export class PlayersService {
   popoutService = inject(PopupsService);
   // @ts-ignore
   selectedGroup = signal<null | any>(null);
+  numberOfTeams = signal<number>(2);
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
-  private teams = signal(structuredClone(skeleton));
+  private teams = signal<{[key: string]: { players: Player[] }}>(structuredClone(skeleton));
 
-   computedTeams = computed(() => { // use only in drag-drop-component.
-    console.log('computed')
-    return JSON.parse(JSON.stringify(this.teams()))
-  });
+   computedTeams = computed(() =>  JSON.parse(JSON.stringify(this.teams()))) // use only in drag-drop-component.
 
   setTeams(teams: any) {
     this.teams.set({...teams});
@@ -92,8 +90,9 @@ export class PlayersService {
       return this.playersApiService.getAllActivePlayers(this.selectedGroup().id).pipe(
          take(1),
         tap((allPlayers) => {
-          const teams = structuredClone(skeleton);
+          const teams = Object.fromEntries(Object.entries(structuredClone(skeleton)).slice(0, this.numberOfTeams() + 1));
           for (const player of allPlayers) {
+            if(teams.hasOwnProperty(player['team']))
             // @ts-ignore
             teams[player.team].players.push(player);
           }

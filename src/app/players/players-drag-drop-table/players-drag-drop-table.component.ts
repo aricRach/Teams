@@ -42,14 +42,31 @@ export class PlayersDragDropTableComponent {
   modalPosition = signal({ x: 0, y: 0 });
 
   showStatistics = signal(false);
-  totalRatings = linkedSignal(() => {
+  totalRatings = linkedSignal(() => this.setTotalRatingToAllTeams());
+
+  readonly teamKeys = computed(() =>
+    Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.playersService.numberOfTeams())
+  );
+
+  readonly dropListRefs = computed(() =>
+    [...this.teamKeys(), 'allPlayers']
+  );
+
+
+  private setTotalRatingToAllTeams() {
     const teams = this.clonedTeams();
-    return {
-      teamA: this.calculateRating(teams.teamA.players),
-      teamB: this.calculateRating(teams.teamB.players),
-      teamC: this.calculateRating(teams.teamC.players),
-    }
-  })
+    console.log(teams)
+    const res =  Object.entries(teams).filter((team) => {
+      return team[0] !== 'allPlayers'
+    })
+      .reduce((acc, [teamName, teamData]) => {
+        // @ts-ignore
+        acc[teamName] = this.calculateRating(teamData.players);
+        return acc;
+      }, {} as  any) as any;
+    console.log(res)
+    return res
+  }
 
   isAdminMode = computed(() => this.adminControlService.adminControl().isAdminMode);
   toggleShowStatistics() {
@@ -65,7 +82,6 @@ export class PlayersDragDropTableComponent {
   }
 
   drop(event: CdkDragDrop<any>) {
-    const teams = this.clonedTeams();
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
@@ -79,11 +95,7 @@ export class PlayersDragDropTableComponent {
         // @ts-ignore
         p.team = event.container.id;
       })
-      this.totalRatings.set({
-           teamA: this.calculateRating(teams.teamA.players),
-           teamB: this.calculateRating(teams.teamB.players),
-           teamC: this.calculateRating(teams.teamC.players),
-        })
+      // this.totalRatings.set(this.setTotalRatingToAllTeams());
     }
     this.playersService.setTeams(this.clonedTeams())
   }
@@ -148,33 +160,32 @@ export class PlayersDragDropTableComponent {
 
   makeBalancedTeams() {
     const teams = this.clonedTeams();
-    const players = this.playersService.flattenPlayers({teamA: teams.teamA, teamB: teams.teamB, teamC: teams.teamC});
+    const numberOfTeams = this.playersService.numberOfTeams();
+
+    const teamEntries = Object.entries(teams).slice(1, numberOfTeams + 1); // all active teams except "allPlayers"
+    const players = this.playersService.flattenPlayers(Object.fromEntries(teamEntries));
+
     const shuffledPlayers = shuffleArray(players);
     shuffledPlayers.sort((a, b) => b.rating - a.rating);
 
-    const teamA: Player[] = [];
-    const teamB: Player[] = [];
-    const teamC: Player[] = [];
-    let sumA = 0, sumB =0, sumC = 0;
-    shuffledPlayers.forEach((player, index) => {
-      if (index % 3 === 0) {
-        teamA.push(player);
-        sumA+=player.rating
-      } else if (index % 3 === 1) {
-        teamB.push(player);
-        sumB+=player.rating
-      } else {
-        teamC.push(player);
-        sumC+=player.rating
-
-      }
+    // Initialize team structures
+    const teamMap: Record<string, { players: Player[], totalRating: number }> = {};
+    teamEntries.forEach(([teamKey]) => {
+      teamMap[teamKey] = { players: [], totalRating: 0 };
     });
-    this.playersService.setTeams({...teams,
-      teamA: {players: teamA, totalRating: sumA},
-      teamB: {players: teamB, totalRating: sumB},
-      teamC: {players: teamC, totalRating: sumC},
-    })
-    return { teamA, teamB, teamC };
+
+    shuffledPlayers.forEach((player, index) => {
+      const teamIndex = index % numberOfTeams;
+      const [teamKey] = teamEntries[teamIndex];
+      teamMap[teamKey].players.push(player);
+      teamMap[teamKey].totalRating += player.rating;
+    });
+
+    this.playersService.setTeams({...teams, ...teamMap});
+    //
+    // return Object.fromEntries(
+    //   Object.entries(teamMap).map(([key, val]) => [key, val.players])
+    // );
   }
 
    setBalancedTeamsModal(confirm : boolean) {

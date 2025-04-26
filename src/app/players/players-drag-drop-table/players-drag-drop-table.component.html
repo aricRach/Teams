@@ -1,96 +1,67 @@
 <div>
   <div class="center gap statistics-button">
-  @if(showStatistics()) {
-    <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
-  } @else {
-    <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
-  }
-  @if(this.isAdminMode()) {
-    <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
-  }
+    @if(showStatistics()) {
+      <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
+    } @else {
+      <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
+    }
+    @if(this.isAdminMode()) {
+      <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
+    }
   </div>
-
   <div class="all-teams-container">
-    <div class="list-container">
-      <h2>A</h2>
-      @if(isAdminMode()) {
-        <h5>{{totalRatings().teamA}}</h5>
-      }
-      <div
-        id="teamA"
-        cdkDropList
-        #teamAList="cdkDropList"
-        [cdkDropListDisabled]="isGameOn()"
-        [cdkDropListData]="clonedTeams()?.teamA?.players"
-        [cdkDropListConnectedTo]="[teamBList, playersList, teamCList]"
-        class="list"
-        (cdkDropListDropped)="drop($event)">
-        @for (item of clonedTeams()?.teamA?.players; track item) {
-          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamA'})" class="box" cdkDrag></app-player-view>
-        }
-      </div>
-    </div>
+    @for (teamKey of teamKeys(); track teamKey) {
+      <div class="list-container">
+        <h2>{{ teamKey.slice(-1).toUpperCase() }}</h2>
 
-    <div class="list-container">
-      <h2>B</h2>
-      @if(isAdminMode()) {
-        <h5>{{totalRatings().teamB}}</h5>
-      }
-      <div
-        id="teamB"
-        cdkDropList
-        #teamBList="cdkDropList"
-        [cdkDropListDisabled]="isGameOn()"
-        [cdkDropListData]="clonedTeams()?.teamB?.players"
-        [cdkDropListConnectedTo]="[teamAList, playersList, teamCList]"
-        class="list"
-        (cdkDropListDropped)="drop($event)">
-        @for (item of clonedTeams()?.teamB?.players; track item) {
-          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamB'})" class="box" cdkDrag></app-player-view>
+        @if (isAdminMode()) {
+          <h5>{{ totalRatings()?.[teamKey] }}</h5>
         }
-      </div>
-    </div>
 
-    <div class="list-container">
-      <h2>C</h2>
-      @if(isAdminMode()) {
-        <h5>{{totalRatings().teamC}}</h5>
-      }
-      <div
-        cdkDropList
-        id="teamC"
-        #teamCList="cdkDropList"
-        [cdkDropListDisabled]="isGameOn()"
-        [cdkDropListData]="clonedTeams()?.teamC?.players"
-        [cdkDropListConnectedTo]="[teamAList, teamBList, playersList]"
-        class="list"
-        (cdkDropListDropped)="drop($event)">
-        @for (item of clonedTeams()?.teamC?.players; track item) {
-          <app-player-view [showStatistics]="showStatistics()" [player]="item" [isAdminMode]="isAdminMode()" appDoubleClick [doubleClickDisabled]="!isGameOn()" (doubleClicked)="openSetGoalModal($event, {player: item, team: 'teamC'})" class="box" cdkDrag></app-player-view>
-        }
+        <div
+          cdkDropList
+          id="{{teamKey}}"
+          [cdkDropListDisabled]="isGameOn()"
+          [cdkDropListData]="clonedTeams()?.[teamKey]?.players"
+          [cdkDropListConnectedTo]="dropListRefs()"
+          class="list"
+          (cdkDropListDropped)="drop($event)"
+        >
+          @for (item of clonedTeams()?.[teamKey]?.players; track item) {
+            <app-player-view
+              [showStatistics]="showStatistics()"
+              [player]="item"
+              [isAdminMode]="isAdminMode()"
+              appDoubleClick
+              [doubleClickDisabled]="!isGameOn()"
+              (doubleClicked)="openSetGoalModal($event, {player: item, team: teamKey})"
+              class="box"
+              cdkDrag
+            ></app-player-view>
+          }
+        </div>
       </div>
-    </div>
+    }
   </div>
 
   <h2>Players</h2>
   <div
     cdkDropList
     id="allPlayers"
-    #playersList="cdkDropList"
     [cdkDropListDisabled]="isGameOn()"
     [cdkDropListData]="clonedTeams()?.allPlayers?.players"
-    [cdkDropListConnectedTo]="[teamAList, teamBList, teamCList]"
+    [cdkDropListConnectedTo]="teamKeys()"
     class="box available-player"
-    (cdkDropListDropped)="drop($event)">
+    (cdkDropListDropped)="drop($event)"
+  >
     @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
       <div class="player">
-      @if(!isAdminMode()) {
-        <div class="box" cdkDrag>{{item.name}}</div>
-
-      } @else {
-        <div class="box" cdkDrag>{{item.name}} - {{item.rating}}</div>
-      }
-      <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>
+        @if (!isAdminMode()) {
+          <div class="box" cdkDrag>{{ item.name }}</div>
+        } @else {
+          <div class="box" cdkDrag>{{ item.name }} - {{ item.rating }}</div>
+        }
+        <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>
       </div>
     }
   </div>
