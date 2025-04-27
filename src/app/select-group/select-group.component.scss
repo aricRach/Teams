@@ -3,4 +3,13 @@
   display: flex;
   justify-content: center;
   align-items: center;
+
+  section {
+    margin-bottom: 10px;
+  }
+
+  .select-number-of-teams {
+    min-width: 50px;
+    text-align: center;
+  }
 }

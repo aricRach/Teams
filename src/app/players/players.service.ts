@@ -1,4 +1,4 @@
-import {computed, inject, Injectable, linkedSignal, signal} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersApiService} from './players-api.service';
 import {Player} from './models/player.model';
 import {of, take, tap} from 'rxjs';
@@ -92,9 +92,14 @@ export class PlayersService {
         tap((allPlayers) => {
           const teams = Object.fromEntries(Object.entries(structuredClone(skeleton)).slice(0, this.numberOfTeams() + 1));
           for (const player of allPlayers) {
-            if(teams.hasOwnProperty(player['team']))
-            // @ts-ignore
-            teams[player.team].players.push(player);
+            if(teams.hasOwnProperty(player['team'])) {
+              // @ts-ignore
+              teams[player.team].players.push(player);
+            } else {
+              // @ts-ignore
+              teams['allPlayers'].players.push(player);
+            }
+
           }
           this.teams.set(teams);
         })

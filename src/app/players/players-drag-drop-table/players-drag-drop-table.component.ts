@@ -1,10 +1,4 @@
-import {
-  Component, computed, HostListener,
-  inject,
-  input,
-  linkedSignal,
-  signal,
-} from '@angular/core';
+import {Component, computed, HostListener, inject, input, linkedSignal, signal,} from '@angular/core';
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
@@ -55,17 +49,14 @@ export class PlayersDragDropTableComponent {
 
   private setTotalRatingToAllTeams() {
     const teams = this.clonedTeams();
-    console.log(teams)
-    const res =  Object.entries(teams).filter((team) => {
+    return Object.entries(teams).filter((team) => {
       return team[0] !== 'allPlayers'
     })
       .reduce((acc, [teamName, teamData]) => {
         // @ts-ignore
         acc[teamName] = this.calculateRating(teamData.players);
         return acc;
-      }, {} as  any) as any;
-    console.log(res)
-    return res
+      }, {} as any) as any
   }
 
   isAdminMode = computed(() => this.adminControlService.adminControl().isAdminMode);

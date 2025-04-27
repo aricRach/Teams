@@ -1,20 +1,46 @@
 <div class="select-group-container">
 <div class="column-center">
 
-<h3>Select group</h3>
+  <header><h3>Select group</h3></header>
 
-  <div class="gap in-row">
-<select [(ngModel)]="selectedGroup">
+  <section class="gap in-row">
+<select [(ngModel)]="selectedGroup" (ngModelChange)="groupChangedSubmitted.set(false)">
   @for(group of groups(); track group.name; let i=$index) {
     <option [ngValue]="group">
       {{ group.name }}
     </option>
   }
 </select>
+    @if(selectedGroup) {
+      <button class="action-btn" (click)="setSelectedGroup()">Set</button>
+    }
 
-@if(selectedGroup) {
-  <button class="action-btn" (click)="setSelectedGroup()">Continue</button>
-}
-  </div>
+  </section>
+
+  @if(isAdmin() && groupChangedSubmitted()) {
+    <section class="in-row gap-10">
+      <label>
+        Number of teams:
+      </label>
+      <select class="select-number-of-teams" [(ngModel)]="numberOfTeams">
+        <option [ngValue]="2">
+          2
+        </option>
+        <option [ngValue]="3">
+          3
+        </option>
+        <option [ngValue]="4">
+          4
+        </option>
+      </select>
+    </section>
+
+  }
+
+  @if(selectedGroup && groupChangedSubmitted()) {
+    <button class="action-btn" (click)="submit()">Continue</button>
+  }
 </div>
+
+
 </div>

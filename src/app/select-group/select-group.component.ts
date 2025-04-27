@@ -1,7 +1,6 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, computed, inject, input, signal} from '@angular/core';
 import {PlayersService} from '../players/players.service';
 import {FormsModule} from '@angular/forms';
-import {UserService} from '../user/user.service';
 import {Router} from '@angular/router';
 import {Auth} from '@angular/fire/auth';
 
@@ -17,24 +16,32 @@ export class SelectGroupComponent {
 
   groups = input<any[]>();
   playersService = inject(PlayersService);
-  usersService = inject(UserService);
   router = inject(Router);
   private auth = inject(Auth);
-
+  isAdmin = computed(() => this.playersService.isAdmin())
+  groupChangedSubmitted = signal(false);
   selectedGroup!: {admins: string[], id: string};
+  numberOfTeams = 3;
 
+  private get currentUserEmail(): string | null {
+    return this.auth.currentUser?.email ?? null;
+  }
 
   setSelectedGroup() {
-    const user = this.auth.currentUser;
-    if(user && user.email) {
+    const email = this.currentUserEmail;
+    if (email) {
+      this.groupChangedSubmitted.set(true);
       this.playersService.selectedGroup.set(this.selectedGroup);
-      if(this.selectedGroup.admins.includes(user.email)) {
-        this.playersService.isAdmin.set(true);
-        this.router.navigate(['/home', 'game']);
-      } else {
-        this.playersService.isAdmin.set(false);
-        this.router.navigate(['/home', 'statistics']);
-      }
+      this.playersService.isAdmin.set(this.selectedGroup.admins.includes(email));
+    }
+  }
+
+  submit() {
+    const email = this.currentUserEmail;
+    if (email) {
+      this.playersService.numberOfTeams.set(this.numberOfTeams);
+      const route = this.selectedGroup.admins.includes(email) ? ['home', 'game'] : ['home', 'statistics'];
+      this.router.navigate(route);
     }
   }
 }

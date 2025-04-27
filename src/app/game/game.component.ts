@@ -166,11 +166,6 @@ export class GameComponent {
     this.code = '';
   }
 
-  ngOnInit(): void {
-    // this.playersService.getAllPlayersFromDatabase();
-    // this.addPlayerFirebase().then(() => console.log('done'));
-  }
-
   saveGlobal() {
     this.playersService.setPlayersIntoDataBase();
   }
