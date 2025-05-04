@@ -1,0 +1,65 @@
+
+@if(existingOpenSessions()) {
+  <h3>There is already an open session</h3>
+  <h5>{{existingOpenSessions()}}</h5>
+} @else{
+  <main>
+    <p class="select-players">
+      @for (columnArr of createDraftSessionService.chunkedPlayers(); track columnArr) {
+        <div class="players-column">
+          @for (player of columnArr; track player) {
+            <label class="select-player">
+              <input type="checkbox"
+                     [value]="player"
+                     (change)="createDraftSessionService.togglePlayer(player, $event.target)"
+              />
+              {{ player.name }}
+            </label>
+          }
+        </div>
+      }
+    </p>
+
+    <section class="in-row center gap-10">
+      <label>
+        Number of teams:
+      </label>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <select formControlName="numberOfTeams" class="select-number-of-teams">
+          <option [ngValue]="2">2</option>
+          <option [ngValue]="3">3</option>
+          <option [ngValue]="4">4</option>
+        </select>
+
+        <div formArrayName="captains">
+          @for (captainGroup of captains.controls; track captainGroup; let i = $index) {
+            <div [formGroupName]="i">
+              <input formControlName="captainEmail" placeholder="Captain email" />
+              <select formControlName="player" [compareWith]="comparePlayers">
+                  @for(player of createDraftSessionService.captainOptions()[i]; track player) {
+                      <option [ngValue]="player">
+                      {{ player.name }}
+                      </option>
+                  }
+              </select>
+            </div>
+          }
+        </div>
+
+        <button type="submit">Save</button>
+      </form>
+    </section>
+
+  </main>
+
+
+
+  <footer class="center">
+    <button (click)="submit()">Submit</button>
+  </footer>
+
+}
+
+<h5>
+  {{inviteUrl()}}
+</h5>

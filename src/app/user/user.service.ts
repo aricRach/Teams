@@ -37,17 +37,22 @@ export class UserService {
     }
     if(this.auth.currentUser) {
       this.user.set(this.auth.currentUser);
-      this.router.navigate(['/select-group']).then(() => {
+      const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
+      localStorage.setItem('redirectTo', '');
+      this.router.navigate([redirectTo]).then(() => {
         // @ts-ignore
         this.popoutService.addSuccessPopOut(`welcome ${this.auth.currentUser.displayName}`)
       });
 
     } else {
       this.spinnerService.setIsLoading(true);
+      const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
+      localStorage.setItem('redirectTo', '');
       signInWithPopup(this.auth, this.provider)
         .then((result) => {
           this.user.set(result.user);
-          this.router.navigate(['/select-group']).then(() => this.spinnerService.setIsLoading(false));
+          debugger
+          this.router.navigate([redirectTo]).then(() => this.spinnerService.setIsLoading(false));
         })
         .catch((error) => {
           this.spinnerService.setIsLoading(false);

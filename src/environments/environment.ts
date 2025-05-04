@@ -9,5 +9,6 @@
       messagingSenderId: "201962993990",
       appId: "1:201962993990:web:1079d2bd55113d41558d47"
     },
-    gatewayServiceBaseUrl: 'http://localhost:3002'
+    gatewayServiceBaseUrl: 'http://localhost:3002',
+    domain: 'http://localhost:4200',
   }

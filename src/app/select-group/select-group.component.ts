@@ -44,4 +44,10 @@ export class SelectGroupComponent {
       this.router.navigate(route);
     }
   }
+
+  logout() {
+    this.auth.signOut().then(() => {
+      this.router.navigate(['/']);
+    });
+  }
 }

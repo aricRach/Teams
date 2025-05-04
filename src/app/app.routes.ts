@@ -12,12 +12,15 @@ import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './players/edit-player/edit-player.component';
 import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
 import {PlayersStatisticsTableComponent} from './players-statistics-table/players-statistics-table.component';
+import {TeamDraftComponent} from './team-draft/team-draft.component';
+import {CreateDraftSessionComponent} from './create-draft-session/create-draft-session.component';
+import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
 
 export const routes: Routes = [
   {
     path: '',
     component: SignInComponent,
-    canActivate: [authRoutesGuard]
+    // canActivate: [authRoutesGuard]
 
   },
   {
@@ -69,6 +72,13 @@ export const routes: Routes = [
         component: EditPlayerComponent,
         canActivate: [groupAdminGuard]
       },
+      {
+        path: 'create-draft-session',
+        component: CreateDraftSessionComponent,
+        resolve: {
+          existingSessions: getDraftSessionsByOwnerResolver
+        },
+      },
       // {
       //   path: 'rate-players',
       //   component: RatePlayersComponent,
@@ -78,5 +88,10 @@ export const routes: Routes = [
       //   component: TeamOfTheWeekComponent,
       // },
     ]
+  },
+  {
+    path: 'team-draft/:groupId/:sessionId',
+    component: TeamDraftComponent,
+    canActivate: [authRoutesGuard]
   },
 ];

@@ -1,4 +1,5 @@
 export interface Player {
+  id?: string,
   team: 'teamA' | 'teamB' | 'teamC' | 'teamD';
   name: string;
   rating: number;

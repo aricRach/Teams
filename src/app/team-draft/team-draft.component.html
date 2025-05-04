@@ -1,0 +1,52 @@
+<header>
+  <h2>Team Drafting</h2>
+  <a [routerLink]="'/'">Home </a>
+</header>
+
+<main>
+@if(!isCompleted()) {
+
+@if(!isMyTurn()) {
+  <p >Waiting for other members...</p>
+} @else {
+  <p>It's your turn to assign a player</p>
+}
+
+} @else {
+  <p>completed</p>
+}
+
+<div class="teams">
+  @for(i of range(); track i) {
+    <div>
+      <h3>Team {{ i + 1 }}</h3>
+      <ul>
+        @for(player of session()?.teams['team' + i]; track player.name) {
+          <li>{{ player.name }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+</div>
+
+@if(!isCompleted()) {
+  <h3>Unassigned Players</h3>
+  <ul>
+    @for(player of session()?.unassignedPlayers; track player.name) {
+      <li>
+        {{ player.name }}
+        @if(isMyTurn()) {
+
+        <button (click)="assignPlayer(player)">
+        take
+        </button>
+        }
+      </li>
+    }
+  </ul>
+}
+</main>
+
+
+{{myTeamIndex()}}

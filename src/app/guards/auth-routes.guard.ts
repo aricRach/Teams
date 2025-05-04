@@ -5,5 +5,6 @@ import {Auth} from '@angular/fire/auth';
 export const authRoutesGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
-  return !auth.currentUser ? true : router.navigate(['/select-group']);
+  localStorage.setItem('redirectTo', state.url);
+  return !!auth.currentUser;
 };

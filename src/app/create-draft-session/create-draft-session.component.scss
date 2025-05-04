@@ -1,0 +1,19 @@
+.select-players {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  .players-column {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    max-width: 150px;
+    min-width: 120px;
+  }
+
+  .select-player {
+    margin-top: 1rem;
+  }
+
+}
+
