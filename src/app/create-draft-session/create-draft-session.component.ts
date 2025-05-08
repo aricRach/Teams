@@ -6,6 +6,7 @@ import {RangePipe} from '../pipes/range.pipe';
 import {startWith, Subject, takeUntil} from 'rxjs';
 import {CommonModule} from '@angular/common';
 import {Player} from "../players/models/player.model";
+import {shuffleArray} from "../utils/array-utils";
 
 @Component({
   selector: 'app-create-draft-session',
@@ -17,8 +18,17 @@ export class CreateDraftSessionComponent implements OnDestroy{
 
   createDraftSessionService = inject(CreateDraftSessionService);
   existingSessions = input<any[]>();
-
-  existingOpenSessions = computed(() => {
+  createdDraftSessionUrl = signal('');
+  sessionUrlToShow = computed(() => {
+    if(this.existingOpenSessionUrl()) {
+      return this.existingOpenSessionUrl();
+    }
+    if(this.createdDraftSessionUrl()) {
+      return this.createdDraftSessionUrl();
+    }
+    return '';
+  })
+  existingOpenSessionUrl = computed(() => {
     const existingSessions = this.existingSessions();
     if(existingSessions && existingSessions.length > 0) {
       return this.createDraftSessionService.buildUrl(existingSessions[0].id);
@@ -47,11 +57,6 @@ export class CreateDraftSessionComponent implements OnDestroy{
       this.setNumberOfTeams(value);
       this.createDraftSessionService.numberOfTeams.set(this.form.get('numberOfTeams')?.value);
     });
-    // this.form.valueChanges.subscribe((value: any) => {
-    //   console.log(value)
-    //   this.setNumberOfTeams(value.numberOfTeams);
-    //
-    // })
   }
 
   setNumberOfTeams(n: number) {
@@ -72,7 +77,9 @@ export class CreateDraftSessionComponent implements OnDestroy{
         .subscribe(value => {
           console.log(`Player ${i} changed:`, value);
           debugger;
-          this.createDraftSessionService.updateCaptainsOptions(this.captains.getRawValue());
+          if(value) {
+            this.createDraftSessionService.updateCaptainsOptions(this.captains.getRawValue());
+          }
         });
 
       this.captains.push(group);
@@ -89,15 +96,10 @@ export class CreateDraftSessionComponent implements OnDestroy{
     this.createDraftSessionService.updateCaptainsOptions(this.captains.getRawValue());
   }
 
-
-
   async submit() {
-    // const playersArray = Array.from(this.selectedPlayers);
-    // console.log('Selected players:', playersArray);
-    // console.log('number of teams:', this.numberOfTeams);
-    // const id = await this.createDraftSessionService.createSession(['aricrachmany@gmail.com','aricrach8@gmail.com'], 2, playersArray);
-    // this.inviteUrl.set(this.createDraftSessionService.buildUrl(id));
-    console.log(this.form.getRawValue());
+   const formValue = this.form.getRawValue();
+   const sessionId  = await this.createDraftSessionService.createSession(shuffleArray(formValue.captains));
+   this.createdDraftSessionUrl.set(this.createDraftSessionService.buildUrl(sessionId));
   }
 
   ngOnDestroy() {

@@ -1,15 +1,22 @@
 
-@if(existingOpenSessions()) {
-  <h3>There is already an open session</h3>
-  <h5>{{existingOpenSessions()}}</h5>
+<h2>Create Draft Session</h2>
+@if(sessionUrlToShow()) {
+  @if(createdDraftSessionUrl()) {
+    <h3>Draft session created successfully, please send this link to the captains.</h3>
+  } @else {
+    <h3>There is already an open session.</h3>
+  }
+  <h5>{{sessionUrlToShow()}}</h5>
 } @else{
   <main>
-    <p class="select-players">
+      <div class="number-of-selected-players"> selected players: {{this.createDraftSessionService.checkedPlayers.size}}</div>
+    <p class="check-players">
       @for (columnArr of createDraftSessionService.chunkedPlayers(); track columnArr) {
         <div class="players-column">
           @for (player of columnArr; track player) {
             <label class="select-player">
               <input type="checkbox"
+                     [checked]="createDraftSessionService.checkedPlayers.has(player.id)"
                      [value]="player"
                      (change)="createDraftSessionService.togglePlayer(player, $event.target)"
               />
@@ -21,19 +28,20 @@
     </p>
 
     <section class="in-row center gap-10">
-      <label>
-        Number of teams:
-      </label>
       <form [formGroup]="form" (ngSubmit)="submit()">
-        <select formControlName="numberOfTeams" class="select-number-of-teams">
+          <label for="select-number-of-teams">
+              Number of teams:
+          </label>
+        <select id="select-number-of-teams" formControlName="numberOfTeams" class="select-number-of-teams">
           <option [ngValue]="2">2</option>
           <option [ngValue]="3">3</option>
           <option [ngValue]="4">4</option>
         </select>
 
         <div formArrayName="captains">
+            <small>select captain for each team and email to get link for team draft</small>
           @for (captainGroup of captains.controls; track captainGroup; let i = $index) {
-            <div [formGroupName]="i">
+            <div class="in-row gap-10 btn-mrg" [formGroupName]="i">
               <input formControlName="captainEmail" placeholder="Captain email" />
               <select formControlName="player" [compareWith]="comparePlayers">
                   @for(player of createDraftSessionService.captainOptions()[i]; track player) {
@@ -45,8 +53,6 @@
             </div>
           }
         </div>
-
-        <button type="submit">Save</button>
       </form>
     </section>
 
@@ -55,7 +61,7 @@
 
 
   <footer class="center">
-    <button (click)="submit()">Submit</button>
+    <button [disabled]="form.invalid" class="active-btn submit-btn" (click)="submit()">Submit</button>
   </footer>
 
 }

@@ -7,9 +7,19 @@
 @if(!isCompleted()) {
 
 @if(!isMyTurn()) {
-  <p >Waiting for other members...</p>
+    <div class="dots-loader">
+        <div>
+            Waiting for other members to select a player
+        </div>
+        <div class="dots-container">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+    </div>
 } @else {
-  <p>It's your turn to assign a player</p>
+  <p class="your-turn-text">It's your turn to select a player</p>
 }
 
 } @else {
@@ -30,23 +40,25 @@
 
 </div>
 
+    <section class="unassigned-players">
+
 @if(!isCompleted()) {
   <h3>Unassigned Players</h3>
   <ul>
     @for(player of session()?.unassignedPlayers; track player.name) {
-      <li>
-        {{ player.name }}
-        @if(isMyTurn()) {
-
-        <button (click)="assignPlayer(player)">
-        take
-        </button>
-        }
-      </li>
+            <li>
+                <div class="player-name">
+                 {{ player.name }}
+                </div>
+                @if(isMyTurn()) {
+                    <button class="active-btn action-btn" (click)="assignPlayer(player)">
+                        take
+                    </button>
+                }
+            </li>
     }
   </ul>
 }
+
+    </section>
 </main>
-
-
-{{myTeamIndex()}}

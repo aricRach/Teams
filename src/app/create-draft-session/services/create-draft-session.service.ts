@@ -5,14 +5,17 @@ import {addDoc, collection, doc, Firestore, getDoc, getDocs, query, where} from 
 import {Auth} from '@angular/fire/auth';
 import {environment} from '../../../environments/environment';
 
-
+export interface DraftPlayer {
+  id: string,
+  name: string
+}
 interface TeamDraftSession {
   currentTurn: number;
   members: string[];
   status: 'active' | 'completed'; // or string if not enum
   teamCount: number;
   teams: Record<string, Player[]>;
-  unassignedPlayers: Player[];
+  unassignedPlayers: DraftPlayer[];
   createdBy: string;
 }
 
@@ -26,18 +29,18 @@ export class CreateDraftSessionService {
   private firestore = inject(Firestore);
   private auth = inject(Auth);
 
-  checkedPlayers: Set<any> = new Set();
+  checkedPlayers: Set<string> = new Set();
 
   chunkedPlayers = computed(() => {
     const players =  this.playersService.flattenPlayers().map((player) => {
-      return {name: player.name, id: player.id}
+      return {name: player.name, id: player.id} as any
     });
     const chunkSize = 5;
-    const result: {name: string, id: string | undefined}[][] = [];
+    const result: {name: string, id: string}[][] = [];
     for (let i = 0; i < players.length; i += chunkSize) {
       result.push(players.slice(i, i + chunkSize));
     }
-    return result as Player[][];
+    return result as {name: string, id: string}[][];
   });
 
   allPlayers = computed(() => this.playersService.flattenPlayers().map((player) => {
@@ -64,21 +67,38 @@ export class CreateDraftSessionService {
   readonly captainPlayerIds = signal<string[]>([]);
 
 
-  async createSession(members: string[], teamCount: number, unassignedPlayers: Player[]): Promise<string> {
+  async createSession(captains: any[]): Promise<string> {
+
+    const captainsIds = captains.map((captain) => captain.player.id)
+
+    const selectedPlayers: { name: string; id: string }[] = Array.from(this.checkedPlayers)
+        .map(id => this.allPlayers().find(player => player.id === id))
+        .filter((player): player is { name: string; id: string } => !!player && !captainsIds.includes(player.id));
+
+    console.log(selectedPlayers)
+    const membersEmails = captains.map((captain: {captainEmail: string, player: Player}) => captain.captainEmail);
+
+    const initialTeams: Record<string, Player[]> = {};
+
+    for (let i = 0; i < this.numberOfTeams(); i++) {
+      const captainGroup = captains.at(i);
+      const captainPlayer: Player = captainGroup?.player;
+      initialTeams[`team${i}`] = captainPlayer ? [captainPlayer] : [];
+    }
+
     const sessionData: TeamDraftSession = {
       currentTurn: 0,
-      members,
+      members: membersEmails,
       status: 'active',
-      teamCount,
-      teams: {}, // Can initialize with empty arrays if needed: { team1: [], team2: [] }
-      unassignedPlayers,
+      teamCount: this.numberOfTeams(),
+      teams: initialTeams,
+      unassignedPlayers: selectedPlayers,
       createdBy: this.auth.currentUser?.email || ''
     };
 
     const sessionsRef = collection(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamDraftSessions`);
     const docRef = await addDoc(sessionsRef, sessionData);
-
-    return docRef.id; // This is your sessionId
+    return docRef.id; // sessionId
   }
 
   async getSessionsByCreator(): Promise<any[]> {
@@ -96,19 +116,25 @@ export class CreateDraftSessionService {
 
   updateCaptainsOptions(captainsControlArray: { captainEmail: string; player: Player }[]) {
     const usedIds = captainsControlArray
-        .map(c => c.player?.id)
+        .map(captain => {
+          if(!captain?.player?.id) {
+          return
+          }
+          this.checkedPlayers.add(captain.player.id);
+          return captain.player?.id
+        })
         .filter((id): id is string => !!id);
     debugger;
     this.captainPlayerIds.set(usedIds);
   }
 
 
-  togglePlayer(player: any, checkEvent: any) {
+  togglePlayer(player: {id: string, name: string}, checkEvent: any) {
     console.log(checkEvent.checked)
     if (checkEvent.checked) {
-      this.checkedPlayers.add(player);
+      this.checkedPlayers.add(player.id);
     } else {
-      this.checkedPlayers.delete(player);
+      this.checkedPlayers.delete(player.id);
     }
   }
 

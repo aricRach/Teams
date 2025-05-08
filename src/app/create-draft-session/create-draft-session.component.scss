@@ -1,7 +1,18 @@
-.select-players {
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.number-of-selected-players {
+  display: flex;
+  justify-content: end;
+}
+.check-players {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  margin-bottom: 15px;
   .players-column {
     display: flex;
     flex-direction: column;
@@ -15,5 +26,11 @@
     margin-top: 1rem;
   }
 
+}
+
+.select-number-of-teams {
+ min-width: 50px;
+  margin-left: 20px;
+  margin-bottom: 15px;
 }
 

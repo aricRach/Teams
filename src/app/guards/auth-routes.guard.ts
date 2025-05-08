@@ -6,5 +6,9 @@ export const authRoutesGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
   localStorage.setItem('redirectTo', state.url);
-  return !!auth.currentUser;
+  if(!!auth.currentUser) {
+    localStorage.removeItem('redirectTo');
+    return true;
+  }
+  return false;
 };

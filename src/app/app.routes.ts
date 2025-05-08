@@ -15,12 +15,13 @@ import {PlayersStatisticsTableComponent} from './players-statistics-table/player
 import {TeamDraftComponent} from './team-draft/team-draft.component';
 import {CreateDraftSessionComponent} from './create-draft-session/create-draft-session.component';
 import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
+import {signInPageGuard} from './guards/sign-in-page.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: SignInComponent,
-    // canActivate: [authRoutesGuard]
+    canActivate: [signInPageGuard]
 
   },
   {
