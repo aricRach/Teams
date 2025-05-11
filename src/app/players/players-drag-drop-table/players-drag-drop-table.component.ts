@@ -172,6 +172,12 @@ export class PlayersDragDropTableComponent {
       teamMap[teamKey].totalRating += player.rating;
     });
 
+    // shuffle balanced teams to avoid knowing level of each player.
+    for(const teamKey in teamMap) {
+      const currentTeam = teamMap[teamKey];
+      currentTeam.players = shuffleArray(currentTeam.players);
+    }
+
     this.playersService.setTeams({...teams, ...teamMap});
     //
     // return Object.fromEntries(

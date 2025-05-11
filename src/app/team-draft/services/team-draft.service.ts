@@ -3,6 +3,7 @@ import {collection, deleteDoc, doc, docData, Firestore, getDoc, updateDoc} from 
 import {Observable} from 'rxjs';
 import {Auth} from '@angular/fire/auth';
 import {PlayersService} from '../../players/players.service';
+import {shuffleArray} from '../../utils/array-utils';
 
 @Injectable({
   providedIn: 'root'
@@ -46,6 +47,13 @@ export class TeamDraftService {
     const newUnassigned = data['unassignedPlayers'].filter((p: {id: string, name: string}) => p.id !== player.id);
     const nextTurn = (data['currentTurn'] + 1) % data['members'].length;
     const newStatus = newUnassigned.length === 0 ? 'completed' : 'active';
+
+    if(newStatus === 'completed') {
+      // shuffle teams to avoid knowing level of each player.
+      for(const teamKey in newTeams) {
+        newTeams[teamKey] = shuffleArray(newTeams[teamKey]);
+      }
+    }
 
     await updateDoc(ref, {
       teams: newTeams,
