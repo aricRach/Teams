@@ -37,12 +37,6 @@ export class HeaderComponent {
       show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.adminControl().isAdminMode,
       link: '/home/edit-player'
     },
-    // {
-    //   action: MenuAction.NAVIGATE,
-    //   alias: 'Team draft',
-    //   show: true,
-    //   link: '/home/team-draft'
-    // },
     {
       action: MenuAction.NAVIGATE,
       alias: 'create draft',
