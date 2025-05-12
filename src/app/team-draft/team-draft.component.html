@@ -4,8 +4,11 @@
 </header>
 
 <main>
+  @if(!session()) {
+    <h1>Something went wrong, please make sure you have the right permissions</h1>
+  }
+  @else {
 @if(!isCompleted()) {
-
 @if(!isMyTurn()) {
     <div class="dots-loader">
         <div>
@@ -59,6 +62,6 @@
     }
   </ul>
 }
-
     </section>
+  }
 </main>
