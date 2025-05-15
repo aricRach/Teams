@@ -23,14 +23,9 @@
 
 <app-players-drag-drop-table [isGameOn]="isGameOn()"></app-players-drag-drop-table>
 
-
 @if(adminControlService.adminControl().isAdminMode) {
-  <h2>Add Player</h2>
-  <form [formGroup]="playerForm" (ngSubmit)="addPlayer()">
-    <input #nameField formControlName="name" placeholder="Player Name">
-    <input formControlName="rating" type="number" placeholder="Rating">
-    <button type="submit">Add Player</button>
-  </form>
+  <app-add-new-player></app-add-new-player>
+
 }
 
 <app-stopwatch (timeStartEvent)="onGameStartEvent()" (timeStoppedEvent)="onGameStopEvent()" (timeEndEvent)="showTeamWinModal()"></app-stopwatch>

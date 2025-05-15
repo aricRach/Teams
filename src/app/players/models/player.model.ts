@@ -3,6 +3,7 @@ export interface Player {
   team: 'teamA' | 'teamB' | 'teamC' | 'teamD';
   name: string;
   rating: number;
+  isActive?: boolean;
   statistics: {
     [key: string]: { // `key` is used to represent date strings (e.g., 'dd-mm-yyyy')
       goals: number;

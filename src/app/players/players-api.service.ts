@@ -65,34 +65,6 @@ export class PlayersApiService {
     }
   }
 
-  async addPlayerToGroup(groupId: string, player: Player): Promise<boolean> {
-    const user = this.auth.currentUser;
-    if (!user) {
-      console.error("User not authenticated");
-      return false;
-    }
-
-    // Check if group exists
-    const groupDocRef = doc(this.firestore, `groups/${groupId}`);
-    const groupSnap = await getDoc(groupDocRef);
-    if (!groupSnap.exists()) {
-      console.error("Group not found");
-      return false;
-    }
-
-    const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-    const q = query(playersRef, where("name", "==", player.name));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      console.error(`Player with name "${player.name}" already exists in group "${groupId}".`);
-      return false;
-    }
-    await addDoc(playersRef, player);
-    console.log(`Player "${player.name}" added to group "${groupId}"`);
-    return true;
-  }
-
   async addOrUpdatePlayers(groupId: string, players: any[]): Promise<boolean> {
     const user = this.auth.currentUser;
     if (!user) {

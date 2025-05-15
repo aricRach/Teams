@@ -11,17 +11,17 @@ import {Player} from '../players/models/player.model';
 import {AuditTrailService} from '../audit-trail/services/audit-trail.service';
 import {AuditTrailComponent} from '../audit-trail/audit-trail.component';
 import {AdminControlService} from '../user/admin-control.service';
+import {AddNewPlayerComponent} from '../add-new-player/add-new-player.component';
 
 @Component({
   selector: 'app-game',
   imports: [ReactiveFormsModule, CommonModule, PlayersDragDropTableComponent,
-    StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent, AuditTrailComponent],
+    StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent, AuditTrailComponent, AddNewPlayerComponent],
   templateUrl: './game.component.html',
   standalone: true,
   styleUrl: './game.component.scss'
 })
 export class GameComponent {
-  playerForm!: FormGroup;
   playersService = inject(PlayersService);
   auditTrailService = inject(AuditTrailService);
   adminControlService = inject(AdminControlService);
@@ -31,25 +31,9 @@ export class GameComponent {
   isGameOn = signal(false);
   isTeamWinModalVisible = signal(false);
 
-  @ViewChild('nameField') nameField!: ElementRef;
   protected isAdminCodeModalVisible = signal(false);
   protected isAuditTrailModalVisible = signal(false);
 
-  constructor(private fb: FormBuilder) {
-    this.playerForm = this.fb.group({
-      name: '',
-      rating: ''
-    });
-  }
-
-  addPlayer() {
-    const {name, rating} = this.playerForm.value;
-    if (name && rating > 0) {
-      this.playersService.addNewPlayer({name, rating} as Player);
-      this.playerForm.reset();
-      this.nameField.nativeElement.focus();
-    }
-  }
 
   onGameStartEvent() {
     this.isGameOn.set(true);

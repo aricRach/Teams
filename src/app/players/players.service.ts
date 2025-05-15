@@ -64,28 +64,6 @@ export class PlayersService {
     return playersArray;
   }
 
-  addNewPlayer(newPlayer: Player) {
-    const allPlayersArray = this.flattenPlayers();
-    const isPlayerExist = allPlayersArray.some(player => player.name.toLowerCase() === newPlayer.name.toLowerCase());
-    if(isPlayerExist) {
-      alert(`❌ player with name: ${newPlayer.name} already exist`);
-      return;
-    }
-    this.spinnerService.setIsLoading(true);
-    this.playersApiService.addPlayerToGroup(this.selectedGroup().id, newPlayer).then(() => {
-      this.popoutService.addSuccessPopOut(`${newPlayer.name} successfully added.`);
-    }).catch(() => {
-      this.popoutService.addSuccessPopOut(`cant add ${newPlayer.name},please try again later.`);
-    }).finally(() => {
-      this.spinnerService.setIsLoading(false);
-      this.teams.update((teams: any) => {
-        teams.allPlayers.players.push({name: newPlayer.name, rating: newPlayer.rating, statistics: {}})
-        return {...teams}
-      })
-    })
-
-    }
-
     getAllActivePlayers() {
       return this.playersApiService.getAllActivePlayers(this.selectedGroup().id).pipe(
          take(1),
