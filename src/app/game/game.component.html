@@ -21,8 +21,9 @@
   </button>
 </div>
 
-<app-players-drag-drop-table [isGameOn]="isGameOn()"></app-players-drag-drop-table>
+<button (click)="isGameOn.set(!this.isGameOn())">lock</button>
 
+<app-players-drag-drop-table [isGameOn]="isGameOn()"></app-players-drag-drop-table>
 @if(adminControlService.adminControl().isAdminMode) {
   <app-add-new-player></app-add-new-player>
 
