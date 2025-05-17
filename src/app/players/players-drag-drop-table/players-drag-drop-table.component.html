@@ -21,7 +21,7 @@
         <div
           cdkDropList
           id="{{teamKey}}"
-          [cdkDropListDisabled]="isGameOn()"
+          [cdkDropListDisabled]="isLocked()"
           [cdkDropListData]="clonedTeams()?.[teamKey]?.players"
           [cdkDropListConnectedTo]="dropListRefs()"
           class="list"
@@ -33,7 +33,7 @@
               [player]="item"
               [isAdminMode]="isAdminMode()"
               appDoubleClick
-              [doubleClickDisabled]="!isGameOn()"
+              [doubleClickDisabled]="!isLocked()"
               (doubleClicked)="openSetGoalModal($event, {player: item, team: teamKey})"
               class="box"
               cdkDrag
@@ -48,7 +48,7 @@
   <div
     cdkDropList
     id="allPlayers"
-    [cdkDropListDisabled]="isGameOn()"
+    [cdkDropListDisabled]="isLocked()"
     [cdkDropListData]="clonedTeams()?.allPlayers?.players"
     [cdkDropListConnectedTo]="teamKeys()"
     class="box available-player"

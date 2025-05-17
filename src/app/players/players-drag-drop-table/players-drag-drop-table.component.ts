@@ -20,7 +20,7 @@ import {AdminControlService} from '../../user/admin-control.service';
 })
 export class PlayersDragDropTableComponent {
 
-  isGameOn = input.required();
+  isLocked = input.required();
 
   playersService = inject(PlayersService);
   adminControlService = inject(AdminControlService);

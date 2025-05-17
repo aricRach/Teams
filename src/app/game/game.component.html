@@ -1,8 +1,7 @@
 <div class="in-row center gap">
   <h1 >Teams</h1>
-  <button class="action-btn" (click)="toggleShowHideRating()">Toggle Admin Mode</button>
+  <button class="action-btn" (click)="isAdminCodeModalVisible.set(true)">Toggle Admin Mode</button>
 </div>
-
 
 <div class="space-between save-buttons gap">
   @if(adminControlService.adminControl().isAdminMode) {
@@ -10,7 +9,6 @@
       <button (click)="load()">Load local data</button>
       <button (click)="save()">Save local data </button>
     </div>
-
       <button (click)="saveGlobal()">Save Global</button>
   }
 </div>
@@ -21,30 +19,35 @@
   </button>
 </div>
 
-<button (click)="isGameOn.set(!this.isGameOn())">lock</button>
 
-<app-players-drag-drop-table [isGameOn]="isGameOn()"></app-players-drag-drop-table>
+<button class="button-icon" (click)="isMovePlayersLocked.set(!this.isMovePlayersLocked())">
+  <img alt="login" [src]=lockIcon() height="30" width="30">
+</button>
+
+<app-players-drag-drop-table [isLocked]="isMovePlayersLocked()"/>
 @if(adminControlService.adminControl().isAdminMode) {
-  <app-add-new-player></app-add-new-player>
-
+  <app-add-new-player/>
 }
 
-<app-stopwatch (timeStartEvent)="onGameStartEvent()" (timeStoppedEvent)="onGameStopEvent()" (timeEndEvent)="showTeamWinModal()"></app-stopwatch>
+<app-stopwatch (timeStartEvent)="isMovePlayersLocked.set(true)"
+               (timeEndEvent)="isTeamWinModalVisible.set(true)"/>
 
 @if(isTeamWinModalVisible()) {
-  <app-modal [showCloseIcon]="true" [showSubmitButton]="false" [showCloseButton]="false" (close)="closeTeamWinModal()">
+  <app-modal [showCloseIcon]="true" [showSubmitButton]="false" [showCloseButton]="false" (close)="isTeamWinModalVisible.set(false)">
     <app-game-details (endGame)="endGame($event)" [originalTeamNames]="originalTeamNames()"></app-game-details>
   </app-modal>
 }
 
 @if(isAdminCodeModalVisible()) {
-  <app-modal [showCloseButton]="false" (submit)="codeModalSubmitted()" (close)="closeAdminCodeModal()">
+  <app-modal [showCloseButton]="false" (submit)="codeModalSubmitted()"
+             (close)="isAdminCodeModalVisible.set(false)">
     <input placeholder="code" [(ngModel)]="code">
   </app-modal>
 }
 
 @if(isAuditTrailModalVisible()) {
-  <app-modal [showSubmitButton]="false" (close)="closeAuditTrailModal()">
+  <app-modal [showSubmitButton]="false"
+             (close)="isAuditTrailModalVisible.set(false)">
     <app-audit-trail></app-audit-trail>
   </app-modal>
 }

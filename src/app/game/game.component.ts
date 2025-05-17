@@ -1,5 +1,5 @@
-import {Component, computed, ElementRef, inject, signal, ViewChild} from '@angular/core';
-import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {Component, computed, inject, signal} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {PlayersService} from '../players/players.service';
 import {GameDetails, GameDetailsComponent} from '../game-details/game-details.component';
 import {currentDate} from '../utils/date-utils';
@@ -28,20 +28,14 @@ export class GameComponent {
   readonly originalTeamNames = computed(() =>
     Object.keys(this.playersService.getTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.playersService.numberOfTeams())
   );
-  isGameOn = signal(false);
+  isMovePlayersLocked = signal(false);
   isTeamWinModalVisible = signal(false);
 
   protected isAdminCodeModalVisible = signal(false);
   protected isAuditTrailModalVisible = signal(false);
 
-
-  onGameStartEvent() {
-    this.isGameOn.set(true);
-  }
-
-  onGameStopEvent() {
-    this.isGameOn.set(false);
-  }
+  lockIcon = computed(() =>
+    this.isMovePlayersLocked() ? 'assets/icons/unlock.svg' : 'assets/icons/lock.svg')
 
   save() {
     localStorage.setItem(`teams-${this.playersService.selectedGroup().id}`, JSON.stringify(this.playersService.getTeams()));
@@ -55,26 +49,7 @@ export class GameComponent {
     }
   }
 
-  toggleShowHideRating() {
-    this.isAdminCodeModalVisible.set(true);
-  }
-
   code!: string;
-  showTeamWinModal() {
-    this.isTeamWinModalVisible.set(true);
-  }
-
-  closeTeamWinModal() {
-    this.isTeamWinModalVisible.set(false);
-  }
-
-  closeAdminCodeModal() {
-    this.isAdminCodeModalVisible.set(false);
-  }
-
-  closeAuditTrailModal() {
-    this.isAuditTrailModalVisible.set(false);
-  }
 
   endGame(gameDetails: GameDetails) {
     const teams = this.playersService.getTeams();
