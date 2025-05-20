@@ -16,7 +16,8 @@ export class TeamOfTheWeekApiService {
   baseUrl = `${environment.gatewayServiceBaseUrl}/team-of-the-week`;
   async generateAiTotw(
     date: string,
-    players: any[]
+    players: any[],
+    teamSize: number
   ): Promise<any> {
     const ref = doc(
       this.firestore,
@@ -30,7 +31,7 @@ export class TeamOfTheWeekApiService {
         return snapshotData;
       }
 
-      const totwData: any = await firstValueFrom(this.httpClient.post(this.baseUrl, players));
+      const totwData: any = await firstValueFrom(this.httpClient.post(this.baseUrl, {players, teamSize}));
 
       // Fire and forget
       setDoc(ref, {...totwData, shouldUpdate: false}).catch(() => console.error('cant save'));

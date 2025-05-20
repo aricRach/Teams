@@ -35,10 +35,13 @@ export class TeamOfTheWeekService {
 
   calculateWeekStates(date: string) {
     const allPlayers = this.playersService.flattenPlayers();
-    return allPlayers.filter((player) => !!player.statistics[date] && player.statistics[date].games > 0).map(player => {
+    const setOfTeams = new Set();
+    const players =  allPlayers.filter((player) => !!player.statistics[date] && player.statistics[date].games > 0).map(player => {
       const dateStats = player.statistics[date];
+      setOfTeams.add(player.team)
         return {name: player.name, team: player.team, totalGoals: dateStats.goals, totalGames: dateStats.games, totalWins: dateStats.wins}
     })
+    return {players, teamSize:  Math.floor(players.length/setOfTeams.size)}
   }
 
   getTeamOfTheWeek(date: string) {
@@ -47,8 +50,8 @@ export class TeamOfTheWeekService {
       return Promise.resolve(null);
     } else {
       this.spinnerService.setIsLoading(true);
-      const players = this.calculateWeekStates(date);
-      return this.teamOfTheWeekApiService.generateAiTotw(date, players).finally(() => {
+      const weekStates = this.calculateWeekStates(date);
+      return this.teamOfTheWeekApiService.generateAiTotw(date, weekStates.players, weekStates.teamSize ).finally(() => {
         this.spinnerService.setIsLoading(false)
       });
     }
