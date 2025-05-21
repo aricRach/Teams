@@ -61,7 +61,7 @@ export class PlayersService {
       }
     });
 
-    return playersArray;
+    return playersArray.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
   }
 
     getAllActivePlayers() {
