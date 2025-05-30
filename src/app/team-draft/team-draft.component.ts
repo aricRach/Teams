@@ -3,6 +3,7 @@ import {TeamDraftService} from './services/team-draft.service';
 import {NgIf} from '@angular/common';
 import {Subscription} from 'rxjs';
 import {RouterModule} from '@angular/router';
+import {TeamDraftSession} from '../create-draft-session/services/create-draft-session.service';
 
 @Component({
   selector: 'app-team-draft',
@@ -13,6 +14,7 @@ import {RouterModule} from '@angular/router';
 export class TeamDraftComponent implements OnInit, OnDestroy{
 
   teamDraftService = inject(TeamDraftService);
+  // @ts-ignore
   session = signal<any>(null);
   sessionId = input<string>('');
   groupId = input<string>('');
@@ -31,7 +33,7 @@ export class TeamDraftComponent implements OnInit, OnDestroy{
     this.currentUserEmail = this.teamDraftService.auth.currentUser?.email || '';
    this.subscription.add(this.teamDraftService.getSession(this.sessionId(), this.groupId()).subscribe((data => {
      if(data) {
-       this.session.set(data);
+       this.session.set(data as TeamDraftSession);
      } else {
        this.teamDraftService.popupsService.addSuccessPopOut('session ended')
        this.teamDraftService.router.navigate(['home']);

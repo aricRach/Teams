@@ -3,6 +3,19 @@
   <a [routerLink]="'/'">Home </a>
 </header>
 
+@if(session()?.selectionMethod.isSnakeMode) {
+  <div class="center">
+    <h5 class="mrg">Snake mode</h5>
+    <small>Selection order 1,2,3,3,2,1 ...</small>
+  </div>
+}
+
+@if(isCompleted()) {
+  <div class="center completed-session">
+    <h2>Completed</h2>
+  </div>
+}
+
 <main>
   @if(!session()) {
     <h1>Something went wrong, please make sure you have the right permissions</h1>
@@ -24,11 +37,7 @@
 } @else {
   <p class="your-turn-text">It's your turn to select a player</p>
 }
-
-} @else {
-  <p>completed</p>
 }
-
 <div class="teams">
   @for(i of range(); track i) {
     <div>

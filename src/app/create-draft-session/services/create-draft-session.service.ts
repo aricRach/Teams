@@ -21,6 +21,10 @@ export interface TeamDraftSession {
   unassignedPlayers: DraftPlayer[];
   createdBy: string;
   id: string;
+  selectionMethod: {
+    isSnakeMode: boolean;
+    isForward: boolean;
+  }
 }
 
 @Injectable({
@@ -71,7 +75,7 @@ export class CreateDraftSessionService {
   readonly captainPlayerIds = signal<string[]>([]);
 
 
-  async createSession(captains: any[]): Promise<string> {
+  async createSession(captains: any[], isSnakeMode: boolean): Promise<string> {
 
     const captainsIds = captains.map((captain) => captain.player.id)
 
@@ -96,7 +100,11 @@ export class CreateDraftSessionService {
       teamCount: this.numberOfTeams(),
       teams: initialTeams,
       unassignedPlayers: selectedPlayers,
-      createdBy: this.auth.currentUser?.email || ''
+      createdBy: this.auth.currentUser?.email || '',
+      selectionMethod: {
+        isSnakeMode,
+        isForward: isSnakeMode ? true : null
+      }
     };
 
     const sessionsRef = collection(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamDraftSessions`);

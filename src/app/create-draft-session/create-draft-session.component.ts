@@ -7,10 +7,11 @@ import {CommonModule} from '@angular/common';
 import {Player} from "../players/models/player.model";
 import {shuffleArray} from "../utils/array-utils";
 import {RouterModule} from '@angular/router';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-create-draft-session',
-  imports: [FormsModule, RangePipe, ReactiveFormsModule, CommonModule, RouterModule],
+  imports: [FormsModule, RangePipe, ReactiveFormsModule, CommonModule, RouterModule, MatTooltipModule],
   templateUrl: './create-draft-session.component.html',
   styleUrl: './create-draft-session.component.scss'
 })
@@ -55,6 +56,7 @@ export class CreateDraftSessionComponent implements OnDestroy{
     this.form = this.fb.group({
       numberOfTeams: [this.createDraftSessionService.numberOfTeams()],
       captains: this.fb.array([]),
+      isSnakeMode: [false]
     });
     this.form.get('numberOfTeams')!.valueChanges.pipe((startWith(this.form.get('numberOfTeams')!.value))).subscribe((value: number) => {
       this.setNumberOfTeams(value);
@@ -103,7 +105,7 @@ export class CreateDraftSessionComponent implements OnDestroy{
       return;
     }
    const formValue = this.form.getRawValue();
-   const sessionId  = await this.createDraftSessionService.createSession(shuffleArray(formValue.captains));
+   const sessionId  = await this.createDraftSessionService.createSession(shuffleArray(formValue.captains), formValue.isSnakeMode);
    this.activeSession.set(sessionId);
    this.sessionUrlToShow.set(this.createDraftSessionService.buildUrl(sessionId));
   }

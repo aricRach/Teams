@@ -45,7 +45,7 @@ export class TeamDraftService {
     newTeams[teamKey] = [...(newTeams[teamKey] || []), player];
 
     const newUnassigned = data['unassignedPlayers'].filter((p: {id: string, name: string}) => p.id !== player.id);
-    const nextTurn = (data['currentTurn'] + 1) % data['members'].length;
+    const nextTurnData = this.determineNextTurn(data);
     const newStatus = newUnassigned.length === 0 ? 'completed' : 'active';
 
     if(newStatus === 'completed') {
@@ -57,9 +57,50 @@ export class TeamDraftService {
 
     await updateDoc(ref, {
       teams: newTeams,
+      currentTurn: nextTurnData.nextTurn,
       unassignedPlayers: newUnassigned,
-      currentTurn: nextTurn,
+      selectionMethod: {
+        isForward: nextTurnData.isForward,
+        isSnakeMode: data['selectionMethod']['isSnakeMode']
+      },
       status: newStatus
     });
+  }
+
+  determineNextTurn(data: any): {nextTurn: number, isForward: boolean | null} {
+
+    let isForward = data['selectionMethod']['isForward'];
+    const currentTurn = data['currentTurn'];
+    const isSnakeMode = data['selectionMethod']['isSnakeMode'];
+    const membersCount = data['members'].length;
+
+    if(!isSnakeMode) {
+      return {
+        nextTurn: (currentTurn + 1) % data['members'].length,
+        isForward: null,
+      }
+    }
+
+    // snake
+    let nextTurn: number;
+    if (isForward) {
+      if (currentTurn + 1 >= membersCount) {
+        nextTurn = currentTurn;
+        isForward = false;
+      } else {
+        nextTurn = currentTurn + 1;
+      }
+    } else {
+      if (currentTurn - 1 < 0) {
+        nextTurn = currentTurn;
+        isForward = true;
+      } else {
+        nextTurn = currentTurn - 1;
+      }
+    }
+    return {
+      nextTurn,
+      isForward
+    }
   }
 }
