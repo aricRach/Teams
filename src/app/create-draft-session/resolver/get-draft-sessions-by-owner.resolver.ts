@@ -3,8 +3,9 @@ import {inject} from '@angular/core';
 import {CreateDraftSessionService} from '../services/create-draft-session.service';
 import {SpinnerService} from '../../spinner.service';
 
-export const getDraftSessionsByOwnerResolver: ResolveFn<Promise<any>> = (route, state) => {
+export const getDraftSessionsByOwnerResolver: ResolveFn<Promise<any>> = async (route, state) => {
 
   const createDraftSessionService = inject(CreateDraftSessionService);
-  return createDraftSessionService.getSessionsByCreator()
+  const sessions = await createDraftSessionService.getSessionsByCreator();
+  return sessions ? sessions[0] : null;
 };

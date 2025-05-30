@@ -10,7 +10,6 @@ export const getGroupPlayersResolver: ResolveFn<any> = (route, state) => {
   const spinnerService = inject(SpinnerService);
   const router = inject(Router);
   if(!playersService.selectedGroup()) {
-    debugger
     router.navigate(['/select-group']);
     return;
   }

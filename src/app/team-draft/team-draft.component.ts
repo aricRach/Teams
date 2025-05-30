@@ -1,6 +1,5 @@
 import {Component, computed, inject, input, OnDestroy, OnInit, signal} from '@angular/core';
 import {TeamDraftService} from './services/team-draft.service';
-import {Auth} from '@angular/fire/auth';
 import {NgIf} from '@angular/common';
 import {Subscription} from 'rxjs';
 import {RouterModule} from '@angular/router';
@@ -14,7 +13,6 @@ import {RouterModule} from '@angular/router';
 export class TeamDraftComponent implements OnInit, OnDestroy{
 
   teamDraftService = inject(TeamDraftService);
-  private auth = inject(Auth);
   session = signal<any>(null);
   sessionId = input<string>('');
   groupId = input<string>('');
@@ -30,8 +28,15 @@ export class TeamDraftComponent implements OnInit, OnDestroy{
   subscription = new Subscription();
 
   ngOnInit(): void {
-    this.currentUserEmail = this.auth.currentUser?.email || '';
-   this.subscription.add(this.teamDraftService.getSession(this.sessionId(), this.groupId()).subscribe((data => this.session.set(data))));
+    this.currentUserEmail = this.teamDraftService.auth.currentUser?.email || '';
+   this.subscription.add(this.teamDraftService.getSession(this.sessionId(), this.groupId()).subscribe((data => {
+     if(data) {
+       this.session.set(data);
+     } else {
+       this.teamDraftService.popupsService.addSuccessPopOut('session ended')
+       this.teamDraftService.router.navigate(['home']);
+     }
+   })));
   }
 
   async assignPlayer(player: {id: string, name: string}) {
@@ -41,15 +46,7 @@ export class TeamDraftComponent implements OnInit, OnDestroy{
     await this.teamDraftService.assignPlayer(this.sessionId(), this.groupId(), player, 'team'+ this.myTeamIndex());
   }
 
-  async finalizeIfNeeded() {
-    if (this.session()?.status === 'completed') {
-      await this.teamDraftService.finalizeSession(this.sessionId(), this.groupId());
-    }
-  }
-
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
   }
-
-
 }

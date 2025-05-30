@@ -121,13 +121,10 @@ export class PlayersService {
    return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.name, isActive).then(() => {
      this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`);
      if(isActive) { // if you want to make the player active you need to fetch again.
-       debugger
        this.getAllActivePlayers();
        return;
      }
-     debugger
      if(!isActive) { // if you want to remove delete it from the specific team.
-       debugger
         this.teams.update((teams) => {
           for (const teamKey in teams) {
             // @ts-ignore

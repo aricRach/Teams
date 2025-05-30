@@ -51,7 +51,6 @@ export class UserService {
       signInWithPopup(this.auth, this.provider)
         .then((result) => {
           this.user.set(result.user);
-          debugger
           this.router.navigate([redirectTo]).then(() => this.spinnerService.setIsLoading(false));
         })
         .catch((error) => {

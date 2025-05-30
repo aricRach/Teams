@@ -78,7 +78,7 @@ export const routes: Routes = [
         component: CreateDraftSessionComponent,
         canActivate: [groupAdminGuard],
         resolve: {
-          existingSessions: getDraftSessionsByOwnerResolver
+          existingSession: getDraftSessionsByOwnerResolver
         },
       },
       // {

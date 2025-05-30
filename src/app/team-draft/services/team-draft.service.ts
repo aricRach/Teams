@@ -4,16 +4,17 @@ import {Observable} from 'rxjs';
 import {Auth} from '@angular/fire/auth';
 import {PlayersService} from '../../players/players.service';
 import {shuffleArray} from '../../utils/array-utils';
+import {Router} from '@angular/router';
+import {PopupsService} from 'ui';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TeamDraftService {
-  private auth = inject(Auth);
+  auth = inject(Auth);
   private firestore = inject(Firestore);
-  private playersService = inject(PlayersService);
-
-  constructor() {}
+  router = inject(Router);
+  popupsService = inject(PopupsService);
 
   getSession(sessionId: string, groupId: string): Observable<any> {
     const ref = doc(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}`);
@@ -28,7 +29,6 @@ export class TeamDraftService {
     if (!data){
       throw new Error('Session not found')
     }
-    debugger
     const isExist = data['unassignedPlayers'].some((p: {id: string, name: string}) => p.id === player.id)
     if (!isExist) {
       throw new Error('Player already assigned')
@@ -61,23 +61,5 @@ export class TeamDraftService {
       currentTurn: nextTurn,
       status: newStatus
     });
-  }
-
-  async finalizeSession(sessionId: string, groupId: string) {
-    const sessionRef = doc(this.firestore, `teamDraftSessions/${sessionId}`);
-    const groupRef = doc(this.firestore, `groups/${groupId}`);
-
-    const sessionSnap = await getDoc(sessionRef);
-    const sessionData = sessionSnap.data();
-
-    if (sessionData?.['status'] !== 'completed') {
-      throw new Error('Session is not complete');
-    }
-
-    await updateDoc(groupRef, {
-      teams: sessionData['teams']
-    });
-
-    await deleteDoc(sessionRef);
   }
 }

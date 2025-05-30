@@ -1,12 +1,15 @@
 
 <h2>Create Draft Session</h2>
 @if(sessionUrlToShow()) {
-  @if(createdDraftSessionUrl()) {
-    <h3>Draft session created successfully, please send this link to the captains.</h3>
-  } @else {
-    <h3>There is already an open session.</h3>
+  <div>Send the following link to the relevant players:</div>
+  <div class="invite-url">{{sessionUrlToShow()}}</div>
+  <a class="link-btn team-draft-link" [routerLink]="sessionRouterLink()">Go To Team Draft</a>
+
+  <button class="active-btn alert-btn" (click)="createDraftSessionService.removeSession(activeSession())">delete session</button>
+
+  @if(existingSession()?.status === 'completed') {
+    <button class="active-btn action-btn set-teams-after-draft" (click)="createDraftSessionService.finishTeamDraftSession(existingSession())">Submit and set teams</button>
   }
-  <h5>{{sessionUrlToShow()}}</h5>
 } @else{
   <main>
       <div class="number-of-selected-players"> selected players: {{this.createDraftSessionService.checkedPlayers.size}}</div>
@@ -55,17 +58,9 @@
         </div>
       </form>
     </section>
-
   </main>
 
-
-
-  <footer class="center">
-    <button [disabled]="form.invalid" class="active-btn submit-btn" (click)="submit()">Submit</button>
+   <footer class="center">
+    <button [disabled]="notValid" class="active-btn submit-btn" [class.disabled]="notValid" (click)="submit()">Submit</button>
   </footer>
-
 }
-
-<h5>
-  {{inviteUrl()}}
-</h5>

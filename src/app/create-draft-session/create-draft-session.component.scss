@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 1rem;
 }
 
 .number-of-selected-players {
@@ -34,3 +35,10 @@
   margin-bottom: 15px;
 }
 
+.set-teams-after-draft {
+  margin-top: 20px;
+}
+
+.team-draft-link {
+  width: fit-content;
+}
