@@ -3,4 +3,14 @@
   div {
     margin: 1rem;
   }
+
+  .score-input {
+    margin-left: 5px;
+    width: 80px;
+    text-align: center;
+  }
+
+  .score-error {
+    border-color: red;
+  }
 }

@@ -3,14 +3,14 @@
 
     <ng-content></ng-content>
     @if(showCloseIcon()) {
-      <button class="close-icon" (click)="closeModal()">×</button>
+      <button class="close-icon" (click)="close.emit()">×</button>
     }
     <div class="modal-buttons gap">
     @if(showSubmitButton()) {
-      <button (click)="submitModal()">submit</button>
+      <button (click)="submit.emit()">submit</button>
     }
     @if(showCloseButton()) {
-      <button (click)="closeModal()">close</button>
+      <button (click)="close.emit()">close</button>
     }
     </div>
   </div>

@@ -16,12 +16,4 @@ export class ModalComponent {
   showSubmitButton = input(true);
   close = output();
   submit = output();
-
-  closeModal(): void {
-    this.close.emit();
-  }
-
-  submitModal(): void {
-    this.submit.emit();
-  }
 }

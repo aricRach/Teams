@@ -1,4 +1,4 @@
-import {computed, inject, Injectable, resource, signal} from '@angular/core';
+import {computed, inject, Injectable, resource} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {TeamOfTheWeekApiService} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
@@ -39,7 +39,7 @@ export class TeamOfTheWeekService {
     const players =  allPlayers.filter((player) => !!player.statistics[date] && player.statistics[date].games > 0).map(player => {
       const dateStats = player.statistics[date];
       setOfTeams.add(player.team)
-        return {name: player.name, team: player.team, totalGoals: dateStats.goals, totalGames: dateStats.games, totalWins: dateStats.wins}
+        return {name: player.name, team: player.team, totalGoals: dateStats.goals, totalGames: dateStats.games, totalWins: dateStats.wins, totalGoalsConceded: dateStats.goalsConceded}
     })
     return {players, teamSize:  Math.floor(players.length/setOfTeams.size)}
   }

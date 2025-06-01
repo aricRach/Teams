@@ -15,27 +15,32 @@
       } @else {
         <label for="'firstTeam'">Select first team:</label>
       }
+      <div class="center in-row">
       <select id="'firstTeam'" [(ngModel)]="selectedWonTeam">
         @for(team of winTeamOptions(); track team) {
           <option [value]="team">{{team}}</option>
         }
       </select>
+      <input [class.score-error]="hasScoreError()" [(ngModel)]="wonTeamScore" class="score-input" placeholder="score" type="number">
+      </div>
     </div>
 
     <div>
       @if(selectedEndGameStatus() === 'decided') {
         <label for="'secondTeam'">Loser:</label>
       } @else {
-
         <label for="'secondTeam'">Select second team</label>
       }
+      <div class="center in-row">
       <select id="'secondTeam'" [(ngModel)]="selectedLoseTeam">
         @for(team of loseTeamOptions(); track team) {
           <option [value]="team">{{team}}</option>
         }
       </select>
+        <input [class.score-error]="hasScoreError()" [(ngModel)]="loseTeamScore" class="score-input" placeholder="score" type="number">
+      </div>
     </div>
 
-    <button [disabled]="isSubmitButtonDisabled()" (click)="EndGame()">submit</button>
+    <button [class.disabled]="isSubmitButtonDisabled()" class="active-btn submit-btn" [disabled]="isSubmitButtonDisabled()" (click)="EndGame()">submit</button>
   }
     </div>

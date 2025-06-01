@@ -56,6 +56,7 @@ export class GameComponent {
     // @ts-ignore
     const winners = teams[gameDetails.winner].players.map((player: Player) => {
       const currentStats = player.statistics[currentDate] || {};
+      const goalsConceded = gameDetails.loseTeamScore;
       const updatedStatistics = {
         ...player.statistics,
         [currentDate]: {
@@ -65,6 +66,7 @@ export class GameComponent {
           draws: (currentStats.draws || 0) + (gameDetails.gameStatus === 'decided' ? 0 : 1),
           goals: (currentStats.goals || 0),
           loses: (currentStats.loses || 0),
+          goalsConceded: (currentStats.goalsConceded || 0) + goalsConceded
         },
       };
 
@@ -77,6 +79,8 @@ export class GameComponent {
     // @ts-ignore
     const losers = teams[gameDetails.loser].players.map((player: Player) => {
       const currentStats = player.statistics[currentDate] || {};
+      const goalsConceded = gameDetails.wonTeamScore;
+
       const updatedStatistics = {
         ...player.statistics,
         [currentDate]: {
@@ -85,7 +89,8 @@ export class GameComponent {
           games: (currentStats.games || 0) + 1,
           draws: (currentStats.draws || 0) + (gameDetails.gameStatus === 'decided' ? 0 : 1),
           wins: (currentStats.wins || 0),
-          goals: (currentStats.goals || 0)
+          goals: (currentStats.goals || 0),
+          goalsConceded: (currentStats.goalsConceded || 0) + goalsConceded
         },
       };
 

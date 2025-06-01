@@ -11,6 +11,7 @@ export interface Player {
       loses: number;
       draws: number;
       games: number;
+      goalsConceded: number;
     };
   };
 }
