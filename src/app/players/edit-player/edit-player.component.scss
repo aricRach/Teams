@@ -1,9 +1,24 @@
 .edit-player-header {
-  margin-top: 10px;
+  margin-top: 50px;
   align-items: baseline;
   gap: 12px
 }
 
 .delete-btn {
   margin-left: 20px;
+}
+
+
+.edit-player-form-container {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  justify-content: center;
+
+  ::ng-deep {
+    .form-container {
+      width: 250px;
+    }
+  }
 }
