@@ -27,9 +27,6 @@ export interface TeamDraftSession {
   }
 }
 
-@Injectable({
-  providedIn: 'root'
-})
 export class CreateDraftSessionService {
 
   playersService = inject(PlayersService);
@@ -52,7 +49,7 @@ export class CreateDraftSessionService {
   });
 
   allPlayers = computed(() => this.playersService.flattenPlayers().map((player) => {
-    return {name: player.name, id: player.id}
+    return {name: player.name, id: player.id, email: player.email || ''}
   }))
 
   numberOfTeams = signal(this.playersService.numberOfTeams());
@@ -81,7 +78,7 @@ export class CreateDraftSessionService {
 
     const selectedPlayers: { name: string; id: string }[] = Array.from(this.checkedPlayers)
         .map(id => this.allPlayers().find(player => player.id === id))
-        .filter((player): player is { name: string; id: string } => !!player && !captainsIds.includes(player.id));
+        .filter((player): player is { name: string; id: string, email: string } => !!player && !captainsIds.includes(player.id));
 
     const membersEmails = captains.map((captain: {captainEmail: string, player: Player}) => captain.captainEmail);
 
@@ -110,14 +107,6 @@ export class CreateDraftSessionService {
     const sessionsRef = collection(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamDraftSessions`);
     const docRef = await addDoc(sessionsRef, sessionData);
     return docRef.id; // sessionId
-  }
-
-  async getSessionsByCreator(): Promise<any[]> {
-    const sessionsRef = collection(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamDraftSessions`);
-    const q = query(sessionsRef, where('createdBy', '==', this.auth.currentUser?.email));
-    const snapshot = await getDocs(q);
-
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 
   buildUrl(sessionId: string) {

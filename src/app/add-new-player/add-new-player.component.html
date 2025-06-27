@@ -3,7 +3,14 @@
   [formGroup]="addNewPlayerService.playerForm"
   (ngSubmit)="submitAddNewPlayer()"
 >
-  <input #nameField formControlName="name" placeholder="Player Name">
-  <input formControlName="rating" type="number" placeholder="Rating">
-  <button class="active-btn submit-btn" type="submit">Add Player</button>
+  <label>
+    <input required #nameField formControlName="name" placeholder="Player Name">
+  </label>
+  <label>
+    <input required formControlName="rating" type="number" placeholder="Rating">
+  </label>
+  <label>
+    <input formControlName="email" type="email" placeholder="Email">
+  </label>
+  <button [disabled]="addNewPlayerService.playerForm.invalid" [class.disabled]="addNewPlayerService.playerForm.invalid" class="active-btn submit-btn" type="submit">Add Player</button>
 </form>

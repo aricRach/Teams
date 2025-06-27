@@ -9,4 +9,9 @@ form {
     border: 1px solid #ccc;
     border-radius: 5px;
   }
+  label:has(input:required)::before {
+    content: ' *';
+    color: red;
+    margin-right: 4px;
+  }
 }

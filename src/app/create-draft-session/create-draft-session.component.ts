@@ -12,6 +12,7 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 @Component({
   selector: 'app-create-draft-session',
   imports: [FormsModule, RangePipe, ReactiveFormsModule, CommonModule, RouterModule, MatTooltipModule],
+  providers: [CreateDraftSessionService],
   templateUrl: './create-draft-session.component.html',
   styleUrl: './create-draft-session.component.scss'
 })
@@ -72,7 +73,7 @@ export class CreateDraftSessionComponent implements OnDestroy{
       this.playerDestroyMap.set(i, destroy$);
 
       const group = this.fb.group({
-        captainEmail: ['', Validators.required],
+        captainEmail: ['', [Validators.required,Validators.email]],
         player: ['', Validators.required],
       });
 
@@ -81,6 +82,8 @@ export class CreateDraftSessionComponent implements OnDestroy{
         .subscribe(value => {
           if(value) {
             this.createDraftSessionService.updateCaptainsOptions(this.captains.getRawValue());
+            // @ts-ignore
+            group.patchValue({ captainEmail: value.email || '' });
           }
         });
 

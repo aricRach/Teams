@@ -4,6 +4,7 @@ export interface Player {
   name: string;
   rating: number;
   isActive?: boolean;
+  email?: string;
   statistics: {
     [key: string]: { // `key` is used to represent date strings (e.g., 'dd-mm-yyyy')
       goals: number;

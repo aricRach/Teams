@@ -132,7 +132,8 @@ export class PlayersApiService {
      return updateDoc(playerDocRef, updatedPlayer);
     }
     return updateDoc(playerDocRef, {
-      rating: updatedPlayer.rating
+      rating: updatedPlayer.rating,
+      email: updatedPlayer.email
     });
   }
 
@@ -160,6 +161,14 @@ export class PlayersApiService {
     const playerSnapshot = await this.getPlayerSnapshot(groupId, playerName);
     const playerRef = doc(this.firestore, `groups/${groupId}/players/${playerSnapshot.docs[0].id}`);
     return updateDoc(playerRef, {isActive});
+  }
+
+  async getDraftSessionsByCreator(groupId: string): Promise<any[]> {
+    const sessionsRef = collection(this.firestore, `groups/${groupId}/teamDraftSessions`);
+    const q = query(sessionsRef, where('createdBy', '==', this.auth.currentUser?.email));
+    const snapshot = await getDocs(q);
+
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 }
 

@@ -85,10 +85,6 @@ export const routes: Routes = [
       //   path: 'rate-players',
       //   component: RatePlayersComponent,
       // },
-      // {
-      //   path: 'team-of-the-week',
-      //   component: TeamOfTheWeekComponent,
-      // },
     ]
   },
   {

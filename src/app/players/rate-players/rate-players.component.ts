@@ -1,4 +1,4 @@
-import {Component, inject, linkedSignal, signal} from '@angular/core';
+import {Component, computed, inject, linkedSignal, signal} from '@angular/core';
 import {PlayersService} from '../players.service';
 import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {JsonPipe, NgForOf, NgIf} from '@angular/common';
@@ -19,7 +19,7 @@ import {JsonPipe, NgForOf, NgIf} from '@angular/common';
 export class RatePlayersComponent {
 
   playersService = inject(PlayersService);
-  allPlayers = signal(this.playersService.flattenPlayers())
+  allPlayers = computed(() => this.playersService.flattenPlayers())
 
   ratings = linkedSignal<Record<string, FormControl>>(() => {
     const r = {}

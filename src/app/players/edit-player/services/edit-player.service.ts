@@ -1,7 +1,7 @@
-import {computed, inject, Injectable, signal} from '@angular/core';
+import {computed, inject, linkedSignal} from '@angular/core';
 import {PlayersService} from '../../players.service';
 import {DynamicComponentsTypes, FormField, genericValidators, ModalsService, subInputType} from 'ui';
-import {FormGroup} from '@angular/forms';
+import {FormGroup, Validators} from '@angular/forms';
 import {convertFormValuesToNumbers} from '../../../utils/form-utils';
 import {TeamOfTheWeekApiService} from '../../../team-of-the-week/services/team-of-the-week-api.service';
 
@@ -13,9 +13,18 @@ export class EditPlayerService {
 
   selectedPlayerOption = '';
 
-  selectedPlayer = signal<any>(null);
+  // linked signal - *computed* when allPlayersArray changed allow to load the newest player details.
+  // initial value is null.
+  // *able to change*.
+  selectedPlayer = linkedSignal<any>(() => {
+    return this.allPlayersArray().filter((p => p.name === this.selectedPlayerOption))[0] || null;
+  });
 
-  allPlayersArray = computed(() => [...this.playersService.flattenPlayers()]);
+  allPlayersArray = computed(() => {
+    return [...this.playersService.flattenPlayers(this.playersService.computedTeams())]
+  });
+
+  // @ts-ignore
   controls = computed<FormField[]>(() => this.buildEditPlayerDetailsFields());
   gameControls = computed<FormField[]>(() => this.buildEditGameStatsFields())
   lastDayPlayedStatistics = computed(() => {
@@ -33,7 +42,7 @@ export class EditPlayerService {
   editPlayer(playerDetails: FormGroup<any>) {
     const details = playerDetails.getRawValue();
     details.rating = Number(details.rating)
-    this.playersService.updatePlayer({...this.selectedPlayer(), ...details}, false).then()
+    this.playersService.updatePlayer(this.selectedPlayer(), {...this.selectedPlayer(), ...details}, false).then()
   }
 
   deletePlayer() {
@@ -120,6 +129,19 @@ export class EditPlayerService {
         subInputType: subInputType.NUMBER,
         validators: {...genericValidators.required, ...genericValidators.positiveNumber},
       },
+      {
+        alias: 'email:',
+        name: 'email',
+        disabled: this.shouldDisabledFields(),
+        value: this.selectedPlayer()?.email,
+        dynamicComponent: DynamicComponentsTypes.INPUT,
+        validators: {
+          email: {
+            validatorFn: Validators.email,
+            errorMsg: 'Must be a valid email address',
+          }
+        }
+      }
     ]
   }
 
@@ -127,7 +149,7 @@ export class EditPlayerService {
     const formValues = lastStatisticsForm.getRawValue();
     const updatedPlayer = this.selectedPlayer();
     updatedPlayer.statistics[this.lastDayPlayedStatistics().date] = convertFormValuesToNumbers(formValues);
-    this.playersService.updatePlayer(updatedPlayer, true).then(() => {
+    this.playersService.updatePlayer(this.selectedPlayer(), updatedPlayer, true).then(() => {
       this.teamOfTheWeekApiService.markTotwDateNotUpdated(this.lastDayPlayedStatistics().date).then()
     });
   }

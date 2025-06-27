@@ -132,7 +132,7 @@ export class PlayersDragDropTableComponent {
       const prevGoals = dateStats.goals;
       dateStats.goals = goals;
       team.players[playerIndex].statistics[currentDate] = dateStats;
-      this.playersService.updatePlayer(player, true).then(() => {
+      this.playersService.updatePlayer(team.players[playerIndex], player, true).then(() => {
         this.auditTrailService.addAuditTrail(`goals set for ${player.name} ${prevGoals || 0} -> ${goals}`)
       });
       this.closeSetGoalModal();

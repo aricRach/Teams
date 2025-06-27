@@ -5,6 +5,7 @@ import {of, take, tap} from 'rxjs';
 import {SpinnerService} from '../spinner.service';
 import {PopupsService} from 'ui';
 import {skeleton} from './consts/teams-skeleton';
+import {MembersService} from '../admin/services/members.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ import {skeleton} from './consts/teams-skeleton';
 export class PlayersService {
 
   playersApiService = inject(PlayersApiService);
+  membersService = inject(MembersService);
   spinnerService = inject(SpinnerService);
   popoutService = inject(PopupsService);
   // @ts-ignore
@@ -60,7 +62,6 @@ export class PlayersService {
         });
       }
     });
-
     return playersArray.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
   }
 
@@ -84,28 +85,32 @@ export class PlayersService {
        )
     }
 
-  updatePlayer(player: any, updateStats: boolean) {
+  async updatePlayer(player: Player, editedPlayer: Player, updateStats: boolean): Promise<void> {
     this.spinnerService.setIsLoading(true);
-    return this.playersApiService.updatePlayerStats(this.selectedGroup().id, player.name, player, updateStats ).then(() => {
-        this.popoutService.addSuccessPopOut(`${player.name} updated successfully.`);
-      })
-      .catch(() => this.popoutService.addErrorPopOut(`cant save in db please try later, and save locally`))
-      .finally(() => {
-        this.spinnerService.setIsLoading(false)
-        this.teams.update((teams) => {
-          for (const teamKey in teams) {
-            // @ts-ignore
-            const team = teams[teamKey];
-            let foundPlayerIndex = team.players.findIndex((playerObj: Player) => playerObj.name.toLowerCase() === player.name.toLowerCase());
 
-            if (foundPlayerIndex > -1) {
-              team.players[foundPlayerIndex] = {...player}
-              break;
-            }
-          }
-          return {...teams};
-        })
-      });
+    try {
+      await this.playersApiService.updatePlayerStats(
+        this.selectedGroup().id,
+        editedPlayer.name,
+        editedPlayer,
+        updateStats
+      );
+
+      this.updatePlayerSignal(editedPlayer);
+      this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`);
+
+      if(player.email && editedPlayer.email && player.email !== editedPlayer.email) {
+        await this.membersService.replaceEmail(this.selectedGroup().id, player.email, editedPlayer.email);
+      } else if(!player.email && editedPlayer.email) {
+        await this.membersService.addMember(this.selectedGroup().id, editedPlayer.email);
+      } else if(!editedPlayer.email && player.email) {
+        await this.membersService.removeMember(this.selectedGroup().id, player.email)
+      }
+    } catch {
+      this.popoutService.addErrorPopOut(`Can't save to database. Please try again later or save locally.`);
+    } finally {
+      this.spinnerService.setIsLoading(false);
+    }
   }
 
   async submitRatings(ratingData: Record<string, number>) {
@@ -116,29 +121,17 @@ export class PlayersService {
      .finally(() => this.spinnerService.setIsLoading(false));
   }
 
-  setPlayerActiveStatus(player: Player, isActive: boolean) {
+  async setPlayerActiveStatus(player: Player, isActive: boolean) {
     this.spinnerService.setIsLoading(true)
-   return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.name, isActive).then(() => {
+   return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.name, isActive).then(async () => {
      this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`);
      if(isActive) { // if you want to make the player active you need to fetch again.
        this.getAllActivePlayers();
        return;
      }
      if(!isActive) { // if you want to remove delete it from the specific team.
-        this.teams.update((teams) => {
-          for (const teamKey in teams) {
-            // @ts-ignore
-            const team = teams[teamKey];
-            let foundPlayerIndex = team.players.findIndex(
-              (playerObj: Player) => playerObj.name.toLowerCase() === player.name.toLowerCase()
-            );
-            if (foundPlayerIndex > -1) {
-                team.players.splice(foundPlayerIndex, 1);
-              break;
-            }
-          }
-          return { ...teams };
-        });
+       await this.membersService.removeMember(this.selectedGroup().id, player.email);
+        this.removePlayerSignal(player);
       }
    }).catch(() => {
      this.popoutService.addErrorPopOut(`please try again later`);
@@ -149,4 +142,44 @@ export class PlayersService {
   getTeams(): any {
    return structuredClone(this.teams())
   }
+
+  async getDraftSessionsByCreator(): Promise<any[]> {
+   this.spinnerService.setIsLoading(true);
+   return this.playersApiService.getDraftSessionsByCreator(this.selectedGroup().id).finally(() => {
+     this.spinnerService.setIsLoading(false)
+   })
+  }
+
+  updatePlayerSignal(player: Player) {
+      this.teams.update((teams) => {
+        for (const teamKey in teams) {
+          // @ts-ignore
+          const team = teams[teamKey];
+          let foundPlayerIndex = team.players.findIndex((playerObj: Player) => playerObj.id === player.id);
+
+          if (foundPlayerIndex > -1) {
+            team.players[foundPlayerIndex] = {...player}
+            break;
+          }
+        }
+        return {...teams};
+      })
+    }
+
+    removePlayerSignal(player: Player) {
+      this.teams.update((teams) => {
+        for (const teamKey in teams) {
+          // @ts-ignore
+          const team = teams[teamKey];
+          let foundPlayerIndex = team.players.findIndex(
+            (playerObj: Player) => playerObj.id === player.id
+          );
+          if (foundPlayerIndex > -1) {
+            team.players.splice(foundPlayerIndex, 1);
+            break;
+          }
+        }
+        return { ...teams };
+      });
+    }
 }
