@@ -133,7 +133,7 @@ export class PlayersApiService {
     }
     return updateDoc(playerDocRef, {
       rating: updatedPlayer.rating,
-      email: updatedPlayer.email
+      email: updatedPlayer.email || ''
     });
   }
 
