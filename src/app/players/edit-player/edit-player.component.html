@@ -1,29 +1,6 @@
-<div class="center edit-player-header">
-    <label for="select-player">Select a player</label>
-    <select id="select-player" [(ngModel)]="editPlayerService.selectedPlayerOption" (change)="editPlayerService.onChangePlayer()">
-      @for(player of editPlayerService.allPlayersArray(); track player.name) {
-        <option>{{player.name}}</option>
-      }
-    </select>
-
-  @if(editPlayerService.selectedPlayer()) {
-    <button class="delete-btn active-btn alert-btn" (click)="editPlayerService.deletePlayer()">Delete Player</button>
-  }
-</div>
-
-<div class="edit-player-form-container">
-  <app-generic-form
+ <app-generic-form
     [formFields]=editPlayerService.controls()
     [title]="'Edit player details'"
     (formSubmit)="editPlayerService.editPlayer($event)">
   </app-generic-form>
-
-  <app-generic-form
-    [formFields]=editPlayerService.gameControls()
-    [title]="editPlayerService.editStatisticsFormTitle()"
-    (formSubmit)="editPlayerService.editLastStatistics($event)">
-  </app-generic-form>
-
-
-</div>
 

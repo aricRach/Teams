@@ -16,6 +16,8 @@ import {TeamDraftComponent} from './team-draft/team-draft.component';
 import {CreateDraftSessionComponent} from './create-draft-session/create-draft-session.component';
 import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
 import {signInPageGuard} from './guards/sign-in-page.guard';
+import {ManagePlayersComponent} from './manage-players/manage-players/manage-players.component';
+import {EditStatisticsComponent} from './manage-players/edit-statistics/edit-statistics.component';
 
 export const routes: Routes = [
   {
@@ -69,9 +71,24 @@ export const routes: Routes = [
         ]
       },
       {
-        path: 'edit-player',
-        component: EditPlayerComponent,
-        canActivate: [groupAdminGuard]
+        path: 'manage-players',
+        component: ManagePlayersComponent,
+        canActivate: [groupAdminGuard],
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'edit-player'
+          },
+          {
+            path: 'edit-player',
+            component: EditPlayerComponent,
+          },
+          {
+            path: 'edit-statistics',
+            component: EditStatisticsComponent
+          }
+        ]
       },
       {
         path: 'create-draft-session',

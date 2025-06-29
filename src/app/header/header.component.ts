@@ -33,9 +33,9 @@ export class HeaderComponent {
     },
     {
       action: MenuAction.NAVIGATE,
-      alias: 'Edit player',
+      alias: 'Manage players',
       show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.adminControl().isAdminMode,
-      link: '/home/edit-player'
+      link: '/home/manage-players'
     },
     {
       action: MenuAction.NAVIGATE,
