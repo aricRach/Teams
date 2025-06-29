@@ -1,8 +1,8 @@
 import {computed, inject} from '@angular/core';
-import {PlayersService} from '../../players.service';
+import {PlayersService} from '../../players/players.service';
 import {DynamicComponentsTypes, FormField, genericValidators, ModalsService, subInputType} from 'ui';
 import {FormGroup, Validators} from '@angular/forms';
-import {ManagePlayersService} from '../../../manage-players/services/manage-players.service';
+import {ManagePlayersService} from './manage-players.service';
 
 export class EditPlayerService {
 

@@ -1,7 +1,7 @@
 import {Component, inject} from '@angular/core';
 import { GenericFormComponent,} from 'ui';
 import {FormsModule} from '@angular/forms';
-import {EditPlayerService} from './services/edit-player.service';
+import {EditPlayerService} from '../services/edit-player.service';
 
 @Component({
   selector: 'app-edit-player',
