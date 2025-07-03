@@ -91,7 +91,6 @@ export class PlayersService {
     try {
       await this.playersApiService.updatePlayerStats(
         this.selectedGroup().id,
-        editedPlayer.name,
         editedPlayer,
         updateStats
       );
@@ -123,7 +122,7 @@ export class PlayersService {
 
   async setPlayerActiveStatus(player: Player, isActive: boolean) {
     this.spinnerService.setIsLoading(true)
-   return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.name, isActive).then(async () => {
+   return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.id, isActive).then(async () => {
      this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`);
      if(isActive) { // if you want to make the player active you need to fetch again.
        this.getAllActivePlayers();

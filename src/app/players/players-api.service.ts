@@ -121,8 +121,8 @@ export class PlayersApiService {
     return collectionData(q, { idField: "id" });
   }
 
-  async updatePlayerStats(groupId: string, playerName: string, updatedPlayer: any, updateStats: boolean) {
-    const playerSnapshot = await this.getPlayerSnapshot(groupId, playerName);
+  async updatePlayerStats(groupId: string, updatedPlayer: any, updateStats: boolean) {
+    const playerSnapshot = await this.getPlayerSnapshot(groupId, updatedPlayer.id);
 
     if (playerSnapshot.empty) {
       return Promise.reject();
@@ -137,13 +137,13 @@ export class PlayersApiService {
     });
   }
 
-  private async getPlayerSnapshot(groupId: string, playerName: string) {
+  private async getPlayerSnapshot(groupId: string, playerId: string) {
     const user = this.auth.currentUser;
     if (!user) {
       return Promise.reject();
     }
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-    const q = query(playersRef, where("name", "==", playerName.toLowerCase()));
+    const q = query(playersRef, where("id", "==", playerId));
     return await getDocs(q);
   }
 
@@ -157,8 +157,8 @@ export class PlayersApiService {
     return await setDoc(ratingDocRef, ratingData, { merge: true });
   }
 
-  async setPlayerActiveStatus(groupId: string, playerName: string, isActive: boolean) {
-    const playerSnapshot = await this.getPlayerSnapshot(groupId, playerName);
+  async setPlayerActiveStatus(groupId: string, playerId: string, isActive: boolean) {
+    const playerSnapshot = await this.getPlayerSnapshot(groupId, playerId);
     const playerRef = doc(this.firestore, `groups/${groupId}/players/${playerSnapshot.docs[0].id}`);
     return updateDoc(playerRef, {isActive});
   }
