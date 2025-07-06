@@ -6,10 +6,6 @@ header {
 }
 
 main {
-  .player-name {
-    width: 50px;
-  }
-
 .teams {
   display: flex;
   justify-content: space-around;
@@ -24,8 +20,7 @@ main {
         list-style: none;
 
         li {
-          display: flex;
-          align-items: center;
+          display: grid;
         }
     }
   }

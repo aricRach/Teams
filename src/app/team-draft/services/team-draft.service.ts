@@ -1,5 +1,16 @@
 import {inject, Injectable} from '@angular/core';
-import {collection, deleteDoc, doc, docData, Firestore, getDoc, updateDoc} from '@angular/fire/firestore';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  docData,
+  Firestore,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+  collectionData, query, orderBy
+} from '@angular/fire/firestore';
 import {Observable} from 'rxjs';
 import {Auth} from '@angular/fire/auth';
 import {PlayersService} from '../../players/players.service';
@@ -19,6 +30,14 @@ export class TeamDraftService {
   getSession(sessionId: string, groupId: string): Observable<any> {
     const ref = doc(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}`);
     return docData(ref, { idField: 'id' });
+  }
+
+  getMessages(sessionId: string, groupId: string) {
+    const messagesRef = collection(
+      this.firestore,
+      `groups/${groupId}/teamDraftSessions/${sessionId}/messages`
+    );
+    return collectionData(query(messagesRef, orderBy('createdAt')), { idField: 'id' });
   }
 
   async assignPlayer(sessionId: string, groupId: string, player: {id: string, name: string}, teamKey: string) {
@@ -102,5 +121,18 @@ export class TeamDraftService {
       nextTurn,
       isForward
     }
+  }
+
+  async sendMessage(message: string, sessionId: string, groupId: string) {
+    const messagesRef = collection(
+      this.firestore,
+      `groups/${groupId}/teamDraftSessions/${sessionId}/messages`
+    );
+    await addDoc(messagesRef, {
+      text: message,
+      senderId: this.auth.currentUser?.email || '',
+      senderName: this.auth.currentUser?.displayName || '',
+      createdAt: serverTimestamp(),
+    });
   }
 }

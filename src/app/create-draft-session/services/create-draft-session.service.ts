@@ -25,6 +25,7 @@ export interface TeamDraftSession {
     isSnakeMode: boolean;
     isForward: boolean;
   }
+  messages?: any
 }
 
 export class CreateDraftSessionService {
