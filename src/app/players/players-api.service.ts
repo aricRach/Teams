@@ -34,6 +34,11 @@ export class PlayersApiService {
     return collectionData(activePlayersQuery, { idField: "id" }); // Fetch only active players with Firestore ID
   }
 
+  getAllPlayers(groupId: string) {
+    const playersRef = collection(this.firestore, `groups/${groupId}/players`);
+    return collectionData(playersRef, { idField: "id" });
+  }
+
   /**
    * Create a new group with the authenticated user's email as admin.
    * @param groupName Name of the group.

@@ -16,8 +16,8 @@ export class AddNewPlayerComponent {
   addNewPlayerService = inject(AddNewPlayerService);
   @ViewChild('nameField') nameField!: ElementRef;
 
-  submitAddNewPlayer() {
-    this.addNewPlayerService.addNewPlayer();
+  async submitAddNewPlayer() {
+    await this.addNewPlayerService.addNewPlayer();
     this.nameField.nativeElement.focus();
   }
 }

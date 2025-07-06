@@ -1,7 +1,7 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersApiService} from './players-api.service';
 import {Player} from './models/player.model';
-import {of, take, tap} from 'rxjs';
+import {finalize, of, take, tap} from 'rxjs';
 import {SpinnerService} from '../spinner.service';
 import {PopupsService} from 'ui';
 import {skeleton} from './consts/teams-skeleton';
@@ -38,6 +38,12 @@ export class PlayersService {
     }));
   }
 
+  getAllPlayers() {
+     this.spinnerService.setIsLoading(true);
+     return this.playersApiService.getAllPlayers(this.selectedGroup().id)
+       .pipe(finalize(() => this.spinnerService.setIsLoading(false)));
+  }
+
   setPlayersIntoDataBase(specificTeams?: any) {
     this.spinnerService.setIsLoading(true);
     return this.playersApiService.addOrUpdatePlayers(this.selectedGroup().id, this.flattenPlayers(specificTeams)).then(
@@ -51,14 +57,14 @@ export class PlayersService {
     const playersArray: Player[] = [];
     const teams = {...specificTeams || this.teams()}
     Object.keys(teams).forEach(team => {
-      // @ts-ignore
       if (teams[team].players && Array.isArray(teams[team].players)) {
-        // @ts-ignore
-        teams[team].players.forEach((player: any) => {
-          playersArray.push({
-            ...JSON.parse(JSON.stringify(player)),
-            team: team, // Add team name for reference
-          });
+        teams[team].players
+          .filter((p: Player) => p.isActive)
+          .forEach((player: Player) => {
+            playersArray.push({
+              ...JSON.parse(JSON.stringify(player)),
+              team: team, // Add team name for reference
+            });
         });
       }
     });

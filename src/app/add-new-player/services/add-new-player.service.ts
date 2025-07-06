@@ -1,4 +1,4 @@
-import {ElementRef, inject, Injectable, ViewChild} from '@angular/core';
+import {computed, inject, Injectable} from '@angular/core';
 import {Player} from '../../players/models/player.model';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {PlayersService} from '../../players/players.service';
@@ -6,6 +6,7 @@ import {SpinnerService} from '../../spinner.service';
 import {PopupsService} from 'ui';
 import {AddNewPlayerApiService} from './add-new-player-api.service';
 import {MembersService} from '../../admin/services/members.service';
+import {firstValueFrom} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -20,58 +21,7 @@ export class AddNewPlayerService {
   private popoutService = inject(PopupsService);
   private addNewPlayerApiService = inject(AddNewPlayerApiService);
 
-  async addNewPlayer(): Promise<void> {
-    const { name, rating, email } = this.playerForm.value;
-
-    if (!name?.trim() || !rating) {
-      return;
-    }
-
-    const groupId = this.playersService.selectedGroup().id;
-    const trimmedName = name.trim();
-    const normalizedPlayerName = trimmedName.toLowerCase();
-
-    const isPlayerExist = this.playersService
-      .flattenPlayers()
-      .some(player => player.name.toLowerCase() === normalizedPlayerName);
-
-    if (isPlayerExist) {
-      alert(`❌ Player with name "${trimmedName}" already exists.`);
-      return;
-    }
-
-    const newPlayer = {
-      name: trimmedName,
-      rating,
-      email,
-      isActive: true,
-      statistics: {}
-    } as Player;
-
-    this.spinnerService.setIsLoading(true);
-
-    let playerDoc;
-    try {
-      playerDoc = await this.addNewPlayerApiService.addPlayerToGroup(groupId, newPlayer);
-    } catch (error) {
-      this.popoutService.addErrorPopOut(`Failed to add ${newPlayer.name}. Please try again later.`);
-      this.spinnerService.setIsLoading(false);
-      return;
-    }
-
-    this.popoutService.addSuccessPopOut(`${newPlayer.name} successfully added.`);
-
-    const teams = this.playersService.getTeams();
-    teams.allPlayers.players.push(playerDoc);
-    this.playersService.setTeams(teams);
-    this.playerForm.reset();
-
-    await this.membersService.addMember(groupId, email);
-
-    this.spinnerService.setIsLoading(false);
-  }
-
-
+  groupId = computed(() => this.playersService.selectedGroup().id);
 
   constructor() {
     this.playerForm = this.fb.group({
@@ -79,4 +29,46 @@ export class AddNewPlayerService {
       rating: new FormControl('', [Validators.required]),
       email: new FormControl('', [Validators.email]),
     });
-  }}
+  }
+
+  async addNewPlayer(): Promise<void> {
+    const {name, rating, email} = this.playerForm.value;
+    if (!name?.trim() || !rating) return;
+    const normalizedPlayerName = name.trim().toLowerCase();
+
+      const players = await firstValueFrom(this.playersService.getAllPlayers()) as Player[];
+      const isPlayerExist = players.some(
+        (player: Player) => player.name.toLowerCase() === normalizedPlayerName
+      );
+
+      if (isPlayerExist) {
+        this.popoutService.addErrorPopOut(`Player with name "${normalizedPlayerName}" already exists as active/inactive player.`);
+        return;
+      }
+
+      await this.saveNewPlayer({
+        name: normalizedPlayerName,
+        rating,
+        email,
+        isActive: true,
+        statistics: {}
+      } as Player);
+  }
+
+  private async saveNewPlayer(newPlayer: Player) {
+    try {
+      this.spinnerService.setIsLoading(true);
+      const playerDoc = await this.addNewPlayerApiService.addPlayerToGroup(this.groupId(), newPlayer);
+      this.popoutService.addSuccessPopOut(`${newPlayer.name} successfully added.`);
+      const teams = this.playersService.getTeams();
+      teams.allPlayers.players.push(playerDoc);
+      this.playersService.setTeams(teams);
+      this.playerForm.reset();
+      await this.membersService.addMember(this.groupId(), newPlayer.email);
+    } catch (error) {
+      this.popoutService.addErrorPopOut(`Failed to add ${newPlayer.name}. Please try again later.`);
+    } finally {
+      this.spinnerService.setIsLoading(false);
+    }
+  }
+}
