@@ -31,7 +31,6 @@ export class GameComponent {
   isMovePlayersLocked = signal(false);
   isTeamWinModalVisible = signal(false);
 
-  protected isAdminCodeModalVisible = signal(false);
   protected isAuditTrailModalVisible = signal(false);
 
   lockIcon = computed(() =>
@@ -49,7 +48,6 @@ export class GameComponent {
     }
   }
 
-  code!: string;
 
   endGame(gameDetails: GameDetails) {
     const teams = this.playersService.getTeams();
@@ -120,14 +118,6 @@ export class GameComponent {
         this.auditTrailService.addAuditTrail(`draw: ${gameDetails.winner} - ${gameDetails.loser}`)
       }
     });
-  }
-
-  codeModalSubmitted() {
-    this.isAdminCodeModalVisible.set(false);
-    if(this.code === '2626') {
-      this.adminControlService.setIsAdmin(!this.adminControlService.adminControl().isAdminMode);
-    }
-    this.code = '';
   }
 
   saveGlobal() {

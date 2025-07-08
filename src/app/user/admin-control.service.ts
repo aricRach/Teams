@@ -1,25 +1,22 @@
 import {Injectable, signal} from '@angular/core';
 
 export interface AdminControl {
-  isAdminMode: boolean
+  showAddPlayerForm: boolean;
+  showRating: boolean;
+  showProtectedPages: boolean;
+  showSaveButtons: boolean;
+  showMakeBalanceTeams: boolean;
 }
 @Injectable({
   providedIn: 'root'
 })
 export class AdminControlService {
 
-  adminControl = signal<AdminControl>({isAdminMode: false});
+  adminControl = signal<AdminControl>({} as AdminControl);
 
-  setAdminControl(adminControl: AdminControl) {
+  setAdminControl(adminControl: any) {
     this.adminControl.update((adminControlState) => {
-      adminControlState.isAdminMode = adminControl.isAdminMode;
-      return adminControlState;
+      return {...adminControlState, ...adminControl};
     })
   }
-
-  setIsAdmin(isAdminc: boolean) {
-    this.adminControl.set({isAdminMode: isAdminc});
-  }
-
-  constructor() { }
 }

@@ -59,7 +59,6 @@ export class PlayersDragDropTableComponent {
       }, {} as any) as any
   }
 
-  isAdminMode = computed(() => this.adminControlService.adminControl().isAdminMode);
   toggleShowStatistics() {
     this.showStatistics.set(!this.showStatistics());
   }

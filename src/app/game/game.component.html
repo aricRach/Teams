@@ -1,10 +1,9 @@
 <div class="in-row center gap">
   <h1 >Teams</h1>
-  <button class="action-btn" (click)="isAdminCodeModalVisible.set(true)">Toggle Admin Mode</button>
 </div>
 
 <div class="space-between save-buttons gap">
-  @if(adminControlService.adminControl().isAdminMode) {
+  @if(adminControlService.adminControl().showSaveButtons) {
     <div>
       <button (click)="load()">Load local data</button>
       <button (click)="save()">Save local data </button>
@@ -25,7 +24,7 @@
 </button>
 
 <app-players-drag-drop-table [isLocked]="isMovePlayersLocked()"/>
-@if(adminControlService.adminControl().isAdminMode) {
+@if(adminControlService.adminControl().showAddPlayerForm) {
   <app-add-new-player/>
 }
 
@@ -35,13 +34,6 @@
 @if(isTeamWinModalVisible()) {
   <app-modal [showCloseIcon]="true" [showSubmitButton]="false" [showCloseButton]="false" (close)="isTeamWinModalVisible.set(false)">
     <app-game-details (endGame)="endGame($event)" [originalTeamNames]="originalTeamNames()"></app-game-details>
-  </app-modal>
-}
-
-@if(isAdminCodeModalVisible()) {
-  <app-modal [showCloseButton]="false" (submit)="codeModalSubmitted()"
-             (close)="isAdminCodeModalVisible.set(false)">
-    <input placeholder="code" [(ngModel)]="code">
   </app-modal>
 }
 

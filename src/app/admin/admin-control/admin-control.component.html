@@ -1,0 +1,41 @@
+<h1>Admin Control</h1>
+
+@if(isAllowed()) {
+  <form [formGroup]="adminForm" (ngSubmit)="submitAdminControl()">
+    <label>
+      <input type="checkbox" formControlName="showAddPlayerForm" />
+      Allow Add Player Form
+    </label>
+
+    <label>
+      <input type="checkbox" formControlName="showRating" />
+      Show Rating
+    </label>
+
+    <label>
+      <input type="checkbox" formControlName="showProtectedPages" />
+      Show Protected Pages
+    </label>
+
+    <label>
+      <input type="checkbox" formControlName="showSaveButtons" />
+      Show Save Buttons
+    </label>
+
+    <label>
+      <input type="checkbox" formControlName="showMakeBalanceTeams" />
+      Show "Make Balanced Teams"
+    </label>
+
+    <div class="center">
+      <button class="submit-btn active-btn" type="submit">Save Settings</button>
+    </div>
+  </form>
+} @else {
+  <form [formGroup]="codeForm" (ngSubmit)="submitCode()">
+    <input [class.invalid]="codeForm.invalid && codeForm.dirty" placeholder="admin code" formControlName="code">
+    <div class="center">
+      <button class="submit-btn active-btn">Continue</button>
+    </div>
+  </form>
+}

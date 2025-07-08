@@ -1,12 +1,15 @@
 import {Component, computed, inject} from '@angular/core';
-import {MenuAction, NavigationBarComponent} from 'ui'
+import {MenuAction, ModalsService, NavigationBarComponent} from 'ui'
 import {UserService} from '../user/user.service';
 import {PlayersService} from '../players/players.service';
 import {AdminControlService} from '../user/admin-control.service';
+import {FormsModule} from '@angular/forms';
+import {ModalComponent} from '../../modals/modal/modal.component';
+import {AdminControlComponent} from '../admin/admin-control/admin-control.component';
 
 @Component({
   selector: 'app-header',
-  imports: [NavigationBarComponent],
+  imports: [NavigationBarComponent, FormsModule, ModalComponent],
   providers: [UserService],
   templateUrl: './header.component.html',
   standalone: true,
@@ -16,6 +19,7 @@ export class HeaderComponent {
 
   playersService = inject(PlayersService);
   adminControlService = inject(AdminControlService);
+  modalsService = inject(ModalsService);
 
   title = computed(() => this.playersService.selectedGroup()?.name || 'TeamsRach');
   navItems = computed(() => [
@@ -34,7 +38,7 @@ export class HeaderComponent {
     {
       action: MenuAction.NAVIGATE,
       alias: 'Manage players',
-      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.adminControl().isAdminMode,
+      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.adminControl().showProtectedPages,
       link: '/home/manage-players'
     },
     {
@@ -44,4 +48,15 @@ export class HeaderComponent {
       link: '/home/create-draft-session'
     }
   ])
+
+  openAdminControl() {
+    const dialogRef = this.modalsService.openComponentModal(AdminControlComponent, {
+      width: 500,
+      height: 500,
+    });
+    // @ts-ignore
+    dialogRef.componentInstance.submitted.subscribe(() => {
+      dialogRef.close();
+    });
+  }
 }

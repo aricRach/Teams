@@ -11,7 +11,7 @@ import {Player} from '../models/player.model';
 })
 export class PlayerViewComponent {
 
-  isAdminMode = input.required();
+  showRating = input.required();
   player = input.required<Player>();
   showStatistics = input.required<boolean>();
 
@@ -19,9 +19,9 @@ export class PlayerViewComponent {
   playerView = computed(() => {
     const stats = this.player().statistics[currentDate] ? this.player().statistics[currentDate] : null;
     if(!stats || !this.showStatistics()) {
-      return !this.isAdminMode() ? this.player().name : this.player().name + ' - rating - ' + this.player().rating;
+      return !this.showRating() ? this.player().name : this.player().name + ' - rating - ' + this.player().rating;
     }
-    return !this.isAdminMode() ?
+    return !this.showRating() ?
       `${this.player().name} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} - conceded: ${this.getDisplayValue(stats.goalsConceded)} -games: ${this.getDisplayValue(stats.games)}`
       : `${this.player().name} - rating ${this.player().rating} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} -games: ${this.getDisplayValue(stats.games)}`
   })
