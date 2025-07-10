@@ -3,7 +3,7 @@
 </div>
 
 <div class="space-between save-buttons gap">
-  @if(adminControlService.adminControl().showSaveButtons) {
+  @if(adminControlService.getAdminControl().showSaveButtons) {
     <div>
       <button (click)="load()">Load local data</button>
       <button (click)="save()">Save local data </button>
@@ -24,7 +24,7 @@
 </button>
 
 <app-players-drag-drop-table [isLocked]="isMovePlayersLocked()"/>
-@if(adminControlService.adminControl().showAddPlayerForm) {
+@if(adminControlService.getAdminControl().showAddPlayerForm) {
   <app-add-new-player/>
 }
 

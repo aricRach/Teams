@@ -38,7 +38,7 @@ export class HeaderComponent {
     {
       action: MenuAction.NAVIGATE,
       alias: 'Manage players',
-      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.adminControl().showProtectedPages,
+      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.getAdminControl().showProtectedPages,
       link: '/home/manage-players'
     },
     {
@@ -51,8 +51,8 @@ export class HeaderComponent {
 
   openAdminControl() {
     const dialogRef = this.modalsService.openComponentModal(AdminControlComponent, {
-      width: 500,
-      height: 500,
+      width: 300,
+      height: 400,
     });
     // @ts-ignore
     dialogRef.componentInstance.submitted.subscribe(() => {

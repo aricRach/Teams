@@ -36,7 +36,7 @@ export class AdminControlComponent {
 
   submitCode() {
     if(this.codeForm.get('code')?.value === '2626') {
-      this.adminForm.patchValue(this.adminControlService.adminControl());
+      this.adminForm.patchValue(this.adminControlService.getAdminControl());
       this.isAllowed.set(true);
     } else {
 

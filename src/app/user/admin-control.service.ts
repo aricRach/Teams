@@ -1,4 +1,4 @@
-import {Injectable, signal} from '@angular/core';
+import {computed, Injectable, signal} from '@angular/core';
 
 export interface AdminControl {
   showAddPlayerForm: boolean;
@@ -12,11 +12,17 @@ export interface AdminControl {
 })
 export class AdminControlService {
 
-  adminControl = signal<AdminControl>({} as AdminControl);
+  private adminControl = signal<AdminControl>({} as AdminControl);
+
+  getAdminControl = computed(() => this.adminControl());
 
   setAdminControl(adminControl: any) {
     this.adminControl.update((adminControlState) => {
       return {...adminControlState, ...adminControl};
     })
+  }
+
+  cleanAdminControlState() {
+    this.adminControl.set({} as AdminControl);
   }
 }

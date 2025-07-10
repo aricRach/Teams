@@ -1,6 +1,8 @@
 <div class="in-row space-between">
 <app-navigation-bar [redirectBrandLink]="'/select-group'" [showMenuInSmallScreens]="true" [navItems]="navItems()" [title]="title()"></app-navigation-bar>
-  <button class="button-icon" (click)="openAdminControl()">
-    <img width="38" height="38" src="assets/icons/admin.svg" alt="admin">
-  </button>
+  @if(playersService.isAdmin()) {
+    <button class="button-icon" (click)="openAdminControl()">
+      <img width="38" height="38" src="assets/icons/admin.svg" alt="admin">
+    </button>
+  }
 </div>
