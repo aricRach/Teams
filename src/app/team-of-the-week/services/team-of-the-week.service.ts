@@ -1,4 +1,4 @@
-import {computed, inject, Injectable, resource} from '@angular/core';
+import {computed, inject, Injectable, linkedSignal, resource} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {TeamOfTheWeekApiService} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
@@ -30,7 +30,7 @@ export class TeamOfTheWeekService {
     loader: ({request}) => this.getTeamOfTheWeek(request.date)
   });
 
-  totwData = computed(() => this.totwResource.value());
+  totwData = linkedSignal(() => this.totwResource.value());
 
 
   calculateWeekStates(date: string) {
@@ -55,6 +55,15 @@ export class TeamOfTheWeekService {
         this.spinnerService.setIsLoading(false)
       });
     }
+  }
 
+  reGenerateTeamOfTheWeek(date: string) {
+    this.spinnerService.setIsLoading(true);
+    const weekStates = this.calculateWeekStates(date);
+     this.teamOfTheWeekApiService.generateAiTotw(date, weekStates.players, weekStates.teamSize, true).then(data => {
+       this.totwData.set(data)
+     }).finally(() => {
+      this.spinnerService.setIsLoading(false)
+    });
   }
 }

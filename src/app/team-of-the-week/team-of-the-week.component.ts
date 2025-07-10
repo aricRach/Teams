@@ -50,4 +50,7 @@ export class TeamOfTheWeekComponent {
   totwDescription = computed(() : PlayerPerformance[] => this.teamOfTheWeekService.totwData()?.explanation.sort((a: PlayerPerformance, b: PlayerPerformance) => this.positionOrder[a.position] - this.positionOrder[b.position]))
 
 
+  async reGenerateTotw() {
+   await this.teamOfTheWeekService.reGenerateTeamOfTheWeek(this.teamOfTheWeekService.statisticService.getSelectedDate())
+  }
 }

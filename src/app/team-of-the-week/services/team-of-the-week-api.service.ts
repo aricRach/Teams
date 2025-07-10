@@ -17,20 +17,21 @@ export class TeamOfTheWeekApiService {
   async generateAiTotw(
     date: string,
     players: any[],
-    teamSize: number
+    teamSize: number,
+    createNew?: boolean
   ): Promise<any> {
     const ref = doc(
       this.firestore,
       `groups/${this.playersService.selectedGroup().id}/teamOfTheWeek/${date}`
     );
-
     try {
+    if(!createNew) {
       const snapshot = await getDoc(ref);
       const snapshotData = snapshot.data();
       if (snapshot.exists() && snapshotData && !snapshotData?.['shouldUpdate']) {
         return snapshotData;
       }
-
+    }
       const totwData: any = await firstValueFrom(this.httpClient.post(this.baseUrl, {players, teamSize}));
 
       // Fire and forget
