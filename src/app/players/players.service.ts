@@ -44,9 +44,9 @@ export class PlayersService {
        .pipe(finalize(() => this.spinnerService.setIsLoading(false)));
   }
 
-  setPlayersIntoDataBase(specificTeams?: any) {
+  savePlayers(specificTeams?: any) {
     this.spinnerService.setIsLoading(true);
-    return this.playersApiService.addOrUpdatePlayers(this.selectedGroup().id, this.flattenPlayers(specificTeams)).then(
+    return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(specificTeams)).then(
       () => this.popoutService.addSuccessPopOut('Data was saved successfully.'),
     ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
       () =>  this.spinnerService.setIsLoading(false)
@@ -91,16 +91,31 @@ export class PlayersService {
        )
     }
 
-  async updatePlayer(player: Player, editedPlayer: Player, updateStats: boolean): Promise<void> {
+  async updatePlayerStats(editedPlayer: Player): Promise<void> {
     this.spinnerService.setIsLoading(true);
-
     try {
       await this.playersApiService.updatePlayerStats(
         this.selectedGroup().id,
-        editedPlayer,
-        updateStats
+        editedPlayer.id,
+        editedPlayer.statistics
       );
+      this.updatePlayerSignal(editedPlayer);
+      this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`);
+    } catch {
+      this.popoutService.addErrorPopOut(`Can't save to database. Please try again later or save locally.`);
+    } finally {
+      this.spinnerService.setIsLoading(false);
+    }
+  }
 
+  async updatePlayerDetails(player: Player, editedPlayer: Player): Promise<void> {
+    this.spinnerService.setIsLoading(true);
+
+    try {
+      await this.playersApiService.updatePlayerDetails(
+        this.selectedGroup().id,
+        editedPlayer
+      );
       this.updatePlayerSignal(editedPlayer);
       this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`);
 

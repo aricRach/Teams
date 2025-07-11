@@ -57,7 +57,7 @@ export class EditStatisticsService {
     const formValues = lastStatisticsForm.getRawValue();
     const updatedPlayer = this.managePlayersService.selectedPlayer();
     updatedPlayer.statistics[this.lastDayPlayedStatistics().date] = convertFormValuesToNumbers(formValues);
-    this.playersService.updatePlayer(this.managePlayersService.selectedPlayer(), updatedPlayer, true).then(() => {
+    this.playersService.updatePlayerStats(updatedPlayer).then(() => {
       this.teamOfTheWeekApiService.markTotwDateNotUpdated(this.lastDayPlayedStatistics().date).then()
     });
   }

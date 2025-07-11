@@ -14,8 +14,7 @@ import {
   writeBatch
 } from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
-import {Observable} from 'rxjs';
-import {Player} from './models/player.model';
+import {Observable, switchMap} from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -25,13 +24,24 @@ export class PlayersApiService {
   private firestore = inject(Firestore);
   private auth = inject(Auth);
 
-  constructor() {}
-
-  getAllActivePlayers(groupId: string) {
+  getAllActivePlayers(groupId: string): Observable<any[]> {
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
     const activePlayersQuery = query(playersRef, where('isActive', '!=', false));
+    const players$ = collectionData(activePlayersQuery, { idField: 'id' });
 
-    return collectionData(activePlayersQuery, { idField: "id" }); // Fetch only active players with Firestore ID
+
+    return players$.pipe(
+      switchMap((players: any[]) => {
+        const playersWithStats$ = players.map(async (player) => {
+          const statsRef = collection(this.firestore, `groups/${groupId}/players/${player.id}/statistics`);
+          const statsSnap = await getDocs(statsRef);
+          const statistics: Record<string, any> = {};
+          statsSnap.forEach(doc => statistics[doc.id] = doc.data());
+          return { ...player, statistics };
+        });
+        return Promise.all(playersWithStats$);
+      })
+    )
   }
 
   getAllPlayers(groupId: string) {
@@ -70,14 +80,13 @@ export class PlayersApiService {
     }
   }
 
-  async addOrUpdatePlayers(groupId: string, players: any[]): Promise<boolean> {
+  async savePlayers(groupId: string, players: any[]): Promise<boolean> {
     const user = this.auth.currentUser;
     if (!user) {
       console.error("User not authenticated");
       return false;
     }
 
-    // Check if group exists
     const groupDocRef = doc(this.firestore, `groups/${groupId}`);
     const groupSnap = await getDoc(groupDocRef);
     if (!groupSnap.exists()) {
@@ -89,27 +98,24 @@ export class PlayersApiService {
     const batch = writeBatch(this.firestore);
 
     for (const player of players) {
-      const normalizedPlayerName = player.name.toLowerCase();
+      const { statistics, ...playerData } = player;
+      const normalizedPlayerName = playerData.name.toLowerCase();
       const q = query(playersRef, where("name", "==", normalizedPlayerName));
       const querySnapshot = await getDocs(q);
 
-      let playerDocRef;
-
-      if (!querySnapshot.empty) {
-        // If player exists, get their document reference
-        playerDocRef = doc(this.firestore, `groups/${groupId}/players/${querySnapshot.docs[0].id}`);
-        console.log(`Updating player "${player.name}" in group "${groupId}".`);
-      } else {
-        // If player doesn't exist, create a new document reference
-        playerDocRef = doc(playersRef); // Auto-generated ID
-        console.log(`Adding new player "${player.name}" to group "${groupId}".`);
+      const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${querySnapshot.docs[0].id}`);
+      batch.set(playerDocRef, { ...playerData, name: normalizedPlayerName }, { merge: true });
+      // If there are statistics, write them to the subcollection
+      if (statistics && typeof statistics === 'object') {
+        for (const [date, statData] of Object.entries(statistics)) {
+          const statRef = doc(this.firestore, `${playerDocRef.path}/statistics/${date}`);
+          batch.set(statRef, statData as any, { merge: true });
+        }
       }
-
-      batch.set(playerDocRef, { ...player, name: normalizedPlayerName }, { merge: true });
     }
 
     await batch.commit();
-    console.log("✅ All players added/updated successfully!");
+    console.log("✅ All players and stats added/updated successfully!");
 
     return true;
   }
@@ -126,16 +132,30 @@ export class PlayersApiService {
     return collectionData(q, { idField: "id" });
   }
 
-  async updatePlayerStats(groupId: string, updatedPlayer: any, updateStats: boolean) {
+  async updatePlayerStats(groupId: string, playerId: string, statistics: any) {
+    const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${playerId}`);
+
+    if (!statistics || typeof statistics !== 'object') {
+      throw new Error('Invalid statistics object');
+    }
+
+    const batch = writeBatch(this.firestore);
+
+    for (const [date, statData] of Object.entries(statistics)) {
+      const statRef = doc(this.firestore, `${playerDocRef.path}/statistics/${date}`);
+      batch.set(statRef, statData as any, { merge: true }); // merge to update fields without overwriting
+    }
+
+    return batch.commit();
+  }
+
+  async updatePlayerDetails(groupId: string, updatedPlayer: any) {
     const playerSnapshot = await this.getPlayerSnapshot(groupId, updatedPlayer.id);
 
     if (playerSnapshot.empty) {
       return Promise.reject();
     }
     const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${playerSnapshot.docs[0].id}`);
-    if(updateStats) {
-     return updateDoc(playerDocRef, updatedPlayer);
-    }
     return updateDoc(playerDocRef, {
       rating: updatedPlayer.rating,
       email: updatedPlayer.email || ''

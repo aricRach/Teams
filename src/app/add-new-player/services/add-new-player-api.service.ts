@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {Player} from '../../players/models/player.model';
 import {collection, doc, Firestore, getDoc, getDocs, query, setDoc, where} from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
+import {DuplicatePlayerError} from '../../players/errors/duplicate-player-error';
 
 @Injectable({
   providedIn: 'root'
@@ -28,7 +29,7 @@ export class AddNewPlayerApiService {
     const querySnapshot = await getDocs(q);
 
     if (!querySnapshot.empty) {
-      throw new Error(`Player with name "${player.name}" already exists`);
+      throw new DuplicatePlayerError(player.name);
     }
 
     const newDocRef = doc(playersRef);

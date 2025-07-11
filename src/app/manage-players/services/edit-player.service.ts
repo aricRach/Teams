@@ -16,7 +16,7 @@ export class EditPlayerService {
   editPlayer(playerDetails: FormGroup<any>) {
     const details = playerDetails.getRawValue();
     details.rating = Number(details.rating)
-    this.playersService.updatePlayer(this.managePlayersService.selectedPlayer(), {...this.managePlayersService.selectedPlayer(), ...details}, false).then()
+    this.playersService.updatePlayerDetails(this.managePlayersService.selectedPlayer(), {...this.managePlayersService.selectedPlayer(), ...details}).then()
   }
 
   private buildEditPlayerDetailsFields() {

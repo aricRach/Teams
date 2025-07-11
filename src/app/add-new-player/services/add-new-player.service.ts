@@ -6,7 +6,7 @@ import {SpinnerService} from '../../spinner.service';
 import {PopupsService} from 'ui';
 import {AddNewPlayerApiService} from './add-new-player-api.service';
 import {MembersService} from '../../admin/services/members.service';
-import {firstValueFrom} from 'rxjs';
+import {DuplicatePlayerError} from '../../players/errors/duplicate-player-error';
 
 @Injectable({
   providedIn: 'root'
@@ -35,17 +35,6 @@ export class AddNewPlayerService {
     const {name, rating, email} = this.playerForm.value;
     if (!name?.trim() || !rating) return;
     const normalizedPlayerName = name.trim().toLowerCase();
-
-      const players = await firstValueFrom(this.playersService.getAllPlayers()) as Player[];
-      const isPlayerExist = players.some(
-        (player: Player) => player.name.toLowerCase() === normalizedPlayerName
-      );
-
-      if (isPlayerExist) {
-        this.popoutService.addErrorPopOut(`Player with name "${normalizedPlayerName}" already exists as active/inactive player.`);
-        return;
-      }
-
       await this.saveNewPlayer({
         name: normalizedPlayerName,
         rating,
@@ -65,8 +54,12 @@ export class AddNewPlayerService {
       this.playersService.setTeams(teams);
       this.playerForm.reset();
       await this.membersService.addMember(this.groupId(), newPlayer.email);
-    } catch (error) {
-      this.popoutService.addErrorPopOut(`Failed to add ${newPlayer.name}. Please try again later.`);
+    } catch (error: any) {
+      if (error instanceof DuplicatePlayerError) {
+        this.popoutService.addErrorPopOut(error.message);
+      } else {
+        this.popoutService.addErrorPopOut(`Failed to add ${newPlayer.name}. Please try again later.`);
+      }
     } finally {
       this.spinnerService.setIsLoading(false);
     }

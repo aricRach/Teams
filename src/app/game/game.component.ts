@@ -111,7 +111,7 @@ export class GameComponent {
     // save specific teams that played not good enough if i didnt clicked save global. because it is not saved my players moved from team to another team.
     // it saved only the statistics.
     // this.playersService.setPlayersIntoDataBase({[gameDetails.winner]: {players: winners}, [gameDetails.loser]: {players: losers}})
-    this.playersService.setPlayersIntoDataBase().then(() => {
+    this.playersService.savePlayers().then(() => {
       if(gameDetails.gameStatus === 'decided') {
         this.auditTrailService.addAuditTrail(`winner: ${gameDetails.winner} - loser: ${gameDetails.loser}`)
       } else {
@@ -121,7 +121,7 @@ export class GameComponent {
   }
 
   saveGlobal() {
-    this.playersService.setPlayersIntoDataBase();
+    this.playersService.savePlayers();
   }
 
 }

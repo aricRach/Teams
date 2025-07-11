@@ -190,6 +190,6 @@ export class CreateDraftSessionService {
 
     // Step 5: Save or emit the updated teams
     this.playersService.setTeams(newTeams);
-    this.playersService.setPlayersIntoDataBase().then();
+    this.playersService.savePlayers().then();
   }
 }
