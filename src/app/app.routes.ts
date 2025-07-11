@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import {StatisticsComponent} from './statistics/statistics.component';
+import {StatisticsComponent} from './statistics/statistics/statistics.component';
 import {GameComponent} from './game/game.component';
 import {MainPageComponent} from './main-page/main-page.component';
 import {SelectGroupComponent} from './select-group/select-group.component';
@@ -17,7 +17,8 @@ import {CreateDraftSessionComponent} from './create-draft-session/create-draft-s
 import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
 import {signInPageGuard} from './guards/sign-in-page.guard';
 import {ManagePlayersComponent} from './manage-players/manage-players/manage-players.component';
-import {EditStatisticsComponent} from './manage-players/edit-statistics/edit-statistics.component';
+import {EditPlayerStatisticsComponent} from './manage-players/edit-statistics/edit-player-statistics.component';
+import {EditStatisticsComponent} from './statistics/edit-statistics/edit-statistics.component';
 
 export const routes: Routes = [
   {
@@ -67,6 +68,10 @@ export const routes: Routes = [
           {
             path: 'team-of-the-week',
             component: TeamOfTheWeekComponent
+          },
+          {
+            path: 'edit-statistics',
+            component: EditStatisticsComponent
           }
         ]
       },
@@ -85,8 +90,8 @@ export const routes: Routes = [
             component: EditPlayerComponent,
           },
           {
-            path: 'edit-statistics',
-            component: EditStatisticsComponent
+            path: 'edit-player-statistics',
+            component: EditPlayerStatisticsComponent
           }
         ]
       },

@@ -4,12 +4,12 @@ import {GenericFormComponent} from 'ui';
 import {FormsModule} from '@angular/forms';
 
 @Component({
-  selector: 'app-edit-statistics',
+  selector: 'app-edit-player-statistics',
   imports: [ GenericFormComponent, FormsModule],
-  templateUrl: './edit-statistics.component.html',
-  styleUrl: './edit-statistics.component.scss'
+  templateUrl: './edit-player-statistics.component.html',
+  styleUrl: './edit-player-statistics.component.scss'
 })
-export class EditStatisticsComponent {
+export class EditPlayerStatisticsComponent {
 
   editStatisticsService = inject(EditStatisticsService);
 }
