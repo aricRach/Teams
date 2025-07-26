@@ -14,10 +14,15 @@ export class PlayerViewComponent {
   showRating = input.required();
   player = input.required<Player>();
   showStatistics = input.required<boolean>();
+  dateStatistics = input<string>();
 
+  statistics = computed(() => {
+    const day = this.dateStatistics() || currentDate;
+    return this.player().statistics?.[day];
+  });
 
   playerView = computed(() => {
-    const stats = this.player().statistics[currentDate] ? this.player().statistics[currentDate] : null;
+    const stats = this.statistics();
     if(!stats || !this.showStatistics()) {
       return !this.showRating() ? this.player().name : this.player().name + ' - rating - ' + this.player().rating;
     }

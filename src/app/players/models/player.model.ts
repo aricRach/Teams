@@ -22,3 +22,10 @@ export interface GoalModalEvent {
   team: string;
   player: Player
 }
+
+export enum TeamsOptions {
+  TeamA = 'teamA',
+  TeamB = 'teamB',
+  TeamC = 'teamC',
+  TeamD = 'teamD',
+}

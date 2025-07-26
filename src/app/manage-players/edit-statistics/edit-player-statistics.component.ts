@@ -1,5 +1,5 @@
 import {Component, inject} from '@angular/core';
-import {EditStatisticsService} from '../services/edit-statistics.service';
+import {EditPlayerStatisticsService} from '../services/edit-player-statistics.service';
 import {GenericFormComponent} from 'ui';
 import {FormsModule} from '@angular/forms';
 
@@ -11,5 +11,5 @@ import {FormsModule} from '@angular/forms';
 })
 export class EditPlayerStatisticsComponent {
 
-  editStatisticsService = inject(EditStatisticsService);
+  editStatisticsService = inject(EditPlayerStatisticsService);
 }

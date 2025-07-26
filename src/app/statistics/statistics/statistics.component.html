@@ -10,11 +10,9 @@
 <div class="center gap-10 statistic-links">
   <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="table">Table</a>
   <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="team-of-the-week">Team Of The Week</a>
-  @if(statisticsService.playersService.isAdmin()) {
+  @if(statisticsService.adminControl.getAdminControl().showProtectedPages) {
     <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="edit-statistics">Edit Statistics</a>
   }
 </div>
-
-
 <router-outlet></router-outlet>
 

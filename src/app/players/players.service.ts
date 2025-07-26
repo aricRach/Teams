@@ -6,7 +6,13 @@ import {SpinnerService} from '../spinner.service';
 import {PopupsService} from 'ui';
 import {skeleton} from './consts/teams-skeleton';
 import {MembersService} from '../admin/services/members.service';
+import {DuplicatePlayerError} from './errors/duplicate-player-error';
 
+export interface PlayerStatsUpdate {
+  id: string;
+  date: string;
+  stats: Record<string, any>;
+};
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +28,7 @@ export class PlayersService {
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
   private teams = signal<{[key: string]: { players: Player[] }}>(structuredClone(skeleton));
+  allPlayersLabel = 'allPlayers';
 
    computedTeams = computed(() =>  JSON.parse(JSON.stringify(this.teams()))) // use only in drag-drop-component.
 
@@ -84,7 +91,6 @@ export class PlayersService {
               // @ts-ignore
               teams['allPlayers'].players.push(player);
             }
-
           }
           this.teams.set(teams);
         })
@@ -112,10 +118,7 @@ export class PlayersService {
     this.spinnerService.setIsLoading(true);
 
     try {
-      await this.playersApiService.updatePlayerDetails(
-        this.selectedGroup().id,
-        editedPlayer
-      );
+      await this.playersApiService.updatePlayerDetails(this.selectedGroup().id, editedPlayer, player);
       this.updatePlayerSignal(editedPlayer);
       this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`);
 
@@ -126,9 +129,14 @@ export class PlayersService {
       } else if(!editedPlayer.email && player.email) {
         await this.membersService.removeMember(this.selectedGroup().id, player.email)
       }
-    } catch {
-      this.popoutService.addErrorPopOut(`Can't save to database. Please try again later or save locally.`);
-    } finally {
+    }  catch (error: any) {
+      if (error instanceof DuplicatePlayerError) {
+        this.popoutService.addErrorPopOut(error.message);
+      } else {
+        this.popoutService.addErrorPopOut(`Failed to add ${player.name}. Please try again later.`);
+      }
+    }
+    finally {
       this.spinnerService.setIsLoading(false);
     }
   }
@@ -146,8 +154,7 @@ export class PlayersService {
    return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.id, isActive).then(async () => {
      this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`);
      if(isActive) { // if you want to make the player active you need to fetch again.
-       this.getAllActivePlayers();
-       return;
+       this.getAllActivePlayers().subscribe(() => {});
      }
      if(!isActive) { // if you want to remove delete it from the specific team.
        await this.membersService.removeMember(this.selectedGroup().id, player.email);
@@ -168,6 +175,30 @@ export class PlayersService {
    return this.playersApiService.getDraftSessionsByCreator(this.selectedGroup().id).finally(() => {
      this.spinnerService.setIsLoading(false)
    })
+  }
+
+  async deleteDayStatistics(day: string) {
+     this.spinnerService.setIsLoading(true);
+     return this.playersApiService.deleteDayStatistics(this.selectedGroup().id, day)
+       .catch(() => {
+       this.popoutService.addErrorPopOut('Something went wrong, please try again later')
+     })
+       .finally(()=> {
+       this.spinnerService.setIsLoading(false)
+     })
+  }
+
+  removeDraftSession(sessionId: string) {
+     this.spinnerService.setIsLoading(true);
+     return this.playersApiService.removeDraftSession(this.selectedGroup().id, sessionId).then(() => {
+       this.popoutService.addSuccessPopOut('Draft session deleted successfully')
+     })
+       .catch(() => {
+         this.popoutService.addErrorPopOut('Something went wrong, please try again later')
+       })
+       .finally(() => {
+         this.spinnerService.setIsLoading(false);
+       });
   }
 
   updatePlayerSignal(player: Player) {

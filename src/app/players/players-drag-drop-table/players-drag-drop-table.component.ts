@@ -1,8 +1,8 @@
-import {Component, computed, HostListener, inject, input, linkedSignal, signal,} from '@angular/core';
+import {Component, computed, HostListener, inject, input, linkedSignal, output, signal,} from '@angular/core';
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
-import {GoalModalEvent, Player} from '../models/player.model';
+import {GoalModalEvent, Player, TeamsOptions} from '../models/player.model';
 import {currentDate} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
 import {PlayersService} from '../players.service';
@@ -21,12 +21,18 @@ import {AdminControlService} from '../../user/admin-control.service';
 export class PlayersDragDropTableComponent {
 
   isLocked = input.required();
+  dateStatistics = input<string>();
+  editStatistics = input(false);
+  clonedTeams = input<any>();
+  enableShowRatings = input(false);
+  enableMakeBalancedTeams = input(false);
+  showStatisticsInput = input(false);
 
+  showStatistics = linkedSignal(() => this.showStatisticsInput())
   playersService = inject(PlayersService);
   adminControlService = inject(AdminControlService);
   auditTrailService = inject(AuditTrailService);
 
-  clonedTeams = computed(() => structuredClone(this.playersService.computedTeams()));
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;
   makeBalancedTeamsModalVisible = signal(false);
   getGoalModalDataByPlayer = linkedSignal(() =>
@@ -35,17 +41,18 @@ export class PlayersDragDropTableComponent {
 
   modalPosition = signal({ x: 0, y: 0 });
 
-  showStatistics = signal(false);
   totalRatings = linkedSignal(() => this.setTotalRatingToAllTeams());
 
   readonly teamKeys = computed(() =>
-    Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.playersService.numberOfTeams())
+    Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.playersService.numberOfTeams()) as TeamsOptions[]
   );
 
   readonly dropListRefs = computed(() =>
     [...this.teamKeys(), 'allPlayers']
   );
 
+  dropPlayer = output();
+  updateTeamStatistics = output<{players: Player[], team: TeamsOptions, name: string, number: number}>();
 
   private setTotalRatingToAllTeams() {
     const teams = this.clonedTeams();
@@ -57,10 +64,6 @@ export class PlayersDragDropTableComponent {
         acc[teamName] = this.calculateRating(teamData.players);
         return acc;
       }, {} as any) as any
-  }
-
-  toggleShowStatistics() {
-    this.showStatistics.set(!this.showStatistics());
   }
 
   closeSetGoalModal() {
@@ -85,9 +88,8 @@ export class PlayersDragDropTableComponent {
         // @ts-ignore
         p.team = event.container.id;
       })
-      // this.totalRatings.set(this.setTotalRatingToAllTeams());
     }
-    this.playersService.setTeams(this.clonedTeams())
+    this.dropPlayer.emit(this.clonedTeams());
   }
 
   removeFromList(team: string, index: number) {
@@ -178,10 +180,6 @@ export class PlayersDragDropTableComponent {
     }
 
     this.playersService.setTeams({...teams, ...teamMap});
-    //
-    // return Object.fromEntries(
-    //   Object.entries(teamMap).map(([key, val]) => [key, val.players])
-    // );
   }
 
    setBalancedTeamsModal(confirm : boolean) {
@@ -189,5 +187,9 @@ export class PlayersDragDropTableComponent {
       this.makeBalancedTeams();
     }
     this.makeBalancedTeamsModalVisible.set(false);
+  }
+
+  toggleShowStatistics() {
+    this.showStatistics.set(!this.showStatistics());
   }
 }

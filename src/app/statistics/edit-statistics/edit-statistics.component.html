@@ -1,1 +1,22 @@
-<p>edit-statistics works!</p>
+@if(editStatisticsService.statisticsService.getSelectedDate() !== editStatisticsService.statisticsService.selectAllLabel()) {
+  <div class="delete-btn-container">
+    <button class="active-btn alert-btn" (click)="editStatisticsService.deleteDayStatistics()">Delete</button>
+  </div>
+  <app-players-drag-drop-table
+    [clonedTeams]="editStatisticsService.teams()"
+    [editStatistics]="true"
+    [showStatisticsInput]="true"
+    [enableShowRatings]="false"
+    [enableMakeBalancedTeams]="false"
+    [dateStatistics]="editStatisticsService.statisticsService.getSelectedDate()"
+    [isLocked]="false"
+    (updateTeamStatistics)="editStatisticsService.updateTeamStatistics($event)"
+  ></app-players-drag-drop-table>
+
+} @else {
+  <div class="center">
+    <h5>You must select a date before.</h5>
+  </div>
+}
+
+

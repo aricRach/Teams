@@ -36,6 +36,7 @@ export class GameComponent {
   lockIcon = computed(() =>
     this.isMovePlayersLocked() ? 'assets/icons/unlock.svg' : 'assets/icons/lock.svg')
 
+  teams = computed(() => this.playersService.getTeams())
   save() {
     localStorage.setItem(`teams-${this.playersService.selectedGroup().id}`, JSON.stringify(this.playersService.getTeams()));
   }
@@ -124,4 +125,7 @@ export class GameComponent {
     this.playersService.savePlayers();
   }
 
+  updateTeams(teams: any) {
+    this.playersService.setTeams(teams);
+  }
 }

@@ -31,6 +31,11 @@
       <button class="submit-btn active-btn" type="submit">Save Settings</button>
     </div>
   </form>
+
+  <div class="center">
+    <button (click)="selectAll()">Toggle all</button>
+
+  </div>
 } @else {
   <form [formGroup]="codeForm" (ngSubmit)="submitCode()">
     <input [class.invalid]="codeForm.invalid && codeForm.dirty" placeholder="admin code" formControlName="code">

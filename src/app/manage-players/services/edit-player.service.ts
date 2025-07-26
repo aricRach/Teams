@@ -24,7 +24,7 @@ export class EditPlayerService {
       {
         alias: 'name:',
         name: 'name',
-        disabled: true,
+        disabled: this.shouldDisabledFields(),
         value: this.managePlayersService.selectedPlayer()?.name,
         dynamicComponent: DynamicComponentsTypes.INPUT,
         validators: {},

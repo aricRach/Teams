@@ -15,7 +15,7 @@ export class AdminControlService {
   private adminControl = signal<AdminControl>({} as AdminControl);
 
   getAdminControl = computed(() => this.adminControl());
-
+  isAdminModeEnabled = computed(() => Object.values(this.adminControl()).some(control => control))
   setAdminControl(adminControl: any) {
     this.adminControl.update((adminControlState) => {
       return {...adminControlState, ...adminControl};

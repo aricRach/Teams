@@ -9,7 +9,7 @@ import {TeamOfTheWeekApiService} from '../../team-of-the-week/services/team-of-t
 @Injectable({
   providedIn: 'root'
 })
-export class EditStatisticsService {
+export class EditPlayerStatisticsService {
 
   managePlayersService = inject(ManagePlayersService);
   playersService = inject(PlayersService);

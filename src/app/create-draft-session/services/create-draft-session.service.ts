@@ -1,7 +1,7 @@
-import {computed, inject, Injectable, signal} from '@angular/core';
+import {computed, inject, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {Player} from '../../players/models/player.model';
-import {addDoc, collection, deleteDoc, doc, Firestore, getDoc, getDocs, query, where} from '@angular/fire/firestore';
+import {addDoc, collection, Firestore} from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
 import {environment} from '../../../environments/environment';
 import {skeleton} from '../../players/consts/teams-skeleton';
@@ -138,8 +138,7 @@ export class CreateDraftSessionService {
   }
 
   async removeSession(sessionId: string): Promise<void> {
-    const sessionRef = doc(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamDraftSessions/${sessionId}`);
-    await deleteDoc(sessionRef);
+    await this.playersService.removeDraftSession(sessionId);
     this.router.navigate(['/home']);
   }
 

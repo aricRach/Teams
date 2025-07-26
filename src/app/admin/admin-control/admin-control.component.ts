@@ -13,6 +13,7 @@ export class AdminControlComponent {
   adminControlService = inject(AdminControlService);
 
   isAllowed = signal(false);
+  toggleAll = false;
 
   submitted = output();
 
@@ -38,8 +39,17 @@ export class AdminControlComponent {
     if(this.codeForm.get('code')?.value === '2626') {
       this.adminForm.patchValue(this.adminControlService.getAdminControl());
       this.isAllowed.set(true);
-    } else {
-
     }
+  }
+
+  selectAll() {
+    this.toggleAll = !this.toggleAll;
+    const updatedValues: Record<string, boolean> = {};
+
+    for (const key of Object.keys(this.adminForm.controls)) {
+      updatedValues[key] = this.toggleAll;
+    }
+
+    this.adminForm.patchValue(updatedValues);
   }
 }
