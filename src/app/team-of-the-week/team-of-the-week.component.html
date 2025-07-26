@@ -1,67 +1,73 @@
-@if(teamOfTheWeekService.playersService.isAdmin()) {
+@if(teamOfTheWeekService.shouldShowReGenerate()) {
   <div class="re-generate">
     <button class="active-btn action-btn" (click)="reGenerateTotw()">regenerate</button>
   </div>
 }
 
-<div class="soccer-field">
-  <div class="position-row forwards">
-    @for (player of totwByPosition().striker; track player) {
-      <div class="player-card">
-        <div class="player">
+@if(teamOfTheWeekService.statisticService.getSelectedDate() !== teamOfTheWeekService.statisticService.selectAllLabel()) {
+  <div class="soccer-field">
+    <div class="position-row forwards">
+      @for (player of totwByPosition().striker; track player) {
+        <div class="player-card">
+          <div class="player">
           <span class="player-name">
             {{ player.player }}
           </span>
-          <div class="stats">
-            <span class="stat-circle" title="Rating">⭐ {{ player.rating }}</span>
-            <span class="stat-circle" title="Goals">⚽ {{ player.goals }}</span>
-            <span class="stat-circle" title="Games">🕺 {{ player.wins }}</span>
+            <div class="stats">
+              <span class="stat-circle" title="Rating">⭐ {{ player.rating }}</span>
+              <span class="stat-circle" title="Goals">⚽ {{ player.goals }}</span>
+              <span class="stat-circle" title="Games">🕺 {{ player.wins }}</span>
+            </div>
           </div>
         </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
 
-  <div class="position-row midfielders">
-    @for (player of totwByPosition().midfielder; track player) {
-      <div class="player-card">
-        <div class="player">
+    <div class="position-row midfielders">
+      @for (player of totwByPosition().midfielder; track player) {
+        <div class="player-card">
+          <div class="player">
           <span class="player-name">
             {{ player.player }}
           </span>
-          <div class="stats">
-            <span class="stat-circle" title="Rating">⭐ {{ player.rating }}</span>
-            <span class="stat-circle" title="Goals">⚽ {{ player.goals }}</span>
-            <span class="stat-circle" title="Games">🕺 {{ player.wins }}</span>
+            <div class="stats">
+              <span class="stat-circle" title="Rating">⭐ {{ player.rating }}</span>
+              <span class="stat-circle" title="Goals">⚽ {{ player.goals }}</span>
+              <span class="stat-circle" title="Games">🕺 {{ player.wins }}</span>
+            </div>
           </div>
         </div>
-      </div>
-    }
-  </div>
+      }
+    </div>
 
-  <div class="position-row defenders">
-    @for (player of totwByPosition().defender; track player) {
-      <div class="player-card">
-        <div class="player">
+    <div class="position-row defenders">
+      @for (player of totwByPosition().defender; track player) {
+        <div class="player-card">
+          <div class="player">
           <span class="player-name">
             {{ player.player }}
           </span>
-          <div class="stats">
-            <span class="stat-circle" title="Rating">⭐ {{ player.rating }}</span>
-            <span class="stat-circle" title="Goals">⚽ {{ player.goals }}</span>
-            <span class="stat-circle" title="Games">🕺 {{ player.wins }}</span>
+            <div class="stats">
+              <span class="stat-circle" title="Rating">⭐ {{ player.rating }}</span>
+              <span class="stat-circle" title="Goals">⚽ {{ player.goals }}</span>
+              <span class="stat-circle" title="Games">🕺 {{ player.wins }}</span>
+            </div>
           </div>
         </div>
-      </div>
-    }
+      }
+    </div>
   </div>
-</div>
-
-
-<div class="center">
-  <div>
-@for (player of totwDescription(); track player) {
-  <p> <span class="reason-player-name">{{player.player}}</span> -  {{player.reason}}</p>
+  <div class="center">
+    <div>
+      @for (player of totwDescription(); track player) {
+        <p> <span class="reason-player-name">{{player.player}}</span> -  {{player.reason}}</p>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="center">
+    <h5>You must select a date before.</h5>
+  </div>
 }
-</div>
-</div>
+
+

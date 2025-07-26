@@ -32,6 +32,7 @@ export class TeamOfTheWeekService {
 
   totwData = linkedSignal(() => this.totwResource.value());
 
+  shouldShowReGenerate = computed(() => this.playersService.isAdmin() && this.statisticService.getSelectedDate() !== this.statisticService.selectAllLabel())
 
   calculateWeekStates(date: string) {
     const allPlayers = this.playersService.flattenPlayers();
@@ -41,7 +42,7 @@ export class TeamOfTheWeekService {
       setOfTeams.add(player.team)
         return {name: player.name, team: player.team, totalGoals: dateStats.goals, totalGames: dateStats.games, totalWins: dateStats.wins, totalGoalsConceded: dateStats.goalsConceded}
     })
-    return {players, teamSize:  Math.floor(players.length/setOfTeams.size)}
+    return {players, teamSize:  Math.ceil(players.length/setOfTeams.size)}
   }
 
   getTeamOfTheWeek(date: string) {
