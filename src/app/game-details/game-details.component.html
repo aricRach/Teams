@@ -21,7 +21,7 @@
           <option [value]="team">{{team}}</option>
         }
       </select>
-      <input [class.score-error]="hasScoreError()" [(ngModel)]="wonTeamScore" class="score-input" placeholder="score" type="number">
+      <input min="0" [class.score-error]="hasScoreError()" [(ngModel)]="wonTeamScore" class="score-input" placeholder="score" type="number">
       </div>
     </div>
 
@@ -37,7 +37,7 @@
           <option [value]="team">{{team}}</option>
         }
       </select>
-        <input [class.score-error]="hasScoreError()" [(ngModel)]="loseTeamScore" class="score-input" placeholder="score" type="number">
+        <input min="0" [class.score-error]="hasScoreError()" [(ngModel)]="loseTeamScore" class="score-input" placeholder="score" type="number">
       </div>
     </div>
 

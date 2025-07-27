@@ -1,7 +1,7 @@
 import {inject, linkedSignal} from '@angular/core';
 import {StatisticsService} from './statistics.service';
 import {PlayersService} from '../../players/players.service';
-import {ModalsService} from 'ui';
+import {ModalsService, PopupsService} from 'ui';
 import {Player, TeamsOptions} from '../../players/models/player.model';
 import {EditStatisticsApiService} from './edit-statistics-api.service';
 import {SpinnerService} from '../../spinner.service';
@@ -13,13 +13,13 @@ export class EditStatisticsService {
   spinnerService = inject(SpinnerService);
   playersService = inject(PlayersService);
   modalsService = inject(ModalsService);
+  popupsService = inject(PopupsService);
 
   teams = linkedSignal(() => this.playersService.getTeams())
 
   async deleteDayStatistics() {
     this.modalsService.openConfirmModal({
-      width: 500,
-      description: `Are you sure you want to delete ${this.statisticsService.getSelectedDate()} for all players?`
+      description: `Are you sure you want to <b>delete</b><br> <b>${this.statisticsService.getSelectedDate()}</b> for all players?`
     }).afterClosed().subscribe((res) => {
       if(res) {
         this.statisticsService.deleteAllDayStatistics();
@@ -31,6 +31,7 @@ export class EditStatisticsService {
   async updateTeamStatistics(editTeamEvent: { players: Player[], team: TeamsOptions, name: string; number: number }): Promise<void> {
     this.modalsService.openConfirmModal({
       title: `Edit ${editTeamEvent.team} ${editTeamEvent.name}`,
+      height: 400,
       description: `Are you sure you want to perform this action?<br>All the team players will be affected.<br>${editTeamEvent.players.map(p => `<b>${p.name}</b>`).join('<br>')}`
     }).afterClosed().subscribe(async (res) => {
       if(res) {
@@ -60,7 +61,10 @@ export class EditStatisticsService {
   async updateStatisticsForPlayers(updates: { id: string; team: string, date: string; stats: Record<string, any> }[], team: string): Promise<void> {
     this.spinnerService.setIsLoading(true);
     this.editStatisticsApiService.updateStatisticsForPlayers(this.playersService.selectedGroup().id, updates)
-      .then(() => this.applyStatisticsUpdatesToTeams(updates, team))
+      .then(() => {
+        this.applyStatisticsUpdatesToTeams(updates, team)
+        this.popupsService.addSuccessPopOut(`${team} was updated successfully.`)
+      })
       .finally(() => {
         this.spinnerService.setIsLoading(false);
       })
@@ -90,6 +94,7 @@ export class EditStatisticsService {
     }
     teamToUpdate.players = newTeam;
     this.teams.set({...this.teams(), [team]: teamToUpdate});
+    this.playersService.setTeams({...this.teams(), [team]: teamToUpdate});
   }
 
 }
