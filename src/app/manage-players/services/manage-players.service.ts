@@ -2,9 +2,7 @@ import {computed, inject, Injectable, linkedSignal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {ModalsService} from 'ui';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class ManagePlayersService {
   playersService = inject(PlayersService);
   modalsService = inject(ModalsService);

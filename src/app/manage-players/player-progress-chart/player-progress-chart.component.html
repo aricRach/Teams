@@ -1,0 +1,49 @@
+@if(playerProgressChartService.managePlayersService.selectedPlayer()) {
+  <div class="stat-toggle">
+    <button
+      class="link-btn"
+      [class.active]="playerProgressChartService.statToShow() === 'goals'"
+      (click)="playerProgressChartService.toggleStat('goals')"
+    >
+      Goals
+    </button>
+
+    <button
+      class="link-btn"
+      [class.active]="playerProgressChartService.statToShow() === 'wins'"
+      (click)="playerProgressChartService.toggleStat('wins')"
+    >
+      Wins
+    </button>
+  </div>
+
+  <canvas
+    class="chart-canvas"
+    baseChart
+    [type]="'line'"
+    [data]="playerProgressChartService.lineChartData()"
+    [options]="playerProgressChartService.lineChartOptions()"
+    [legend]="playerProgressChartService.lineChartLegend">
+  </canvas>
+} @else {
+  <div class="center">
+    Please select a player from the list
+  </div>
+}
+
+@if(playerProgressChartService.managePlayersService.selectedPlayer() ) {
+  <label>
+    compare with player
+    <input [(ngModel)]="playerProgressChartService.isCompareMode" (change)="playerProgressChartService.compareModeToggle()" type="checkbox">
+  </label>
+
+  @if(playerProgressChartService.isCompareMode) {
+    <select id="select-player" [(ngModel)]="playerProgressChartService.selectedPlayerOption" (change)="playerProgressChartService.onChangePlayer()">
+      @for(player of playerProgressChartService.compareWithPlayerOptions(); track player.name) {
+        <option>{{player.name}}</option>
+      }
+    </select>
+  }
+}
+
+

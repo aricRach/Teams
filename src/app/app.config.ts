@@ -1,5 +1,6 @@
 import {ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
 import {provideRouter, withComponentInputBinding, withHashLocation} from '@angular/router';
+import '../app/shared/chart.config';
 
 import { routes } from './app.routes';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';

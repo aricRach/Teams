@@ -6,9 +6,7 @@ import {DynamicComponentsTypes, FormField, genericValidators, subInputType} from
 import {PlayersService} from '../../players/players.service';
 import {TeamOfTheWeekApiService} from '../../team-of-the-week/services/team-of-the-week-api.service';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable()
 export class EditPlayerStatisticsService {
 
   managePlayersService = inject(ManagePlayersService);

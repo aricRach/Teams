@@ -6,11 +6,10 @@ import {FormsModule} from '@angular/forms';
 @Component({
   selector: 'app-manage-players',
   imports: [FormsModule, RouterModule],
+  providers: [ManagePlayersService],
   templateUrl: './manage-players.component.html',
   styleUrl: './manage-players.component.scss'
 })
 export class ManagePlayersComponent {
-
   managePlayersService = inject(ManagePlayersService);
-
 }

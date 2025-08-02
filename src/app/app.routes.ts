@@ -17,8 +17,8 @@ import {CreateDraftSessionComponent} from './create-draft-session/create-draft-s
 import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
 import {signInPageGuard} from './guards/sign-in-page.guard';
 import {ManagePlayersComponent} from './manage-players/manage-players/manage-players.component';
-import {EditPlayerStatisticsComponent} from './manage-players/edit-statistics/edit-player-statistics.component';
 import {EditStatisticsComponent} from './statistics/edit-statistics/edit-statistics.component';
+import {PlayerProgressChartComponent} from './manage-players/player-progress-chart/player-progress-chart.component';
 
 export const routes: Routes = [
   {
@@ -91,7 +91,14 @@ export const routes: Routes = [
           },
           {
             path: 'edit-player-statistics',
-            component: EditPlayerStatisticsComponent
+            loadComponent: () =>
+              import('./manage-players/edit-statistics/edit-player-statistics.component').then(
+                (m) => m.EditPlayerStatisticsComponent
+              ),
+          },
+          {
+            path: 'player-progress',
+            component: PlayerProgressChartComponent
           }
         ]
       },
