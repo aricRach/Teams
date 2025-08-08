@@ -19,6 +19,9 @@ import {signInPageGuard} from './guards/sign-in-page.guard';
 import {ManagePlayersComponent} from './manage-players/manage-players/manage-players.component';
 import {EditStatisticsComponent} from './statistics/edit-statistics/edit-statistics.component';
 import {PlayerProgressChartComponent} from './manage-players/player-progress-chart/player-progress-chart.component';
+import {FantasyDraftComponent} from './fantasy/fantasy-draft/fantasy-draft.component';
+import {FantasyAnalyticsComponent} from './fantasy/fantasy-analytics/fantasy-analytics.component';
+import {draftMetaResolver} from './fantasy/resolvers/draft-meta.resolver';
 
 export const routes: Routes = [
   {
@@ -109,6 +112,27 @@ export const routes: Routes = [
         resolve: {
           existingSession: getDraftSessionsByOwnerResolver
         },
+      },
+      {
+        path: 'fantasy',
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'draft'
+          },
+          {
+            path: 'draft',
+            component: FantasyDraftComponent,
+            resolve: {
+              draftMeta: draftMetaResolver
+            }
+          },
+          {
+            path: 'analytics',
+            component: FantasyAnalyticsComponent
+          }
+        ]
       },
       // {
       //   path: 'rate-players',

@@ -1,0 +1,17 @@
+<div class="center gap">
+  <h2>Fantasy Analytics</h2>
+  <select (change)="fantasyAnalyticsService.setSelectedDate($event)">
+    @for(date of fantasyAnalyticsService.allUniqueDates(); track date) {
+      <option [value]="date">{{date}}</option>
+    }
+  </select>
+</div>
+
+<app-grid
+  [dataRows]="fantasyAnalyticsService.dataRows()"
+  [columns]="fantasyAnalyticsService.columns()"
+  [config]="fantasyAnalyticsService.config()"
+  [showPaginator]="false"
+  [actions]="[]"
+  [changeToListInSmallScreens]="false"
+/>

@@ -46,6 +46,12 @@ export class HeaderComponent {
       alias: 'create draft',
       show: this.playersService.isAdmin(),
       link: '/home/create-draft-session'
+    },
+    {
+      action: MenuAction.NAVIGATE,
+      alias: 'fantasy',
+      show: true,
+      link: '/home/fantasy'
     }
   ])
 

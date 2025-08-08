@@ -21,7 +21,6 @@ export class PlayerProgressChartService {
         x: {
           type: 'time',
           time: {
-            unit: 'day',
             tooltipFormat: 'dd-MM-yyyy',
             displayFormats: {
               day: 'MMM d',
@@ -32,10 +31,14 @@ export class PlayerProgressChartService {
             autoSkip: true,
             maxRotation: 45,
             minRotation: 0,
+            source: 'data',
           },
         },
         y: {
           beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
         },
       },
       plugins: {

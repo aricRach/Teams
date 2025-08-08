@@ -1,0 +1,42 @@
+
+<h2>Pick Your Fantasy Team</h2>
+
+<div class="soccer-field">
+  @for (player of fantasyDraftService.fantasySlots(); let i = $index; track player?.name) {
+    <div
+      class="slot column-center"
+      cdkDropList
+      [cdkDropListData]="[player]"
+      [cdkDropListConnectedTo]="['playerPool']"
+      [id]="'slot-' + i"
+      (cdkDropListDropped)="fantasyDraftService.onDropToSlot($event, i)"
+    >
+      @if (player) {
+        <button (click)="fantasyDraftService.setCaptain(player.id)" [disabled]="fantasyDraftService.captain() === player.id"
+                [class.selected-captain]="fantasyDraftService.captain() === player.id">C</button>
+        <div class="player-card selected" cdkDrag [cdkDragData]="player">
+          {{ player.name }}
+        </div>
+      } @else {
+        <div class="empty-slot">Drop here</div>
+      }
+    </div>
+  }
+</div>
+
+<div
+  cdkDropList
+  id="playerPool"
+  [cdkDropListData]="fantasyDraftService.allPoolPlayers()"
+  [cdkDropListConnectedTo]="fantasyDraftService.slotIds()"
+  (cdkDropListDropped)="fantasyDraftService.onDropToPool($event)"
+  class="player-pool"
+>
+  @for (player of fantasyDraftService.allPoolPlayers(); track player.id) {
+    <div class="player-card" cdkDrag [cdkDragData]="player">
+      {{ player.name }}
+    </div>
+  }
+</div>
+
+<button class="active-btn submit-btn" (click)="fantasyDraftService.save()" [disabled]="!fantasyDraftService.canSave()">Save Picks</button>
