@@ -1,0 +1,14 @@
+<div class="center">
+  <h1>Fantasy</h1>
+</div>
+<div class="center gap-10 statistic-links">
+  @if(fantasyMeta()?.isActive) {
+    <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="draft" [queryParams]="{reload: reloadParam()}">Draft</a>
+  }
+  <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="analytics" [queryParams]="{reload: reloadParam()}">Analytics</a>
+  @if(fantasyService.isAdmin()) {
+    <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="manage-fantasy-meta" [queryParams]="{reload: reloadParam()}">Manage fantasy</a>
+  }
+</div>
+
+<router-outlet></router-outlet>

@@ -50,7 +50,7 @@ export class GameComponent {
   }
 
 
-  endGame(gameDetails: GameDetails) {
+  async endGame(gameDetails: GameDetails) {
     const teams = this.playersService.getTeams();
     // @ts-ignore
     const winners = teams[gameDetails.winner].players.map((player: Player) => {
@@ -103,9 +103,9 @@ export class GameComponent {
     this.playersService.setTeams({
       ...teams,
       // @ts-ignore
-      [gameDetails.winner]: { ...teams[gameDetails.winner], players: winners },
+      [gameDetails.winner]: {...teams[gameDetails.winner], players: winners},
       // @ts-ignore
-      [gameDetails.loser]: { ...teams[gameDetails.loser], players: losers },
+      [gameDetails.loser]: {...teams[gameDetails.loser], players: losers},
     });
 
     this.isTeamWinModalVisible.set(false);
@@ -113,12 +113,14 @@ export class GameComponent {
     // it saved only the statistics.
     // this.playersService.setPlayersIntoDataBase({[gameDetails.winner]: {players: winners}, [gameDetails.loser]: {players: losers}})
     this.playersService.savePlayers().then(() => {
-      if(gameDetails.gameStatus === 'decided') {
+      if (gameDetails.gameStatus === 'decided') {
         this.auditTrailService.addAuditTrail(`winner: ${gameDetails.winner} - loser: ${gameDetails.loser}`)
       } else {
         this.auditTrailService.addAuditTrail(`draw: ${gameDetails.winner} - ${gameDetails.loser}`)
       }
     });
+
+    await this.playersService.setFantasyMetaIsActive(false);
   }
 
   saveGlobal() {

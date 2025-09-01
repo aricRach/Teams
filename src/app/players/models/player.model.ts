@@ -6,15 +6,17 @@ export interface Player {
   isActive?: boolean;
   email?: string;
   statistics: {
-    [key: string]: { // `key` is used to represent date strings (e.g., 'dd-mm-yyyy')
-      goals: number;
-      wins: number;
-      loses: number;
-      draws: number;
-      games: number;
-      goalsConceded: number;
-    };
+    [key: string]: Statistics
   };
+}
+
+export interface Statistics {
+  goals: number;
+  wins: number;
+  loses: number;
+  draws: number;
+  games: number;
+  goalsConceded: number;
 }
 
 

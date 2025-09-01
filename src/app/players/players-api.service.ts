@@ -225,9 +225,18 @@ export class PlayersApiService {
 
   async removeDraftSession(groupId: string, sessionId: string) {
     const sessionRef = doc(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}`);
-    const messagesRef = doc(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}/messages`);
-    await deleteDoc(messagesRef);
+    const messagesCollectionRef = collection(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}/messages`);
+
+    const messagesSnapshot = await getDocs(messagesCollectionRef);
+    const deletePromises = messagesSnapshot.docs.map((msgDoc) => deleteDoc(msgDoc.ref));
+    await Promise.all(deletePromises);
+
     return await deleteDoc(sessionRef);
+  }
+
+  async setFantasyMetaIsActive(groupId: string, isActive: boolean) {
+    const metaRef = doc(this.firestore, `groups/${groupId}/fantasyDrafts/meta`);
+    await updateDoc(metaRef, { isActive });
   }
 }
 

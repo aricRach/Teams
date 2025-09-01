@@ -1,7 +1,9 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, input, OnInit} from '@angular/core';
 import {FantasyAnalyticsService} from '../services/fantasy-analytics.service';
 import {JsonPipe} from '@angular/common';
 import {GridComponent} from 'ui';
+import {FantasyData, FantasyMeta} from '../services/fantasy-api.service';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-fantasy-analytics',
@@ -10,7 +12,22 @@ import {GridComponent} from 'ui';
   templateUrl: './fantasy-analytics.component.html',
   styleUrl: './fantasy-analytics.component.scss'
 })
-export class FantasyAnalyticsComponent {
+export class FantasyAnalyticsComponent implements OnInit {
 
   fantasyAnalyticsService = inject(FantasyAnalyticsService);
+  fantasyAllUsersPicks = input();
+
+  private route = inject(ActivatedRoute);
+
+  ngOnInit(): void {
+    const allUsersPicks = this.fantasyAllUsersPicks();
+    if(allUsersPicks) {
+      this.fantasyAnalyticsService.setAllFantasyDates(allUsersPicks as FantasyData);
+      this.fantasyAnalyticsService.allFantasyData.set(allUsersPicks as FantasyData);
+    }
+    const meta = this.route.parent?.snapshot.data['fantasyMeta'];
+    if(meta) {
+      this.fantasyAnalyticsService.setMetaData(meta as FantasyMeta);
+    }
+  }
 }

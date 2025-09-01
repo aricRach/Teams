@@ -1,5 +1,5 @@
 <div class="center gap">
-  <h2>Fantasy Analytics</h2>
+  <h4>Fantasy Analytics</h4>
   <select (change)="fantasyAnalyticsService.setSelectedDate($event)">
     @for(date of fantasyAnalyticsService.allUniqueDates(); track date) {
       <option [value]="date">{{date}}</option>

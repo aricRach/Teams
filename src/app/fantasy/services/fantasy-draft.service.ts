@@ -8,12 +8,6 @@ import {SpinnerService} from '../../spinner.service';
 import {PopupsService} from 'ui';
 import {Router} from '@angular/router';
 
-//todo: create a page to set the meta of the fantasy
-// todo: add number of picks to meta V
-// todo: select captain V
-// todo: strict typing.
-// todo: finish analytics table, route,
-// todo: use the isActive meta property, lock the draft when first game has started. V
 @Injectable()
 export class FantasyDraftService {
 
@@ -26,7 +20,7 @@ export class FantasyDraftService {
 
   draftMetaData = signal<FantasyMeta>({} as FantasyMeta);
   captain = signal('');
-  allPlayers = computed(() => this.playersService.flattenPlayers(this.playersService.getTeams()))
+  allPlayers = computed(() => this.playersService.flattenPlayers())
 
   allPoolPlayers = linkedSignal(() => {
     const fantasySlotIds = this.fantasySlots().map(p => p?.id).filter(Boolean)
@@ -49,7 +43,6 @@ export class FantasyDraftService {
 
   async getUserPicks(date: string) {
     const uid = this.auth.currentUser?.uid || '';
-
     const picks = await this.fantasyApiService.getUserFantasyPicksByDate(
       this.playersService.selectedGroup().id,
       date,
@@ -103,7 +96,7 @@ export class FantasyDraftService {
       this.popupsService.addSuccessPopOut('fantasy draft saved successfully.');
     } catch (e) {
       this.spinnerService.setIsLoading(false);
-      this.popupsService.addSuccessPopOut('can\'t save fantasy draft please try again later.');
+      this.popupsService.addErrorPopOut('can\'t save fantasy draft please try again later.');
     }
   }
 
@@ -112,10 +105,6 @@ export class FantasyDraftService {
   }
 
   setMetaData(draftMeta: FantasyMeta) {
-    if(!draftMeta.isActive) {
-      this.router.navigate(['home', 'fantasy', 'analytics']);
-    } else {
       this.draftMetaData.set(draftMeta);
-    }
   }
 }

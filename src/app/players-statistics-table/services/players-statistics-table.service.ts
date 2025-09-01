@@ -94,10 +94,10 @@ export class PlayersStatisticsTableService {
         }
         return hasPlayed
           ? {
-            name: {value: player.name}, //
-            goals: {value: goals},
-            wins: {value: wins},
-            games: {value: games},
+            name: {value: player.name},
+            goals: {value: goals || 0},
+            wins: {value: wins || 0},
+            games: {value: games || 0},
           }
           : null;
       })

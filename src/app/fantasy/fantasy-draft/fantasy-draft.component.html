@@ -1,8 +1,8 @@
 
-<h2>Pick Your Fantasy Team</h2>
+<h4>Pick Your Fantasy Team</h4>
 
 <div class="soccer-field">
-  @for (player of fantasyDraftService.fantasySlots(); let i = $index; track player?.name) {
+  @for (player of fantasyDraftService.fantasySlots(); let i = $index; track player?.name || i) {
     <div
       class="slot column-center"
       cdkDropList

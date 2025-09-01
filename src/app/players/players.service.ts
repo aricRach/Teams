@@ -53,20 +53,20 @@ export class PlayersService {
 
   savePlayers(specificTeams?: any) {
     this.spinnerService.setIsLoading(true);
-    return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(specificTeams)).then(
+    return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, specificTeams)).then(
       () => this.popoutService.addSuccessPopOut('Data was saved successfully.'),
     ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
       () =>  this.spinnerService.setIsLoading(false)
     );
   }
 
-  flattenPlayers(specificTeams?: any): Player[] {
+  flattenPlayers(showOnlyActive = true, specificTeams?: any): Player[] {
     const playersArray: Player[] = [];
     const teams = {...specificTeams || this.teams()}
     Object.keys(teams).forEach(team => {
       if (teams[team].players && Array.isArray(teams[team].players)) {
         teams[team].players
-          .filter((p: Player) => p.isActive)
+          .filter((p: Player) => showOnlyActive ? p.isActive : true)
           .forEach((player: Player) => {
             playersArray.push({
               ...JSON.parse(JSON.stringify(player)),
@@ -199,6 +199,13 @@ export class PlayersService {
        .finally(() => {
          this.spinnerService.setIsLoading(false);
        });
+  }
+
+  async setFantasyMetaIsActive(isActive: boolean) {
+    this.spinnerService.setIsLoading(true);
+      return await this.playersApiService.setFantasyMetaIsActive(this.selectedGroup().id, isActive).finally(() => {
+        this.spinnerService.setIsLoading(false);
+      });
   }
 
   updatePlayerSignal(player: Player) {

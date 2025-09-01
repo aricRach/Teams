@@ -1,22 +1,21 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
-import {FantasyApiService, FantasyData} from './fantasy-api.service';
+import {FantasyData, FantasyMeta} from './fantasy-api.service';
 import {SpinnerService} from '../../spinner.service';
+import {Player, Statistics} from '../../players/models/player.model';
 
 @Injectable()
 export class FantasyAnalyticsService {
 
   playersService = inject(PlayersService);
   spinnerService = inject(SpinnerService);
-  fantasyApiService = inject(FantasyApiService);
 
   allUniqueDates = signal([] as string[]);
   selectAllLabel = signal('Select All');
   selectedDate = signal(this.selectAllLabel());
-  allFantasyData = signal<any>({});
-  constructor() {
-    this.getAllFantasyDates();
-  }
+  allFantasyData = signal<FantasyData>({});
+  allPlayers = computed(() => this.playersService.flattenPlayers(false));
+  fantasyMetaData = signal({} as FantasyMeta);
 
   columns = signal([
     { alias: 'name', property: 'name', isFilterDisabled: false, isSortDisabled: false},
@@ -25,7 +24,7 @@ export class FantasyAnalyticsService {
   ])
 
   dataRows = computed(() => {
-      return this.tableData().map((fantasyData: any) => {
+      return this.tableData().map((fantasyData) => {
         return {
           name: {value: fantasyData.name},
           points: {value: fantasyData.points},
@@ -37,62 +36,148 @@ export class FantasyAnalyticsService {
     numberOfColumns: 3
   })
 
-  tableData = computed(() => {
-    const date = this.selectedDate();
-    if(date === 'Select All') return []
-    const allActivePlayersInDateMap = new Map(
-      this.playersService.flattenPlayers(this.playersService.getTeams())
-        .filter((p) => !!p.statistics[date]).map(player => {
-        const stats = player.statistics[date];
-        let points = stats.goals * 3 + stats.wins * 2;
-        if (stats.goalsConceded < 5) points += 3;
-        return [player.id, { playerName: player.name, points }];
-      })
-    );
-
-    return this.allFantasyData()[this.selectedDate()].userPicks.map((userPicks: {
-      captain: string,
-      playerIds: string[],
-      userName: string
-    }) => {
-      let points = 0;
-      const pickDescriptions: string[] = [];
-
-      userPicks.playerIds.forEach((id) => {
-        const fantasyPlayer = allActivePlayersInDateMap.get(id);
-        if (id !== userPicks.captain) {
-          points += allActivePlayersInDateMap.get(id)?.points || 0;
-          if (fantasyPlayer) {
-            pickDescriptions.push(`${fantasyPlayer.playerName}->${fantasyPlayer.points}`);
-          }
-        } else {
-          points = points + (allActivePlayersInDateMap.get(id)?.points || 0) * 2;
-          if (fantasyPlayer) {
-            pickDescriptions.push(`${fantasyPlayer.playerName}(C)->${(fantasyPlayer.points * 2)}`);
-          }
-        }
-      })
-      return {name: userPicks.userName, points, description: pickDescriptions.join(', ')};
-    })
-  })
-
-  getAllFantasyDates() {
-      this.spinnerService.setIsLoading(true);
-      this.fantasyApiService.getAllFantasyDataWithUserPicks(this.playersService.selectedGroup().id).then((fantasyData) => {
-        console.log(fantasyData)
-        // @ts-ignore
-        this.setAllFantasyDates(fantasyData);
-        this.allFantasyData.set(fantasyData);
-      })
-        .finally(() => this.spinnerService.setIsLoading(false))
-
+   calculatePoints(stats: { goals: number; wins: number; goalsConceded: number }): number {
+    let points = (stats.goals || 0) * 3 + (stats.wins || 0) * 2;
+    if (stats.goalsConceded < 5) points += 3;
+    return points;
   }
 
-  setAllFantasyDates(fantasyData: FantasyData[]) {
+// Build a lookup map of (playerId_date) -> { playerName, points, date }
+   buildAllPlayersMap(allPlayers: Player[]): Map<string, { playerName: string; points: number; date: string }> {
+    return new Map(
+      allPlayers.flatMap((p) =>
+        Object.entries(p.statistics).filter(([date, stats]: [string, Statistics]) => stats.games > 0).map(([date, stats]: [string, Statistics]) => {
+          if(p.id === 'aShv8yoBw4mIHGBhBoDA' && date === "17-07-2025") {
+            debugger;
+          }
+          return [p.id + '_' + date, { playerName: p.name, points: this.calculatePoints(stats), date }];
+        })
+      )
+    );
+  }
+
+  processUserPicks(
+    userPicks: { captain: string; playerIds: string[]; userName: string },
+    date: string,
+    playersMap: Map<string, { playerName: string; points: number; date: string }>,
+    allDatesMode = false
+  ): { points: number; descriptions: string[]; rawPlayerPoints?: Map<string, number> } {
+    let points = 0;
+    const descriptions: string[] = [];
+    const rawPlayerPoints = new Map<string, number>();
+
+    userPicks.playerIds.slice(0, 5).forEach((id) => {
+      const fantasyPlayer = playersMap.get(id + "_" + date);
+      if (!fantasyPlayer) return;
+
+      rawPlayerPoints.set(id, (rawPlayerPoints.get(id) || 0) + fantasyPlayer.points); //always the base points (ignore captain)
+
+      debugger
+      if (id === userPicks.captain) {
+        points += fantasyPlayer.points * 2;
+        descriptions.push(`${fantasyPlayer.playerName}(C)->${fantasyPlayer.points * 2}`);
+      } else {
+        points += fantasyPlayer.points;
+        descriptions.push(`${fantasyPlayer.playerName}->${fantasyPlayer.points}`);
+      }
+    });
+
+    return allDatesMode
+      ? { points, descriptions, rawPlayerPoints }
+      : { points, descriptions };
+  }
+
+
+  aggregateAllDates(
+    allFantasy: FantasyData,
+    allPlayers: Player[]
+  ): { name: string; points: number; description: string }[] {
+    const fantasyPlayersPointsMap = this.buildAllPlayersMap(allPlayers);
+    console.log(fantasyPlayersPointsMap)
+    const userTotals = new Map<
+      string,
+      {
+        points: number;
+        playerTotals: Map<string, number>;
+        userName: string;
+      }
+    >();
+
+    Object.entries(allFantasy).forEach(([date, fantasy]) => {
+      fantasy.userPicks.forEach((userPicks) => {
+        const { points, rawPlayerPoints } = this.processUserPicks(
+          userPicks,
+          date,
+          fantasyPlayersPointsMap,
+          true
+        );
+
+        if (!userTotals.has(userPicks.userId)) {
+          userTotals.set(userPicks.userId, {
+            points: 0,
+            playerTotals: new Map(),
+            userName: userPicks.userName,
+          });
+        }
+
+        const entry = userTotals.get(userPicks.userId)!;
+        entry.points += points;
+
+        // merge raw contributions by player id.
+        rawPlayerPoints?.forEach((points, id) => {
+          entry.playerTotals.set(id, (entry.playerTotals.get(id) || 0) + points);
+        });
+      });
+    });
+
+    return Array.from(userTotals.values()).map(({ points, playerTotals, userName }) => {
+      // get top 2 players by raw contribution
+      const topPlayers = Array.from(playerTotals.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([id, pts]) => {
+          const playerName = allPlayers.find((p) => p.id === id)?.name || id;
+          return `${playerName}->${pts}`;
+        });
+
+      return {
+        name: userName,
+        points,
+        description: `Top two picks: (regardless captain):  ` + topPlayers.join(", "),
+      };
+    });
+  }
+
+  tableData = computed(() => {
+    const date = this.selectedDate();
+
+    if (date === 'Select All') {
+      return this.aggregateAllDates(this.allFantasyData(), this.allPlayers());
+    }
+    const fantasyPlayersPointsMap = new Map(
+      this.allPlayers()
+        .filter((p) => !!p.statistics[date])
+        .map((player) => [
+          player.id + '_' + date,
+          { playerName: player.name, points: this.calculatePoints(player.statistics[date]), date }
+        ])
+    );
+    return this.allFantasyData()[date].userPicks.map((userPicks) => {
+      const { points, descriptions } = this.processUserPicks(userPicks, date, fantasyPlayersPointsMap, false);
+
+      return {
+        name: userPicks.userName,
+        points,
+        description: descriptions.join(', ')
+      };
+    });
+  });
+
+  setAllFantasyDates(fantasyData: FantasyData) {
     const fantasyDates = new Set(Object.keys(fantasyData).filter((key) => key !== 'meta'));
     this.allUniqueDates.set(
       [this.selectAllLabel(), ...Array.from(new Set(
-        this.playersService.flattenPlayers()
+        this.allPlayers()
           .flatMap(player =>
             Object.entries(player.statistics)
               .filter(([_, stats]) => stats.games > 0)
@@ -108,5 +193,9 @@ export class FantasyAnalyticsService {
   setSelectedDate(event: Event) {
     const date = (event.target as HTMLSelectElement).value;
     this.selectedDate.set(date);
+  }
+
+  setMetaData(metaData: FantasyMeta) {
+    this.fantasyMetaData.set(metaData)
   }
 }

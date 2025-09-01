@@ -22,6 +22,9 @@ import {PlayerProgressChartComponent} from './manage-players/player-progress-cha
 import {FantasyDraftComponent} from './fantasy/fantasy-draft/fantasy-draft.component';
 import {FantasyAnalyticsComponent} from './fantasy/fantasy-analytics/fantasy-analytics.component';
 import {draftMetaResolver} from './fantasy/resolvers/draft-meta.resolver';
+import {ManageFantasyMetaComponent} from './fantasy/manage-fantasy-meta/manage-fantasy-meta.component';
+import {FantasyComponent} from './fantasy/fantasy/fantasy.component';
+import {fantasyAllUsersPicksResolver} from './fantasy/resolvers/fantasy-all-users-picks.resolver';
 
 export const routes: Routes = [
   {
@@ -115,22 +118,32 @@ export const routes: Routes = [
       },
       {
         path: 'fantasy',
+        component: FantasyComponent,
+        resolve: {
+          fantasyMeta: draftMetaResolver
+        },
+        runGuardsAndResolvers: 'pathParamsOrQueryParamsChange',
         children: [
           {
             path: '',
             pathMatch: 'full',
-            redirectTo: 'draft'
+            redirectTo: 'analytics'
           },
           {
             path: 'draft',
             component: FantasyDraftComponent,
-            resolve: {
-              draftMeta: draftMetaResolver
-            }
           },
           {
             path: 'analytics',
-            component: FantasyAnalyticsComponent
+            component: FantasyAnalyticsComponent,
+            resolve: {
+              fantasyAllUsersPicks: fantasyAllUsersPicksResolver
+            }
+          },
+          {
+            path: 'manage-fantasy-meta',
+            component: ManageFantasyMetaComponent,
+            canActivate: [groupAdminGuard]
           }
         ]
       },

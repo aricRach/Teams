@@ -17,7 +17,7 @@ export class ManagePlayersService {
   });
 
   allPlayersArray = computed(() => {
-    return [...this.playersService.flattenPlayers(this.playersService.computedTeams())]
+    return [...this.playersService.flattenPlayers()]
   });
 
   onChangePlayer() {

@@ -155,7 +155,7 @@ export class PlayersDragDropTableComponent {
     const numberOfTeams = this.playersService.numberOfTeams();
 
     const teamEntries = Object.entries(teams).slice(1, numberOfTeams + 1); // all active teams except "allPlayers"
-    const players = this.playersService.flattenPlayers(Object.fromEntries(teamEntries));
+    const players = this.playersService.flattenPlayers(true, Object.fromEntries(teamEntries));
 
     const shuffledPlayers = shuffleArray(players);
     shuffledPlayers.sort((a, b) => b.rating - a.rating);

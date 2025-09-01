@@ -54,7 +54,7 @@ export class PlayerProgressChartService {
   isCompareMode = false;
 
   compareWithPlayerOptions = computed(() => {
-    return [...this.playersService.flattenPlayers(this.playersService.computedTeams()).filter((p: Player) => p.name !== this.managePlayersService.selectedPlayer()?.name)];
+    return [...this.playersService.flattenPlayers().filter((p: Player) => p.name !== this.managePlayersService.selectedPlayer()?.name)];
   });
   compareWithPlayer = linkedSignal<any>(() => {
     debugger

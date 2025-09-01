@@ -1,0 +1,14 @@
+ ::ng-deep {
+  .mat-calendar {
+    border: 1px solid !important;
+    top: -8px !important;
+    position: relative !important;
+    background-color: aliceblue !important;
+  }
+
+  .mat-calendar-body-selected {
+    color: red !important;
+    border: 1px solid !important;
+    background-color: darkslateblue !important;
+  }
+}

@@ -1,11 +1,13 @@
 import {inject, Injectable} from '@angular/core';
 import {collection, doc, Firestore, getDoc, getDocs, setDoc} from '@angular/fire/firestore';
 
-interface FantasyPick {
+export interface FantasyPick {
   playerIds: string[];
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: string;
+  updatedAt?: string;
   captain: string;
+  userId: string;
+  userName: string;
 }
 
 export interface FantasyMeta {
@@ -16,7 +18,7 @@ export interface FantasyMeta {
 }
 
 export interface FantasyData {
-  [date: string] : {userPicks: FantasyPick}
+  [date: string] : {userPicks: FantasyPick[]}
 }
 @Injectable({
   providedIn: 'root'
@@ -30,7 +32,6 @@ export class FantasyApiService {
     dateId: string,
     userId: string
   ): Promise<FantasyPick | null> {
-    debugger
     const ref = doc(
       this.firestore,
       `groups/${groupId}/fantasyDrafts/${dateId}/userPicks/${userId}`
@@ -47,7 +48,7 @@ export class FantasyApiService {
     return snap.docs.map(doc => doc.data() as FantasyData);
   }
 
-  async getAllFantasyDataWithUserPicks(groupId: string): Promise<Record<string, any>> {
+  async getAllFantasyDataWithUserPicks(groupId: string): Promise<FantasyData> {
     const fantasyDraftsRef = collection(this.firestore, `groups/${groupId}/fantasyDrafts`);
     const fantasyDraftsSnap = await getDocs(fantasyDraftsRef);
 

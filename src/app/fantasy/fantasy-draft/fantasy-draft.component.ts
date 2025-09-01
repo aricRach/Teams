@@ -1,9 +1,10 @@
-import {Component, inject, input, OnInit} from '@angular/core';
+import {Component, inject, OnInit} from '@angular/core';
 import {FantasyDraftService} from '../services/fantasy-draft.service';
 import {PlayersService} from '../../players/players.service';
 import {CommonModule} from '@angular/common';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {FantasyMeta} from '../services/fantasy-api.service';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-fantasy-draft',
@@ -16,11 +17,18 @@ export class FantasyDraftComponent implements OnInit{
 
   fantasyDraftService = inject(FantasyDraftService);
   playersService = inject(PlayersService);
-  draftMeta = input<FantasyMeta>();
+  private route = inject(ActivatedRoute);
 
   async ngOnInit() {
-    this.fantasyDraftService.setMetaData(this.draftMeta() as FantasyMeta)
-    // todo: load the relevant date
-   await this.fantasyDraftService.getUserPicks('09-08-2025');
+    const meta = this.route.parent?.snapshot.data['fantasyMeta'];
+    if(meta) {
+      this.fantasyDraftService.setMetaData(meta as FantasyMeta)
+      const nextDate = meta?.nextDate;
+      if(nextDate) {
+        await this.fantasyDraftService.getUserPicks(nextDate);
+      }
+    }
   }
 }
+
+

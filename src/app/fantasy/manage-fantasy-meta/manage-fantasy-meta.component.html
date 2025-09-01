@@ -1,0 +1,5 @@
+<app-generic-form
+  [formFields]=manageFantasyMetaService.fantasyMetaFields()
+  [title]="'Set fantasy meta'"
+  (formSubmit)="manageFantasyMetaService.submitFantasyMetaData($event)">
+</app-generic-form>
