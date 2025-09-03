@@ -29,7 +29,8 @@ export class ManageFantasyMetaService {
         name: 'nextDate',
         dynamicComponent: DynamicComponentsTypes.DATE,
         subInputType: subInputType.DATE,
-        validators: genericValidators.required
+        validators: genericValidators.required,
+        minDate: new Date()
       }
     ]
   )
