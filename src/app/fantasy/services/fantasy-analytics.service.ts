@@ -2,7 +2,7 @@ import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {FantasyData, FantasyMeta} from './fantasy-api.service';
 import {SpinnerService} from '../../spinner.service';
-import {Player, Statistics} from '../../players/models/player.model';
+import {Statistics} from '../../players/models/player.model';
 
 @Injectable()
 export class FantasyAnalyticsService {
@@ -36,28 +36,25 @@ export class FantasyAnalyticsService {
     numberOfColumns: 3
   })
 
+  allPlayersPointsMap = computed(() => {
+    const allPlayers = this.allPlayers();
+    return new Map(
+      allPlayers.flatMap((p) =>
+        Object.entries(p.statistics).filter(([date, stats]: [string, Statistics]) => stats.games > 0).map(([date, stats]: [string, Statistics]) => {
+          return [p.id + '_' + date, { playerName: p.name, points: this.calculatePoints(stats), date }];
+        })
+      )
+    );
+  })
+
    calculatePoints(stats: { goals: number; wins: number; goalsConceded: number }): number {
     let points = (stats.goals || 0) * 3 + (stats.wins || 0) * 2;
     if (stats.goalsConceded < 5) points += 3;
     return points;
   }
 
-// Build a lookup map of (playerId_date) -> { playerName, points, date }
-   buildAllPlayersMap(allPlayers: Player[]): Map<string, { playerName: string; points: number; date: string }> {
-    return new Map(
-      allPlayers.flatMap((p) =>
-        Object.entries(p.statistics).filter(([date, stats]: [string, Statistics]) => stats.games > 0).map(([date, stats]: [string, Statistics]) => {
-          if(p.id === 'aShv8yoBw4mIHGBhBoDA' && date === "17-07-2025") {
-            debugger;
-          }
-          return [p.id + '_' + date, { playerName: p.name, points: this.calculatePoints(stats), date }];
-        })
-      )
-    );
-  }
-
   processUserPicks(
-    userPicks: { captain: string; playerIds: string[]; userName: string },
+    userPicks: { userId: string; captain: string; playerIds: string[]; userName: string },
     date: string,
     playersMap: Map<string, { playerName: string; points: number; date: string }>,
     allDatesMode = false
@@ -66,13 +63,14 @@ export class FantasyAnalyticsService {
     const descriptions: string[] = [];
     const rawPlayerPoints = new Map<string, number>();
 
-    userPicks.playerIds.slice(0, 5).forEach((id) => {
-      const fantasyPlayer = playersMap.get(id + "_" + date);
-      if (!fantasyPlayer) return;
+    userPicks.playerIds
+      .slice(0, this.fantasyMetaData().numberOfPicks)
+      .forEach((id) => {
+        const fantasyPlayer = playersMap.get(id + "_" + date);
+        if (!fantasyPlayer) return;
 
-      rawPlayerPoints.set(id, (rawPlayerPoints.get(id) || 0) + fantasyPlayer.points); //always the base points (ignore captain)
+      rawPlayerPoints.set(id, (rawPlayerPoints.get(id) || 0) + fantasyPlayer.points);
 
-      debugger
       if (id === userPicks.captain) {
         points += fantasyPlayer.points * 2;
         descriptions.push(`${fantasyPlayer.playerName}(C)->${fantasyPlayer.points * 2}`);
@@ -88,12 +86,9 @@ export class FantasyAnalyticsService {
   }
 
 
-  aggregateAllDates(
-    allFantasy: FantasyData,
-    allPlayers: Player[]
-  ): { name: string; points: number; description: string }[] {
-    const fantasyPlayersPointsMap = this.buildAllPlayersMap(allPlayers);
-    console.log(fantasyPlayersPointsMap)
+  aggregateAllDates(allFantasy: FantasyData): { name: string; points: number; description: string }[] {
+    const fantasyPlayersPointsMap = this.allPlayersPointsMap();
+
     const userTotals = new Map<
       string,
       {
@@ -131,19 +126,19 @@ export class FantasyAnalyticsService {
     });
 
     return Array.from(userTotals.values()).map(({ points, playerTotals, userName }) => {
-      // get top 2 players by raw contribution
+      // show top players by raw (no captain effect)
       const topPlayers = Array.from(playerTotals.entries())
-        .sort((a, b) => b[1] - a[1])
+        .sort((playerTotalPoints1, playerTotalPoints2) => playerTotalPoints2[1] - playerTotalPoints1[1])
         .slice(0, 2)
-        .map(([id, pts]) => {
-          const playerName = allPlayers.find((p) => p.id === id)?.name || id;
-          return `${playerName}->${pts}`;
+        .map(([id, points]) => {
+          const playerName = this.allPlayers().find((p) => p.id === id)?.name || id;
+          return `${playerName}->${points}`;
         });
 
       return {
         name: userName,
         points,
-        description: `Top two picks: (regardless captain):  ` + topPlayers.join(", "),
+        description: `Top picks (no captain effect): ${topPlayers.join(", ")}`,
       };
     });
   }
@@ -152,18 +147,11 @@ export class FantasyAnalyticsService {
     const date = this.selectedDate();
 
     if (date === 'Select All') {
-      return this.aggregateAllDates(this.allFantasyData(), this.allPlayers());
+      return this.aggregateAllDates(this.allFantasyData());
     }
-    const fantasyPlayersPointsMap = new Map(
-      this.allPlayers()
-        .filter((p) => !!p.statistics[date])
-        .map((player) => [
-          player.id + '_' + date,
-          { playerName: player.name, points: this.calculatePoints(player.statistics[date]), date }
-        ])
-    );
+
     return this.allFantasyData()[date].userPicks.map((userPicks) => {
-      const { points, descriptions } = this.processUserPicks(userPicks, date, fantasyPlayersPointsMap, false);
+      const { points, descriptions } = this.processUserPicks(userPicks, date, this.allPlayersPointsMap(), false);
 
       return {
         name: userPicks.userName,
