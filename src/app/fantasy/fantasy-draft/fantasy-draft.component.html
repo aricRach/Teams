@@ -1,5 +1,5 @@
 
-<h4>Pick Your Fantasy Team</h4>
+<h4>Pick Your Fantasy Team - {{fantasyDraftService.draftMetaData()?.nextDate}}</h4>
 
 <div class="soccer-field">
   @for (player of fantasyDraftService.fantasySlots(); let i = $index; track player?.name || i) {
