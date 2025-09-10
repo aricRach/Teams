@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ViewChild} from '@angular/core';
 import { GenericFormComponent,} from 'ui';
 import {FormsModule} from '@angular/forms';
 import {EditPlayerService} from '../services/edit-player.service';
@@ -13,4 +13,6 @@ import {EditPlayerService} from '../services/edit-player.service';
 })
 export class EditPlayerComponent {
   editPlayerService = inject(EditPlayerService);
+
+  @ViewChild(GenericFormComponent) genericForm!: GenericFormComponent;
 }

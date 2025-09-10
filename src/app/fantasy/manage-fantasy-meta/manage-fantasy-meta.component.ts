@@ -1,4 +1,4 @@
-import {Component, inject} from '@angular/core';
+import {Component, inject, ViewChild} from '@angular/core';
 import {GenericFormComponent} from 'ui';
 import {ManageFantasyMetaService} from '../services/manage-fantasy-meta.service';
 
@@ -11,4 +11,6 @@ import {ManageFantasyMetaService} from '../services/manage-fantasy-meta.service'
 })
 export class ManageFantasyMetaComponent {
   manageFantasyMetaService = inject(ManageFantasyMetaService);
+
+  @ViewChild(GenericFormComponent) genericForm!: GenericFormComponent;
 }

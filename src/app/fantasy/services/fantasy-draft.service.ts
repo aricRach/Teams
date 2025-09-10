@@ -17,6 +17,7 @@ export class FantasyDraftService {
   popupsService = inject(PopupsService);
   router = inject(Router);
   private auth = inject(Auth);
+  isDraftDirty = signal(false);
 
   draftMetaData = signal<FantasyMeta>({} as FantasyMeta);
   captain = signal('');
@@ -67,6 +68,7 @@ export class FantasyDraftService {
 
     if (this.selectedPlayerIds().includes(player.id)) return;
 
+    this.isDraftDirty.set(true);
     const updated = [...this.fantasySlots()];
     updated[index] = player;
     this.fantasySlots.set(updated);
@@ -101,6 +103,7 @@ export class FantasyDraftService {
   }
 
   setCaptain(captainId: string) {
+    this.isDraftDirty.set(true);
     this.captain.set(captainId);
   }
 

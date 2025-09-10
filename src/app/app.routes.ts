@@ -25,13 +25,14 @@ import {draftMetaResolver} from './fantasy/resolvers/draft-meta.resolver';
 import {ManageFantasyMetaComponent} from './fantasy/manage-fantasy-meta/manage-fantasy-meta.component';
 import {FantasyComponent} from './fantasy/fantasy/fantasy.component';
 import {fantasyAllUsersPicksResolver} from './fantasy/resolvers/fantasy-all-users-picks.resolver';
+import {exitFormGuard} from './guards/exit-form.guard';
+import {exitFantasyDraftGuard} from './fantasy/guards/exit-fantasy-draft.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: SignInComponent,
     canActivate: [signInPageGuard]
-
   },
   {
     path: 'select-group',
@@ -94,6 +95,7 @@ export const routes: Routes = [
           {
             path: 'edit-player',
             component: EditPlayerComponent,
+            canDeactivate: [exitFormGuard]
           },
           {
             path: 'edit-player-statistics',
@@ -101,6 +103,7 @@ export const routes: Routes = [
               import('./manage-players/edit-statistics/edit-player-statistics.component').then(
                 (m) => m.EditPlayerStatisticsComponent
               ),
+            canDeactivate: [exitFormGuard]
           },
           {
             path: 'player-progress',
@@ -115,6 +118,7 @@ export const routes: Routes = [
         resolve: {
           existingSession: getDraftSessionsByOwnerResolver
         },
+        canDeactivate: [exitFormGuard]
       },
       {
         path: 'fantasy',
@@ -132,6 +136,7 @@ export const routes: Routes = [
           {
             path: 'draft',
             component: FantasyDraftComponent,
+            canDeactivate: [exitFantasyDraftGuard]
           },
           {
             path: 'analytics',
@@ -143,7 +148,8 @@ export const routes: Routes = [
           {
             path: 'manage-fantasy-meta',
             component: ManageFantasyMetaComponent,
-            canActivate: [groupAdminGuard]
+            canActivate: [groupAdminGuard],
+            canDeactivate: [exitFormGuard]
           }
         ]
       },
