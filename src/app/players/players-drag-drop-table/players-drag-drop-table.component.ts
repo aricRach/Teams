@@ -25,7 +25,7 @@ export class PlayersDragDropTableComponent {
   editStatistics = input(false);
   clonedTeams = input<any>();
   enableShowRatings = input(false);
-  enableMakeBalancedTeams = input(false);
+  enableMakeBalancedTeams = input(true);
   showStatisticsInput = input(false);
 
   showStatistics = linkedSignal(() => this.showStatisticsInput())
@@ -153,9 +153,9 @@ export class PlayersDragDropTableComponent {
   makeBalancedTeams() {
     const teams = this.clonedTeams();
     const numberOfTeams = this.playersService.numberOfTeams();
-
+    const includeGuests = true; //this.adminControlService.getAdminControl().includeGuests;
     const teamEntries = Object.entries(teams).slice(1, numberOfTeams + 1); // all active teams except "allPlayers"
-    const players = this.playersService.flattenPlayers(true, Object.fromEntries(teamEntries));
+    const players = this.playersService.flattenPlayers(true, includeGuests, Object.fromEntries(teamEntries));
 
     const shuffledPlayers = shuffleArray(players);
     shuffledPlayers.sort((a, b) => b.rating - a.rating);

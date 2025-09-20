@@ -53,20 +53,28 @@ export class PlayersService {
 
   savePlayers(specificTeams?: any) {
     this.spinnerService.setIsLoading(true);
-    return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, specificTeams)).then(
+    return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, true, specificTeams)).then(
       () => this.popoutService.addSuccessPopOut('Data was saved successfully.'),
     ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
       () =>  this.spinnerService.setIsLoading(false)
     );
   }
 
-  flattenPlayers(showOnlyActive = true, specificTeams?: any): Player[] {
+  flattenPlayers(showOnlyActive = true, includeGuests = true, specificTeams?: any): Player[] {
     const playersArray: Player[] = [];
     const teams = {...specificTeams || this.teams()}
     Object.keys(teams).forEach(team => {
       if (teams[team].players && Array.isArray(teams[team].players)) {
         teams[team].players
-          .filter((p: Player) => showOnlyActive ? p.isActive : true)
+          .filter((p: Player) => {
+            if(showOnlyActive && !includeGuests) {
+              return p.isActive && !p.isGuest;
+            }
+            if(showOnlyActive) {
+              return p.isActive;
+            }
+            return true;
+          })
           .forEach((player: Player) => {
             playersArray.push({
               ...JSON.parse(JSON.stringify(player)),

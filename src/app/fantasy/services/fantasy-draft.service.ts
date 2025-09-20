@@ -21,7 +21,7 @@ export class FantasyDraftService {
 
   draftMetaData = signal<FantasyMeta>({} as FantasyMeta);
   captain = signal('');
-  allPlayers = computed(() => this.playersService.flattenPlayers())
+  allPlayers = computed(() => this.playersService.flattenPlayers(true, false))
 
   allPoolPlayers = linkedSignal(() => {
     const fantasySlotIds = this.fantasySlots().map(p => p?.id).filter(Boolean)

@@ -12,5 +12,9 @@
   <label>
     <input formControlName="email" type="email" placeholder="Email">
   </label>
+  <label>
+    <input formControlName="isGuest" type="checkbox">
+    Guest
+  </label>
   <button [disabled]="addNewPlayerService.playerForm.invalid" [class.disabled]="addNewPlayerService.playerForm.invalid" class="active-btn submit-btn" type="submit">Add Player</button>
 </form>

@@ -13,6 +13,7 @@ export const exitFormGuard: CanDeactivateFn<unknown> = (component: any) => {
       || component.form?.dirty
   ) {
     return modalsService.openConfirmModal({
+      title: 'Are you sure?',
       confirmBtn: 'exit page',
       description: 'the changes will not be saved'
     }).afterClosed().pipe(map((result: string) => {

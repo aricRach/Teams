@@ -8,6 +8,7 @@ export interface Player {
   statistics: {
     [key: string]: Statistics
   };
+  isGuest?: boolean;
 }
 
 export interface Statistics {

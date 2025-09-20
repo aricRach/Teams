@@ -172,7 +172,8 @@ export class PlayersApiService {
     return updateDoc(playerDocRef, {
       name: updatedPlayer.name,
       rating: updatedPlayer.rating,
-      email: updatedPlayer.email || ''
+      email: updatedPlayer.email || '',
+      isGuest: updatedPlayer.isGuest
     });
   }
 

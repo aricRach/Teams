@@ -28,11 +28,12 @@ export class AddNewPlayerService {
       name: new FormControl('', [Validators.required]),
       rating: new FormControl('', [Validators.required]),
       email: new FormControl('', [Validators.email]),
+      isGuest: new FormControl(false)
     });
   }
 
   async addNewPlayer(): Promise<void> {
-    const {name, rating, email} = this.playerForm.value;
+    const {name, rating, email, isGuest} = this.playerForm.value;
     if (!name?.trim() || !rating) return;
     const normalizedPlayerName = name.trim().toLowerCase();
       await this.saveNewPlayer({
@@ -40,6 +41,7 @@ export class AddNewPlayerService {
         rating,
         email,
         isActive: true,
+        isGuest,
         statistics: {}
       } as Player);
   }

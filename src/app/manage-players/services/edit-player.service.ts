@@ -15,7 +15,7 @@ export class EditPlayerService {
 
   editPlayer(playerDetails: FormGroup<any>) {
     const details = playerDetails.getRawValue();
-    details.rating = Number(details.rating)
+    details.rating = Number(details.rating);
     this.playersService.updatePlayerDetails(this.managePlayersService.selectedPlayer(), {...this.managePlayersService.selectedPlayer(), ...details}).then()
   }
 
@@ -27,7 +27,7 @@ export class EditPlayerService {
         disabled: this.shouldDisabledFields(),
         value: this.managePlayersService.selectedPlayer()?.name,
         dynamicComponent: DynamicComponentsTypes.INPUT,
-        validators: {},
+        validators: genericValidators.required,
       },
       {
         alias: 'rating:',
@@ -50,7 +50,15 @@ export class EditPlayerService {
             errorMsg: 'Must be a valid email address',
           }
         }
-      }
+      },
+      {
+        alias: 'Is guest:',
+        name: 'isGuest',
+        disabled: this.shouldDisabledFields(),
+        value: this.managePlayersService.selectedPlayer()?.isGuest || false,
+        dynamicComponent: DynamicComponentsTypes.CHECKBOX,
+        validators: {},
+      },
     ]
   }
 }

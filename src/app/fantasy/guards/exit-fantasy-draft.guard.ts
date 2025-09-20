@@ -13,6 +13,7 @@ export const exitFantasyDraftGuard: CanDeactivateFn<any> = (component: FantasyDr
     return true;
   }
     return modalsService.openConfirmModal({
+      title: 'Are you sure?',
       confirmBtn: 'exit page',
       description: 'the changes will not be saved'
     }).afterClosed().pipe(map((result: string) => {
