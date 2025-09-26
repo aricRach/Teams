@@ -1,4 +1,4 @@
-import {Component, inject, output, signal} from '@angular/core';
+import {Component, HostListener, inject, output, signal} from '@angular/core';
 import {AdminControlService} from '../../user/admin-control.service';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 
@@ -13,7 +13,6 @@ export class AdminControlComponent {
   adminControlService = inject(AdminControlService);
 
   isAllowed = signal(false);
-  toggleAll = false;
 
   submitted = output();
 
@@ -44,13 +43,27 @@ export class AdminControlComponent {
   }
 
   selectAll() {
-    this.toggleAll = !this.toggleAll;
+    this.adminControlService.setToggleAll(!this.adminControlService.getToggleAll());
     const updatedValues: Record<string, boolean> = {};
 
     for (const key of Object.keys(this.adminForm.controls)) {
-      updatedValues[key] = this.toggleAll;
+      updatedValues[key] = this.adminControlService.getToggleAll();
     }
 
     this.adminForm.patchValue(updatedValues);
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if(!this.isAllowed()) {
+      return
+    }
+    if (event.key.toLowerCase() === 'a') {
+      event.preventDefault();
+      this.selectAll();
+      setTimeout(() => {
+        this.submitAdminControl();
+      }, 500)
+    }
   }
 }

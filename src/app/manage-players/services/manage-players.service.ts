@@ -1,6 +1,7 @@
 import {computed, inject, Injectable, linkedSignal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
-import {ModalsService} from 'ui';
+import {AutoCompleteOption, ModalsService} from 'ui';
+import {Player} from '../../players/models/player.model';
 
 @Injectable()
 export class ManagePlayersService {
@@ -20,8 +21,13 @@ export class ManagePlayersService {
     return [...this.playersService.flattenPlayers()]
   });
 
-  onChangePlayer() {
-    this.selectedPlayer.set(this.allPlayersArray().filter((p => p.name === this.selectedPlayerOption))[0]);
+  autoCompletePlayersOptions = computed(() => {
+    return [...this.playersService.flattenPlayers().map((p: Player) =>
+      ({value: p.id, alias: p.name}))];
+  });
+
+  onChangePlayer(option: AutoCompleteOption ) {
+    this.selectedPlayer.set(this.allPlayersArray().filter((p => p.id === option.value))[0]);
   }
 
   deletePlayer() {
@@ -34,4 +40,7 @@ export class ManagePlayersService {
     });
   }
 
+  removeSelectedPlayer() {
+    this.selectedPlayer.set(null);
+  }
 }

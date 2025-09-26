@@ -2,12 +2,23 @@
 <h1 class="center">Manage players</h1>
 
 <div class="center gap-10 manage-player-header">
-  <label for="select-player">Select a player</label>
-  <select id="select-player" [(ngModel)]="managePlayersService.selectedPlayerOption" (change)="managePlayersService.onChangePlayer()">
-    @for(player of managePlayersService.allPlayersArray(); track player.name) {
-      <option>{{player.name}}</option>
-    }
-  </select>
+<!--  <label for="select-player">Select a player</label>-->
+<!--  <select id="select-player" [(ngModel)]="managePlayersService.selectedPlayerOption" (change)="managePlayersService.onChangePlayer()">-->
+<!--    @for(player of managePlayersService.allPlayersArray(); track player.name) {-->
+<!--      <option>{{player.name}}</option>-->
+<!--    }-->
+<!--  </select>-->
+
+  <label>
+    <span>
+       select player
+    </span>
+    <app-auto-complete [inputValue]="managePlayersService.selectedPlayer()?.name"
+                       (optionCleaned)="managePlayersService.removeSelectedPlayer()"
+                       [options]="managePlayersService.autoCompletePlayersOptions()"
+                       (optionSelected)="managePlayersService.onChangePlayer($event)"></app-auto-complete>
+
+  </label>
 
   @if(managePlayersService.selectedPlayer()) {
     <button class="delete-btn active-btn alert-btn" (click)="managePlayersService.deletePlayer()">Delete Player</button>
