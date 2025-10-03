@@ -35,9 +35,9 @@
   (dropPlayer)="updateTeams($event)"
 />
 
-@if(adminControlService.getAdminControl().showAddPlayerForm) {
-  <app-add-new-player/>
-}
+<!--@if(adminControlService.getAdminControl().showAddPlayerForm) {-->
+<!--  <app-add-new-player/>-->
+<!--}-->
 
 <app-stopwatch (timeStartEvent)="isMovePlayersLocked.set(true)"
                (timeEndEvent)="isTeamWinModalVisible.set(true)"/>

@@ -1,5 +1,4 @@
 table {
-  width: 100%;
   border-collapse: collapse;
   margin-bottom: 1rem;
 
@@ -8,6 +7,17 @@ table {
     border: 1px solid #ddd;
     padding: 0.5rem;
     text-align: left;
+  }
+
+  td {
+    vertical-align: top;
+  }
+
+  td.rating {
+    width: 50px;
+    input {
+      width:50px;
+    }
   }
 
   td.delete-row {
@@ -33,6 +43,13 @@ input.invalid {
   font-size: 0.8rem;
   color: red;
   margin-top: 0.2rem;
+
+  min-height: 1rem;
+  display: block;
+}
+
+td input + .input-error:empty {
+  visibility: hidden;
 }
 
 .actions {
