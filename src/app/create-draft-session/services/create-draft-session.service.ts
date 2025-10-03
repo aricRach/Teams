@@ -7,6 +7,7 @@ import {environment} from '../../../environments/environment';
 import {skeleton} from '../../players/consts/teams-skeleton';
 import {Router} from '@angular/router';
 import {PopupsService} from 'ui';
+import {NavigationService} from '../../shared/navigation.service';
 
 export interface DraftPlayer {
   id: string,
@@ -35,6 +36,7 @@ export class CreateDraftSessionService {
   private auth = inject(Auth);
   router = inject(Router);
   private popoutService = inject(PopupsService);
+  navigationService = inject(NavigationService);
   checkedPlayers: Set<string> = new Set();
 
   chunkedPlayers = computed(() => {
@@ -139,6 +141,7 @@ export class CreateDraftSessionService {
 
   async removeSession(sessionId: string): Promise<void> {
     await this.playersService.removeDraftSession(sessionId);
+    this.navigationService.unlockNavigation();
     this.router.navigate(['/home']);
   }
 
@@ -146,6 +149,7 @@ export class CreateDraftSessionService {
     this.setTeamsAfterDraft(sessionData.teamCount, sessionData.teams);
     await this.removeSession(sessionData.id);
     this.popoutService.addSuccessPopOut('New teams were set successfully');
+    this.navigationService.unlockNavigation();
     this.router.navigate(['home', 'game']);
   }
 
@@ -190,5 +194,9 @@ export class CreateDraftSessionService {
     // Step 5: Save or emit the updated teams
     this.playersService.setTeams(newTeams);
     this.playersService.savePlayers().then();
+  }
+
+  lockNavigation() {
+    this.navigationService.lockNavigation();
   }
 }

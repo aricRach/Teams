@@ -48,4 +48,8 @@ export class StatisticsService {
    })
 
    }
+
+  shouldShowProtectedRoutes() {
+    return this.adminControl.getAdminControl().showProtectedPages;
+  }
 }

@@ -15,6 +15,13 @@ export class MembersApiService {
     });
   }
 
+  addMembers(groupId: string, emails: string[]) {
+    const groupDocRef = doc(this.firestore, `groups/${groupId}`);
+    return updateDoc(groupDocRef, {
+      members: arrayUnion(...emails)
+    });
+  }
+
   async replaceMember(groupId: string, oldEmail: string, newEmail: string): Promise<void> {
     const groupDocRef = doc(this.firestore, `groups/${groupId}`);
 

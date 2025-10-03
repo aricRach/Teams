@@ -1,6 +1,6 @@
 export interface Player {
   id: string,
-  team: 'teamA' | 'teamB' | 'teamC' | 'teamD';
+  team: TeamsOptions;
   name: string;
   rating: number;
   isActive?: boolean;
@@ -8,7 +8,7 @@ export interface Player {
   statistics: {
     [key: string]: Statistics
   };
-  isGuest?: boolean;
+  isGuest: boolean;
 }
 
 export interface Statistics {
@@ -27,6 +27,7 @@ export interface GoalModalEvent {
 }
 
 export enum TeamsOptions {
+  AllPlayers = 'allPlayers',
   TeamA = 'teamA',
   TeamB = 'teamB',
   TeamC = 'teamC',

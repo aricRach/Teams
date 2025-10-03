@@ -1,13 +1,14 @@
-import {Component, computed, inject, input, linkedSignal, OnDestroy} from '@angular/core';
+import {Component, computed, DestroyRef, inject, input, linkedSignal, OnDestroy} from '@angular/core';
 import {CreateDraftSessionService, TeamDraftSession} from './services/create-draft-session.service';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RangePipe} from '../pipes/range.pipe';
-import {startWith, Subject, takeUntil} from 'rxjs';
+import {skip, startWith, Subject, takeUntil} from 'rxjs';
 import {CommonModule} from '@angular/common';
 import {Player} from "../players/models/player.model";
 import {shuffleArray} from "../utils/array-utils";
 import {RouterModule} from '@angular/router';
 import {MatTooltipModule} from '@angular/material/tooltip';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-create-draft-session',
@@ -18,6 +19,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 })
 export class CreateDraftSessionComponent implements OnDestroy{
 
+  private destroyRef = inject(DestroyRef);
+  fb = inject(FormBuilder);
   createDraftSessionService = inject(CreateDraftSessionService);
 
   existingSession = input<TeamDraftSession>();
@@ -53,13 +56,17 @@ export class CreateDraftSessionComponent implements OnDestroy{
     return this.form.invalid || this.createDraftSessionService.checkedPlayers.size == 0
   }
 
-  constructor(private fb: FormBuilder) {
+  constructor() {
     this.form = this.fb.group({
       numberOfTeams: [this.createDraftSessionService.numberOfTeams()],
       captains: this.fb.array([]),
       isSnakeMode: [false]
     });
-    this.form.get('numberOfTeams')!.valueChanges.pipe((startWith(this.form.get('numberOfTeams')!.value))).subscribe((value: number) => {
+    this.form.get('captains')?.valueChanges.pipe(skip(this.createDraftSessionService.numberOfTeams()), takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.createDraftSessionService.lockNavigation()
+    });
+    this.form.get('numberOfTeams')!.valueChanges.pipe(
+      (startWith(this.form.get('numberOfTeams')!.value)), takeUntilDestroyed(this.destroyRef)).subscribe((value: number) => {
       this.setNumberOfTeams(value);
     });
   }

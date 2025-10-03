@@ -24,6 +24,18 @@ export class MembersService {
     }
   }
 
+  async addMembers(selectedGroupId: string, emails: string[]): Promise<void> {
+    if (!emails || emails.length === 0) return;
+    this.spinnerService.setIsLoading(true);
+    try {
+      return await this.membersApiService.addMembers(selectedGroupId, emails);
+    } catch {
+      this.popoutService.addErrorPopOut(`Failed to add member email`);
+    } finally {
+      this.spinnerService.setIsLoading(false);
+    }
+  }
+
   async removeMember(selectedGroupId: string, email?: string): Promise<void> {
     if (!email) return;
     this.spinnerService.setIsLoading(true);

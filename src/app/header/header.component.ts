@@ -37,7 +37,13 @@ export class HeaderComponent {
     },
     {
       action: MenuAction.NAVIGATE,
-      alias: 'Manage players',
+      alias: 'Register players',
+      show: this.playersService.isAdmin(),
+      link: '/home/register-players'
+    },
+    {
+      action: MenuAction.NAVIGATE,
+      alias: 'Players',
       show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.getAdminControl().showProtectedPages,
       link: '/home/manage-players'
     },

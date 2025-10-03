@@ -248,4 +248,11 @@ export class PlayersService {
         return { ...teams };
       });
     }
+
+  addPlayersSignal(addedPlayers: Player[]) {
+    this.teams.update((teams) => {
+      teams['allPlayers'].players.push(...addedPlayers);
+      return teams;
+    })
+  }
 }

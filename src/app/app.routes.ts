@@ -90,7 +90,7 @@ export const routes: Routes = [
           {
             path: '',
             pathMatch: 'full',
-            redirectTo: 'edit-player'
+            redirectTo: 'player-progress'
           },
           {
             path: 'edit-player',
@@ -110,6 +110,14 @@ export const routes: Routes = [
             component: PlayerProgressChartComponent
           }
         ]
+      },
+      {
+        path: 'register-players',
+        loadComponent: () => import('./register-players/register-players/register-players.component').then(
+          (m) => m.RegisterPlayersComponent
+        ),
+        canActivate: [groupAdminGuard],
+        canDeactivate: [exitFormGuard]
       },
       {
         path: 'create-draft-session',

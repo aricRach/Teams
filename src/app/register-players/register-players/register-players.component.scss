@@ -1,0 +1,42 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  td.delete-row {
+    button {
+      background-color: white;
+      border: none;
+    }
+  }
+  th.required::after {
+    content: '*';
+    width: 20px;
+    height: 20px;
+    color:red;
+  }
+}
+
+input.invalid {
+  border: 1px solid red;
+  background-color: #ffe6e6;
+}
+
+.input-error {
+  font-size: 0.8rem;
+  color: red;
+  margin-top: 0.2rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
