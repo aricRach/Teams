@@ -1,4 +1,5 @@
 <h2>Register New Players</h2>
+<div class="table-container">
 
 <form [formGroup]="registerPlayersService.form()" (ngSubmit)="registerPlayersService.submit()">
   <table>
@@ -13,7 +14,7 @@
     <tbody formArrayName="players">
       @for (player of registerPlayersService.players().controls; track player) {
         <tr [formGroupName]="$index">
-          <td>
+          <td class="name">
             <input
               type="text"
               formControlName="name"
@@ -37,11 +38,11 @@
             }
           </td>
 
-          <td>
-            <input type="email" formControlName="email" placeholder="Optional email" />
+          <td class="email">
+            <input type="email" formControlName="email" placeholder="email" />
           </td>
 
-          <td>
+          <td class="guest">
             <input type="checkbox" formControlName="isGuest" />
           </td>
 
@@ -65,3 +66,4 @@
     <button class="active-btn action-btn" type="button" (click)="registerPlayersService.addRow()">Add Row</button>
   </div>
 </form>
+</div>

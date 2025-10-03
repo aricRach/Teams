@@ -42,7 +42,7 @@ export class RegisterPlayersService {
     {name: 'Rating', isRequired: true},
     {name: 'Email', isRequired: false},
     {name: 'Guest', isRequired: false},
-    {name: 'Action', isRequired: false},
+    {name: '', isRequired: false},
   ])
 
   createPlayerRow() {
