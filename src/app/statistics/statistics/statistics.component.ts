@@ -1,6 +1,7 @@
 import {Component, inject} from '@angular/core';
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {StatisticsService} from '../services/statistics.service';
+import {MatTooltip} from '@angular/material/tooltip';
 
 
 @Component({
@@ -9,6 +10,7 @@ import {StatisticsService} from '../services/statistics.service';
     RouterLink,
     RouterOutlet,
     RouterLinkActive,
+    MatTooltip,
   ],
   templateUrl: './statistics.component.html',
   standalone: true,

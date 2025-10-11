@@ -28,7 +28,9 @@ export class ManagePlayersService {
       ({value: p.id, alias: p.name}))];
   });
 
-  isAllowToViewEditPages = computed(() => this.playersService.isAdmin() && this.adminControlService.getAdminControl().showProtectedPages)
+  isAllowToViewEditPages = computed(() => this.adminControlService.getAdminControl().showProtectedPages)
+
+  isAdmin = computed(() => this.playersService.isAdmin())
 
   onChangePlayer(option: AutoCompleteOption ) {
     this.selectedPlayer.set(this.allPlayersArray().filter((p => p.id === option.value))[0]);

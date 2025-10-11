@@ -1,9 +1,13 @@
 <div class="center gap-10 manage-players-links">
-  <a routerLinkActive="active" class="active-btn link-btn" routerLink="player-progress">player progress</a>
-  @if(managePlayersService.isAllowToViewEditPages()) {
-    <a routerLinkActive="active" class="active-btn link-btn" routerLink="edit-player" [routerLinkActiveOptions]="{ exact: true }">Edit player</a>
-    <a routerLinkActive="active" class="active-btn link-btn" routerLink="edit-player-statistics">Edit last statistics</a>
-
+  <a routerLinkActive="active" class="active-btn link-btn" routerLink="player-progress">Player progress</a>
+  @if(managePlayersService.isAdmin()) {
+    <span [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()"
+          matTooltip="In order to see this page enable 'show protected pages' in admin control" class="active-btn link-btn">
+          <a [class.disabled]="!managePlayersService.isAllowToViewEditPages()" routerLinkActive="active"  routerLink="edit-player" [routerLinkActiveOptions]="{ exact: true }">Edit player</a>
+    </span>
+    <span [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()" matTooltip="In order to see this page enable 'show protected pages' in admin control" class="active-btn link-btn">
+          <a [class.disabled]="!managePlayersService.isAllowToViewEditPages()" routerLinkActive="active" routerLink="edit-player-statistics">Edit last statistics</a>
+    </span>
   }
 </div>
 <div class="center gap-10 manage-player-header">

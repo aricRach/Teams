@@ -27,6 +27,7 @@ import {FantasyComponent} from './fantasy/fantasy/fantasy.component';
 import {fantasyAllUsersPicksResolver} from './fantasy/resolvers/fantasy-all-users-picks.resolver';
 import {exitFormGuard} from './guards/exit-form.guard';
 import {exitFantasyDraftGuard} from './fantasy/guards/exit-fantasy-draft.guard';
+import {adminControlGuard} from './guards/admin-control.guard';
 
 export const routes: Routes = [
   {
@@ -84,6 +85,7 @@ export const routes: Routes = [
             path: 'edit-statistics',
             component: EditStatisticsComponent,
             data: { breadcrumb: 'Edit Statistics' },
+            canActivate: [groupAdminGuard, adminControlGuard],
           }
         ]
       },
@@ -119,7 +121,7 @@ export const routes: Routes = [
               {
                 path: 'edit-player',
                 component: EditPlayerComponent,
-                canActivate: [groupAdminGuard],
+                canActivate: [groupAdminGuard, adminControlGuard],
                 canDeactivate: [exitFormGuard],
                 data: { breadcrumb: 'Edit Player' },
               },
@@ -129,7 +131,7 @@ export const routes: Routes = [
                   import('./manage-players/edit-statistics/edit-player-statistics.component').then(
                     (m) => m.EditPlayerStatisticsComponent
                   ),
-                canActivate: [groupAdminGuard],
+                canActivate: [groupAdminGuard, adminControlGuard],
                 canDeactivate: [exitFormGuard],
                 data: { breadcrumb: 'Edit Player Statistics' },
               },

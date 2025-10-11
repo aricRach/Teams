@@ -1,18 +1,25 @@
-<div class="center gap">
-<h2>Players Statistics</h2>
-<select (change)="statisticsService.setSelectedDate($event)">
-  @for(date of statisticsService.allUniqueDates(); track date) {
-    <option [value]="date">{{date}}</option>
-  }
-</select>
-</div>
-
-<div class="center gap-10 statistic-links">
+<section class="statistic-links">
   <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="table">Table</a>
   <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="team-of-the-week">Team Of The Week</a>
-  @if(statisticsService.shouldShowProtectedRoutes()) {
-    <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="edit-statistics">Edit Statistics</a>
+  @if(statisticsService.isAdmin()) {
+    <span class="active-btn link-btn statistic-link" [matTooltipDisabled]="statisticsService.shouldShowProtectedRoutes()" matTooltip="In order to see this page enable 'show protected pages' in admin control">
+      <a [class.disabled]="!statisticsService.shouldShowProtectedRoutes()"
+         routerLinkActive="active"
+         routerLink="edit-statistics">Edit Statistics</a>
+  </span>
   }
-</div>
+</section>
+
+<section>
+  <span>Select Date</span>
+  <select (change)="statisticsService.setSelectedDate($event)">
+    @for(date of statisticsService.allUniqueDates(); track date) {
+      <option [value]="date">{{date}}</option>
+    }
+  </select>
+</section>
+
+
+
 <router-outlet></router-outlet>
 

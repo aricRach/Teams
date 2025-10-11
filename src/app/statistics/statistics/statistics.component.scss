@@ -1,6 +1,13 @@
 :host {
   display: block;
-  padding: 40px 0;
+  padding: 20px 0;
+}
+
+section {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 10px;
 }
 
 .statistic-links {

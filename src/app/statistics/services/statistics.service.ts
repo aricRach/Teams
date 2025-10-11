@@ -46,8 +46,11 @@ export class StatisticsService {
        this.router.navigate(['home','statistics', 'table']);
      })
    })
+  }
 
-   }
+  isAdmin() {
+    return this.playersService.isAdmin();
+  }
 
   shouldShowProtectedRoutes() {
     return this.adminControl.getAdminControl().showProtectedPages;

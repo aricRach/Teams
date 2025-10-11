@@ -61,5 +61,26 @@ footer {
   border-radius: 3px;
 }
 
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mat-mdc-tooltip {
+  background: rgba(97, 97, 97, 0.9) !important;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+a {
+  color: #0d6efd;
+  text-decoration: none;
+}
 html, body { height: 90vh; }
-body { margin: 0; padding: 20px; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
