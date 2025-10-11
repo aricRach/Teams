@@ -57,11 +57,13 @@ export const routes: Routes = [
       {
         path: 'game',
         component: GameComponent,
-        canActivate: [groupAdminGuard]
+        canActivate: [groupAdminGuard],
+        data: { breadcrumb: 'Game' },
       },
       {
         path: 'statistics',
         component: StatisticsComponent,
+        data: { breadcrumb: 'Statistics' },
         children: [
           {
             path: '',
@@ -70,54 +72,75 @@ export const routes: Routes = [
           },
           {
             path: 'table',
-            component: PlayersStatisticsTableComponent
+            component: PlayersStatisticsTableComponent,
+            data: { breadcrumb: 'Table' },
           },
           {
             path: 'team-of-the-week',
-            component: TeamOfTheWeekComponent
+            component: TeamOfTheWeekComponent,
+            data: { breadcrumb: 'TOTW' },
           },
           {
             path: 'edit-statistics',
-            component: EditStatisticsComponent
+            component: EditStatisticsComponent,
+            data: { breadcrumb: 'Edit Statistics' },
           }
         ]
       },
       {
-        path: 'manage-players',
-        component: ManagePlayersComponent,
-        canActivate: [groupAdminGuard],
+        path: 'players',
+        data: { breadcrumb: 'Players' },
         children: [
           {
             path: '',
             pathMatch: 'full',
-            redirectTo: 'player-progress'
+            loadComponent: () => import('./manage-players/players-landing-page/players-landing-page.component').then(m => m.PlayersLandingPageComponent),
+            canActivate: [groupAdminGuard],
           },
           {
-            path: 'edit-player',
-            component: EditPlayerComponent,
-            canDeactivate: [exitFormGuard]
+            path: 'register-players',
+            loadComponent: () => import('./register-players/register-players/register-players.component').then(
+              (m) => m.RegisterPlayersComponent
+            ),
+            canActivate: [groupAdminGuard],
+            canDeactivate: [exitFormGuard],
+            data: { breadcrumb: 'Register Players' },
           },
           {
-            path: 'edit-player-statistics',
-            loadComponent: () =>
-              import('./manage-players/edit-statistics/edit-player-statistics.component').then(
-                (m) => m.EditPlayerStatisticsComponent
-              ),
-            canDeactivate: [exitFormGuard]
+            path: 'manage-players',
+            component: ManagePlayersComponent,
+            data: { breadcrumb: 'Players Hub' },
+            children: [
+              {
+                path: '',
+                pathMatch: 'full',
+                redirectTo: 'player-progress'
+              },
+              {
+                path: 'edit-player',
+                component: EditPlayerComponent,
+                canActivate: [groupAdminGuard],
+                canDeactivate: [exitFormGuard],
+                data: { breadcrumb: 'Edit Player' },
+              },
+              {
+                path: 'edit-player-statistics',
+                loadComponent: () =>
+                  import('./manage-players/edit-statistics/edit-player-statistics.component').then(
+                    (m) => m.EditPlayerStatisticsComponent
+                  ),
+                canActivate: [groupAdminGuard],
+                canDeactivate: [exitFormGuard],
+                data: { breadcrumb: 'Edit Player Statistics' },
+              },
+              {
+                path: 'player-progress',
+                component: PlayerProgressChartComponent,
+                data: { breadcrumb: 'Player Progress' },
+              },
+            ]
           },
-          {
-            path: 'player-progress',
-            component: PlayerProgressChartComponent
-          }
         ]
-      },
-      {
-        path: 'register-players',
-        loadComponent: () => import('./register-players/register-players/register-players.component').then(
-          (m) => m.RegisterPlayersComponent
-        ),
-        canActivate: [groupAdminGuard],
-        canDeactivate: [exitFormGuard]
       },
       {
         path: 'create-draft-session',
@@ -126,7 +149,8 @@ export const routes: Routes = [
         resolve: {
           existingSession: getDraftSessionsByOwnerResolver
         },
-        canDeactivate: [exitFormGuard]
+        canDeactivate: [exitFormGuard],
+        data: { breadcrumb: 'Create Draft' },
       },
       {
         path: 'fantasy',
@@ -135,6 +159,7 @@ export const routes: Routes = [
           fantasyMeta: draftMetaResolver
         },
         runGuardsAndResolvers: 'pathParamsOrQueryParamsChange',
+        data: { breadcrumb: 'Fantasy' },
         children: [
           {
             path: '',

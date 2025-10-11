@@ -21,9 +21,7 @@ export class AdminControlComponent {
   });
 
   adminForm = new FormGroup({
-    showAddPlayerForm: new FormControl(false),
     showRating: new FormControl(false),
-    showStatistics: new FormControl(false),
     showProtectedPages: new FormControl(false),
     showSaveButtons: new FormControl(false),
     showMakeBalanceTeams: new FormControl(false),

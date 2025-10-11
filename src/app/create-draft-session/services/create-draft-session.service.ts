@@ -7,7 +7,7 @@ import {environment} from '../../../environments/environment';
 import {skeleton} from '../../players/consts/teams-skeleton';
 import {Router} from '@angular/router';
 import {PopupsService} from 'ui';
-import {NavigationService} from '../../shared/navigation.service';
+import {NavigationService} from '../../shared/navigation/navigation.service';
 
 export interface DraftPlayer {
   id: string,

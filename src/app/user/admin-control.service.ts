@@ -1,7 +1,6 @@
 import {computed, Injectable, signal} from '@angular/core';
 
 export interface AdminControl {
-  showAddPlayerForm: boolean;
   showRating: boolean;
   showProtectedPages: boolean;
   showSaveButtons: boolean;

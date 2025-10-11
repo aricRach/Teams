@@ -7,7 +7,7 @@ import {DuplicatePlayerError} from '../../players/errors/duplicate-player-error'
 import {SpinnerService} from '../../spinner.service';
 import {Statistics} from '../../players/models/player.model';
 import {Router} from '@angular/router';
-import {NavigationService} from '../../shared/navigation.service';
+import {NavigationService} from '../../shared/navigation/navigation.service';
 import {FormArray, FormBuilder, Validators} from '@angular/forms';
 
 export interface NewPlayer {

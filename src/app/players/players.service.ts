@@ -255,4 +255,13 @@ export class PlayersService {
       return teams;
     })
   }
+
+  selectGroup(selectedGroup: {admins: string[]; id: string}, email: string) {
+    this.selectedGroup.set(selectedGroup);
+    this.isAdmin.set(selectedGroup.admins.includes(email));
+  }
+
+  setNumberOfTeams(numberOfTeams: number) {
+    this.numberOfTeams.set(numberOfTeams);
+  }
 }

@@ -2,10 +2,6 @@
 
 @if(isAllowed()) {
   <form [formGroup]="adminForm" (ngSubmit)="submitAdminControl()">
-    <label>
-      <input type="checkbox" formControlName="showAddPlayerForm" />
-      Allow Add Player Form
-    </label>
 
     <label>
       <input type="checkbox" formControlName="showRating" />

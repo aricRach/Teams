@@ -1,6 +1,11 @@
+<div class="center gap-10 manage-players-links">
+  <a routerLinkActive="active" class="active-btn link-btn" routerLink="player-progress">player progress</a>
+  @if(managePlayersService.isAllowToViewEditPages()) {
+    <a routerLinkActive="active" class="active-btn link-btn" routerLink="edit-player" [routerLinkActiveOptions]="{ exact: true }">Edit player</a>
+    <a routerLinkActive="active" class="active-btn link-btn" routerLink="edit-player-statistics">Edit last statistics</a>
 
-<h1 class="center">Manage players</h1>
-
+  }
+</div>
 <div class="center gap-10 manage-player-header">
 <!--  <label for="select-player">Select a player</label>-->
 <!--  <select id="select-player" [(ngModel)]="managePlayersService.selectedPlayerOption" (change)="managePlayersService.onChangePlayer()">-->
@@ -23,13 +28,6 @@
   @if(managePlayersService.selectedPlayer()) {
     <button class="delete-btn active-btn alert-btn" (click)="managePlayersService.deletePlayer()">Delete Player</button>
   }
-</div>
-
-
-<div class="center gap-10 manage-players-links">
-  <a routerLinkActive="active" class="active-btn link-btn" routerLink="player-progress">player progress</a>
-  <a routerLinkActive="active" class="active-btn link-btn" routerLink="edit-player" [routerLinkActiveOptions]="{ exact: true }">Edit player</a>
-  <a routerLinkActive="active" class="active-btn link-btn" routerLink="edit-player-statistics">Edit last statistics</a>
 </div>
 
 <router-outlet></router-outlet>

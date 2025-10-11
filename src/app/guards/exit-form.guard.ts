@@ -3,7 +3,7 @@ import {inject} from '@angular/core';
 import {ModalsService} from 'ui';
 import {catchError, map, of} from 'rxjs';
 import {Location} from '@angular/common';
-import {NavigationService} from '../shared/navigation.service';
+import {NavigationService} from '../shared/navigation/navigation.service';
 
 export const exitFormGuard: CanDeactivateFn<unknown> = (component: any) => {
   const modalsService = inject(ModalsService);

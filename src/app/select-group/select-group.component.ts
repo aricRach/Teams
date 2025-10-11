@@ -31,15 +31,14 @@ export class SelectGroupComponent {
     const email = this.currentUserEmail;
     if (email) {
       this.groupChangedSubmitted.set(true);
-      this.playersService.selectedGroup.set(this.selectedGroup);
-      this.playersService.isAdmin.set(this.selectedGroup.admins.includes(email));
+      this.playersService.selectGroup(this.selectedGroup, email);
     }
   }
 
   submit() {
     const email = this.currentUserEmail;
     if (email) {
-      this.playersService.numberOfTeams.set(this.numberOfTeams);
+      this.playersService.setNumberOfTeams(this.numberOfTeams);;
       const route = this.selectedGroup.admins.includes(email) ? ['home', 'game'] : ['home', 'statistics'];
       this.router.navigate(route);
     }

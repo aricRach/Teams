@@ -26,7 +26,7 @@ export class HeaderComponent {
     {
       action: MenuAction.NAVIGATE,
       alias: 'Game',
-      show: this.playersService.isAdmin(),
+      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
       link: '/home/game'
     },
     {
@@ -37,26 +37,26 @@ export class HeaderComponent {
     },
     {
       action: MenuAction.NAVIGATE,
-      alias: 'Register players',
-      show: this.playersService.isAdmin(),
-      link: '/home/register-players'
+      alias: 'Players',
+      show: !!this.playersService.selectedGroup() && !this.playersService.isAdmin(),
+      link: '/home/players/manage-players'
     },
     {
       action: MenuAction.NAVIGATE,
       alias: 'Players',
-      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin() && this.adminControlService.getAdminControl().showProtectedPages,
-      link: '/home/manage-players'
+      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
+      link: '/home/players'
     },
     {
       action: MenuAction.NAVIGATE,
-      alias: 'create draft',
-      show: this.playersService.isAdmin(),
+      alias: 'Create draft',
+      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
       link: '/home/create-draft-session'
     },
     {
       action: MenuAction.NAVIGATE,
-      alias: 'fantasy',
-      show: true,
+      alias: 'Fantasy',
+      show: !!this.playersService.selectedGroup(),
       link: '/home/fantasy'
     }
   ])
