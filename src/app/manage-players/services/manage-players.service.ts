@@ -1,13 +1,12 @@
 import {computed, inject, Injectable, linkedSignal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
-import {AutoCompleteOption, ModalsService} from 'ui';
+import {AutoCompleteOption} from 'ui';
 import {Player} from '../../players/models/player.model';
 import {AdminControlService} from '../../user/admin-control.service';
 
 @Injectable()
 export class ManagePlayersService {
   playersService = inject(PlayersService);
-  modalsService = inject(ModalsService);
   adminControlService = inject(AdminControlService);
 
   selectedPlayerOption = '';
@@ -34,16 +33,6 @@ export class ManagePlayersService {
 
   onChangePlayer(option: AutoCompleteOption ) {
     this.selectedPlayer.set(this.allPlayersArray().filter((p => p.id === option.value))[0]);
-  }
-
-  deletePlayer() {
-    this.modalsService.openConfirmModal({
-      description: `Are you sure you want to delete ${this.selectedPlayer().name}?`,
-    }).afterClosed().subscribe((result) => {
-      if(result) {
-        this.playersService.setPlayerActiveStatus(this.selectedPlayer(), false).then(() => this.selectedPlayer.set(null))
-      }
-    });
   }
 
   removeSelectedPlayer() {

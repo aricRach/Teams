@@ -1,3 +1,6 @@
+@if(editPlayerService.selectedPlayer()) {
+  <button class="delete-btn active-btn alert-btn" (click)="editPlayerService.deletePlayer()">Delete Player</button>
+}
  <app-generic-form
     [formFields]=editPlayerService.controls()
     [title]="'Edit player details'"

@@ -7,11 +7,13 @@ import {ManagePlayersService} from './manage-players.service';
 export class EditPlayerService {
 
   playersService = inject(PlayersService);
+  modalsService = inject(ModalsService);
   managePlayersService = inject(ManagePlayersService);
 
   // @ts-ignore
   controls = computed<FormField[]>(() => this.buildEditPlayerDetailsFields());
   shouldDisabledFields = computed(() => !this.managePlayersService.selectedPlayer())
+  selectedPlayer = computed(() => this.managePlayersService.selectedPlayer());
 
   editPlayer(playerDetails: FormGroup<any>) {
     const details = playerDetails.getRawValue();
@@ -25,7 +27,7 @@ export class EditPlayerService {
         alias: 'name:',
         name: 'name',
         disabled: this.shouldDisabledFields(),
-        value: this.managePlayersService.selectedPlayer()?.name,
+        value: this.selectedPlayer()?.name,
         dynamicComponent: DynamicComponentsTypes.INPUT,
         validators: genericValidators.required,
       },
@@ -33,7 +35,7 @@ export class EditPlayerService {
         alias: 'rating:',
         name: 'rating',
         disabled: this.shouldDisabledFields(),
-        value: this.managePlayersService.selectedPlayer()?.rating,
+        value: this.selectedPlayer()?.rating,
         dynamicComponent: DynamicComponentsTypes.INPUT,
         subInputType: subInputType.NUMBER,
         validators: {...genericValidators.required, ...genericValidators.positiveNumber},
@@ -42,7 +44,7 @@ export class EditPlayerService {
         alias: 'email:',
         name: 'email',
         disabled: this.shouldDisabledFields(),
-        value: this.managePlayersService.selectedPlayer()?.email,
+        value: this.selectedPlayer()?.email,
         dynamicComponent: DynamicComponentsTypes.INPUT,
         validators: {
           email: {
@@ -55,10 +57,20 @@ export class EditPlayerService {
         alias: 'Is guest:',
         name: 'isGuest',
         disabled: this.shouldDisabledFields(),
-        value: this.managePlayersService.selectedPlayer()?.isGuest || false,
+        value: this.selectedPlayer()?.isGuest || false,
         dynamicComponent: DynamicComponentsTypes.CHECKBOX,
         validators: {},
       },
     ]
+  }
+
+  deletePlayer() {
+    this.modalsService.openConfirmModal({
+      description: `Are you sure you want to delete ${this.selectedPlayer().name}?`,
+    }).afterClosed().subscribe((result) => {
+      if(result) {
+        this.playersService.setPlayerActiveStatus(this.selectedPlayer(), false).then(() => this.managePlayersService.removeSelectedPlayer())
+      }
+    });
   }
 }

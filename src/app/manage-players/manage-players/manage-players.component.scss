@@ -5,7 +5,7 @@
 
 .manage-players-links {
   margin-bottom: 10px;
-  a,span {
+  a {
     width: 145px;
   }
 }
@@ -15,4 +15,8 @@
 
 label >span {
   margin-bottom: 10px;
+}
+
+span a {
+  display: block;
 }

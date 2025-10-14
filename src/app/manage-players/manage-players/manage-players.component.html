@@ -2,11 +2,14 @@
   <a routerLinkActive="active" class="active-btn link-btn" routerLink="player-progress">Player progress</a>
   @if(managePlayersService.isAdmin()) {
     <span [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()"
-          matTooltip="In order to see this page enable 'show protected pages' in admin control" class="active-btn link-btn">
-          <a [class.disabled]="!managePlayersService.isAllowToViewEditPages()" routerLinkActive="active"  routerLink="edit-player" [routerLinkActiveOptions]="{ exact: true }">Edit player</a>
+          matTooltip="In order to see this page enable 'show protected pages' in admin control" >
+          <a class="active-btn link-btn" routerLinkActive="active" [class.disabled]="!managePlayersService.isAllowToViewEditPages()"  routerLink="edit-player">Edit player</a>
     </span>
-    <span [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()" matTooltip="In order to see this page enable 'show protected pages' in admin control" class="active-btn link-btn">
-          <a [class.disabled]="!managePlayersService.isAllowToViewEditPages()" routerLinkActive="active" routerLink="edit-player-statistics">Edit last statistics</a>
+    <span  [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()" matTooltip="In order to see this page enable 'show protected pages' in admin control">
+          <a routerLinkActive="active" class="active-btn link-btn" [class.disabled]="!managePlayersService.isAllowToViewEditPages()"  routerLink="edit-player-statistics">Edit last statistics</a>
+    </span>
+    <span [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()" matTooltip="In order to see this page enable 'show protected pages' in admin control">
+          <a routerLinkActive="active" class="active-btn link-btn" [class.disabled]="!managePlayersService.isAllowToViewEditPages()" routerLink="reactivate-players">Reactivate players</a>
     </span>
   }
 </div>
@@ -28,10 +31,6 @@
                        (optionSelected)="managePlayersService.onChangePlayer($event)"></app-auto-complete>
 
   </label>
-
-  @if(managePlayersService.selectedPlayer()) {
-    <button class="delete-btn active-btn alert-btn" (click)="managePlayersService.deletePlayer()">Delete Player</button>
-  }
 </div>
 
 <router-outlet></router-outlet>
