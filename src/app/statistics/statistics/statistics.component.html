@@ -2,8 +2,8 @@
   <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="table">Table</a>
   <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="team-of-the-week">Team Of The Week</a>
   @if(statisticsService.isAdmin()) {
-    <span class="active-btn link-btn statistic-link" [matTooltipDisabled]="statisticsService.shouldShowProtectedRoutes()" matTooltip="In order to see this page enable 'show protected pages' in admin control">
-      <a [class.disabled]="!statisticsService.shouldShowProtectedRoutes()"
+    <span [matTooltipDisabled]="statisticsService.shouldShowProtectedRoutes()" matTooltip="In order to see this page enable 'show protected pages' in admin control">
+      <a class="active-btn link-btn statistic-link" [class.disabled]="!statisticsService.shouldShowProtectedRoutes()"
          routerLinkActive="active"
          routerLink="edit-statistics">Edit Statistics</a>
   </span>

@@ -1,9 +1,13 @@
-@if(editPlayerService.selectedPlayer()) {
-  <button class="delete-btn active-btn alert-btn" (click)="editPlayerService.deletePlayer()">Delete Player</button>
-}
+
  <app-generic-form
     [formFields]=editPlayerService.controls()
     [title]="'Edit player details'"
+    [additionalTemplate]="deleteBtn"
     (formSubmit)="editPlayerService.editPlayer($event)">
   </app-generic-form>
 
+ <ng-template #deleteBtn>
+   @if(editPlayerService.selectedPlayer()) {
+     <button class="delete-btn active-btn alert-btn" (click)="editPlayerService.deletePlayer()">Delete Player</button>
+   }
+ </ng-template>
