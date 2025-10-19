@@ -28,12 +28,21 @@ export class PlayersService {
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
   private teams = signal<{[key: string]: { players: Player[] }}>(structuredClone(skeleton));
+  private inActivePlayers = signal<null | Player[]>(null);
   allPlayersLabel = 'allPlayers';
 
    computedTeams = computed(() =>  JSON.parse(JSON.stringify(this.teams()))) // use only in drag-drop-component.
 
   setTeams(teams: any) {
     this.teams.set({...teams});
+  }
+
+  setInactivePlayers(inactivePlayers: Player[]): void {
+     this.inActivePlayers.set(inactivePlayers);
+  }
+
+  getInactivePlayers(): Player[] | null {
+     return this.inActivePlayers();
   }
 
   getUserCreatedGroups() {
@@ -86,21 +95,23 @@ export class PlayersService {
     return playersArray.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
   }
 
-    getAllActivePlayers() {
-      return this.playersApiService.getAllActivePlayers(this.selectedGroup().id).pipe(
+    getPlayersFromDB(activePlayers = true) {
+      return this.playersApiService.getPlayers(this.selectedGroup().id, activePlayers).pipe(
          take(1),
         tap((allPlayers) => {
-          const teams = Object.fromEntries(Object.entries(structuredClone(skeleton)).slice(0, this.numberOfTeams() + 1));
-          for (const player of allPlayers) {
-            if(teams.hasOwnProperty(player['team'])) {
-              // @ts-ignore
-              teams[player.team].players.push(player);
-            } else {
-              // @ts-ignore
-              teams['allPlayers'].players.push(player);
+          if (activePlayers) {
+            const teams = Object.fromEntries(Object.entries(structuredClone(skeleton)).slice(0, this.numberOfTeams() + 1));
+            for (const player of allPlayers) {
+              if(teams.hasOwnProperty(player['team'])) {
+                // @ts-ignore
+                teams[player.team].players.push(player);
+              } else {
+                // @ts-ignore
+                teams['allPlayers'].players.push(player);
+              }
             }
+            this.teams.set(teams);
           }
-          this.teams.set(teams);
         })
        )
     }
@@ -161,12 +172,11 @@ export class PlayersService {
     this.spinnerService.setIsLoading(true)
    return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.id, isActive).then(async () => {
      this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`);
-     if(isActive) { // if you want to make the player active you need to fetch again.
-       this.getAllActivePlayers().subscribe(() => {});
+     if(isActive) {
+       await this.switchPlayerToActive(player);
      }
-     if(!isActive) { // if you want to remove delete it from the specific team.
-       await this.membersService.removeMember(this.selectedGroup().id, player.email);
-        this.removePlayerSignal(player);
+     if(!isActive) {
+       await this.switchPlayerToInactive(player)
       }
    }).catch(() => {
      this.popoutService.addErrorPopOut(`please try again later`);
@@ -232,7 +242,7 @@ export class PlayersService {
       })
     }
 
-    removePlayerSignal(player: Player) {
+    private removePlayerSignal(player: Player) {
       this.teams.update((teams) => {
         for (const teamKey in teams) {
           // @ts-ignore
@@ -249,9 +259,9 @@ export class PlayersService {
       });
     }
 
-  addPlayersSignal(addedPlayers: Player[]) {
+  addPlayersSignal(addedPlayers: Player[], team='allPlayers') {
     this.teams.update((teams) => {
-      teams['allPlayers'].players.push(...addedPlayers);
+      teams[team].players.push(...addedPlayers);
       return teams;
     })
   }
@@ -263,5 +273,27 @@ export class PlayersService {
 
   setNumberOfTeams(numberOfTeams: number) {
     this.numberOfTeams.set(numberOfTeams);
+  }
+
+  private async switchPlayerToActive(player: Player) {
+    await this.membersService.addMember(this.selectedGroup().id, player.email);
+    this.addPlayersSignal([{...player, isActive: true}]);
+    const inactivePlayers = this.inActivePlayers()
+    if (inactivePlayers) {
+      // @ts-ignore
+      this.inActivePlayers.update((inactivePlayers: Player[]) => {
+        return inactivePlayers.filter(p => p.id !== player.id);
+      })
+    }
+  }
+
+  private async switchPlayerToInactive(player: Player) {
+    await this.membersService.removeMember(this.selectedGroup().id, player.email);
+    this.removePlayerSignal(player);
+    // @ts-ignore
+    this.inActivePlayers.update((inactivePlayers: Player[]) => {
+      inactivePlayers.push(player);
+      return inactivePlayers;
+    })
   }
 }

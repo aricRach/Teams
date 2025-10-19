@@ -66,10 +66,10 @@ export class EditPlayerService {
 
   deletePlayer() {
     this.modalsService.openConfirmModal({
-      description: `Are you sure you want to delete ${this.selectedPlayer().name}?`,
+      description: `Are you sure you want to delete ${this.selectedPlayer()?.name}?`,
     }).afterClosed().subscribe((result) => {
       if(result) {
-        this.playersService.setPlayerActiveStatus(this.selectedPlayer(), false).then(() => this.managePlayersService.removeSelectedPlayer())
+        this.playersService.setPlayerActiveStatus(this.selectedPlayer()!, false).then(() => this.managePlayersService.removeSelectedPlayer())
       }
     });
   }

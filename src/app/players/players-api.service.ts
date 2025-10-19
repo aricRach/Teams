@@ -26,12 +26,10 @@ export class PlayersApiService {
   private firestore = inject(Firestore);
   private auth = inject(Auth);
 
-  getAllActivePlayers(groupId: string): Observable<any[]> {
+  getPlayers(groupId: string, activePlayers: boolean): Observable<any[]> {
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-    const activePlayersQuery = query(playersRef, where('isActive', '!=', false));
+    const activePlayersQuery = query(playersRef, where('isActive', '==', activePlayers));
     const players$ = collectionData(activePlayersQuery, { idField: 'id' });
-
-
     return players$.pipe(
       switchMap((players: any[]) => {
         const playersWithStats$ = players.map(async (player) => {

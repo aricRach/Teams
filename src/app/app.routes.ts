@@ -28,6 +28,7 @@ import {fantasyAllUsersPicksResolver} from './fantasy/resolvers/fantasy-all-user
 import {exitFormGuard} from './guards/exit-form.guard';
 import {exitFantasyDraftGuard} from './fantasy/guards/exit-fantasy-draft.guard';
 import {adminControlGuard} from './guards/admin-control.guard';
+import {inactivePlayersResolver} from './manage-players/resolvers/inactive-players.resolver';
 
 export const routes: Routes = [
   {
@@ -142,6 +143,18 @@ export const routes: Routes = [
               },
             ]
           },
+          {
+            path: 'reactivate-players',
+            loadComponent: () =>
+              import('./manage-players/reactivate-players/reactivate-players.component').then(
+                (m) => m.ReactivatePlayersComponent
+              ),
+            canActivate: [groupAdminGuard],
+            resolve: {
+              inactivePlayers: inactivePlayersResolver
+            },
+            data: { breadcrumb: 'Reactivate Players' },
+          },
         ]
       },
       {
@@ -177,7 +190,8 @@ export const routes: Routes = [
             path: 'analytics',
             component: FantasyAnalyticsComponent,
             resolve: {
-              fantasyAllUsersPicks: fantasyAllUsersPicksResolver
+              fantasyAllUsersPicks: fantasyAllUsersPicksResolver,
+              inactivePlayers: inactivePlayersResolver
             }
           },
           {

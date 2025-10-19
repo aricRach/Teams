@@ -1,4 +1,4 @@
-import {computed, inject, Injectable, linkedSignal} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {AutoCompleteOption} from 'ui';
 import {Player} from '../../players/models/player.model';
@@ -9,14 +9,7 @@ export class ManagePlayersService {
   playersService = inject(PlayersService);
   adminControlService = inject(AdminControlService);
 
-  selectedPlayerOption = '';
-
-  // linked signal - *computed* when allPlayersArray changed allow to load the newest player details.
-  // initial value is null.
-  // *able to change*.
-  selectedPlayer = linkedSignal<any>(() => {
-    return this.allPlayersArray().filter((p => p.name === this.selectedPlayerOption))[0] || null;
-  });
+  selectedPlayer = signal<any>(null);
 
   allPlayersArray = computed(() => {
     return [...this.playersService.flattenPlayers()]

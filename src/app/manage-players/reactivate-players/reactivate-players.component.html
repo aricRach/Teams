@@ -1,0 +1,16 @@
+<h3>
+  Reactivate Players
+</h3>
+<p>select an inactive player from the list in order to reactivate him.<br>
+  once done he will be available for picking again and his statistics will be shown.</p>
+
+    <app-auto-complete [inputValue]="reactivatePlayersService.selectedPlayer()?.name || ''"
+                       (optionCleaned)="reactivatePlayersService.removeSelectedPlayer()"
+                       [options]="reactivatePlayersService.autoCompletePlayersOptions()"
+                       (optionSelected)="reactivatePlayersService.onChangePlayer($event)"/>
+
+  @if(reactivatePlayersService.selectedPlayer()) {
+    <button class="active-btn submit-btn" (click)="reactivatePlayersService.reactivatePlayer()">Reactivate</button>
+  }
+
+

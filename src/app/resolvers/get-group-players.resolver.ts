@@ -17,7 +17,7 @@ export const getGroupPlayersResolver: ResolveFn<any> = (route, state) => {
   }
   adminControlService.cleanAdminControlState();
   spinnerService.setIsLoading(true);
-  return playersService.getAllActivePlayers().pipe(finalize(() => {
+  return playersService.getPlayersFromDB().pipe(finalize(() => {
     spinnerService.setIsLoading(false);
   }),);
 };

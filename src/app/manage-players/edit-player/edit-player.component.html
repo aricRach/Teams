@@ -8,6 +8,6 @@
 
  <ng-template #deleteBtn>
    @if(editPlayerService.selectedPlayer()) {
-     <button class="delete-btn active-btn alert-btn" (click)="editPlayerService.deletePlayer()">Delete Player</button>
+     <button type=button class="delete-btn active-btn alert-btn" (click)="editPlayerService.deletePlayer()">Delete Player</button>
    }
  </ng-template>

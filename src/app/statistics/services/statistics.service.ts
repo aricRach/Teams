@@ -40,7 +40,7 @@ export class StatisticsService {
 
    deleteAllDayStatistics() {
    return this.playersService.deleteDayStatistics(this.selectedDate()).then(() => {
-     this.playersService.getAllActivePlayers().subscribe(() => {
+     this.playersService.getPlayersFromDB().subscribe(() => {
        this.selectedDate.set(this.selectAllLabel());
        this.getAllStatisticsDateOptions();
        this.router.navigate(['home','statistics', 'table']);

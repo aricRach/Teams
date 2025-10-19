@@ -2,7 +2,7 @@ import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {FantasyData, FantasyMeta} from './fantasy-api.service';
 import {SpinnerService} from '../../spinner.service';
-import {Statistics} from '../../players/models/player.model';
+import {Player, Statistics} from '../../players/models/player.model';
 
 @Injectable()
 export class FantasyAnalyticsService {
@@ -14,7 +14,10 @@ export class FantasyAnalyticsService {
   selectAllLabel = signal('Select All');
   selectedDate = signal(this.selectAllLabel());
   allFantasyData = signal<FantasyData>({});
-  allPlayers = computed(() => this.playersService.flattenPlayers(false));
+  allPlayers = computed(() => {
+    return [...this.playersService.flattenPlayers(), ...this.inactivePlayers()];
+  });
+  inactivePlayers = signal<Player[]>([]);
   fantasyMetaData = signal({} as FantasyMeta);
 
   columns = signal([

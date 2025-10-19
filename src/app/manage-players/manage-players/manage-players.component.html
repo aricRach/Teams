@@ -8,9 +8,6 @@
     <span  [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()" matTooltip="In order to see this page enable 'show protected pages' in admin control">
           <a routerLinkActive="active" class="active-btn link-btn" [class.disabled]="!managePlayersService.isAllowToViewEditPages()"  routerLink="edit-player-statistics">Edit last statistics</a>
     </span>
-    <span [matTooltipDisabled]="managePlayersService.isAllowToViewEditPages()" matTooltip="In order to see this page enable 'show protected pages' in admin control">
-          <a routerLinkActive="active" class="active-btn link-btn" [class.disabled]="!managePlayersService.isAllowToViewEditPages()" routerLink="reactivate-players">Reactivate players</a>
-    </span>
   }
 </div>
 <div class="center gap-10 manage-player-header">
@@ -25,7 +22,7 @@
     <span>
        select player
     </span>
-    <app-auto-complete [inputValue]="managePlayersService.selectedPlayer()?.name"
+    <app-auto-complete [inputValue]="managePlayersService.selectedPlayer()?.name || ''"
                        (optionCleaned)="managePlayersService.removeSelectedPlayer()"
                        [options]="managePlayersService.autoCompletePlayersOptions()"
                        (optionSelected)="managePlayersService.onChangePlayer($event)"></app-auto-complete>

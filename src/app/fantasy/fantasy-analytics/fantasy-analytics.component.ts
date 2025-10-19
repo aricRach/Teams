@@ -4,6 +4,7 @@ import {JsonPipe} from '@angular/common';
 import {GridComponent} from 'ui';
 import {FantasyData, FantasyMeta} from '../services/fantasy-api.service';
 import {ActivatedRoute} from '@angular/router';
+import {Player} from '../../players/models/player.model';
 
 @Component({
   selector: 'app-fantasy-analytics',
@@ -16,6 +17,7 @@ export class FantasyAnalyticsComponent implements OnInit {
 
   fantasyAnalyticsService = inject(FantasyAnalyticsService);
   fantasyAllUsersPicks = input();
+  inactivePlayers = input<Player[]>();
 
   private route = inject(ActivatedRoute);
 
@@ -28,6 +30,9 @@ export class FantasyAnalyticsComponent implements OnInit {
     const meta = this.route.parent?.snapshot.data['fantasyMeta'];
     if(meta) {
       this.fantasyAnalyticsService.setMetaData(meta as FantasyMeta);
+    }
+    if(this.inactivePlayers()) {
+      this.fantasyAnalyticsService.inactivePlayers.set(this.inactivePlayers() as Player[])
     }
   }
 }
