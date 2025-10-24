@@ -11,9 +11,32 @@ export class StatisticsService {
 
   getSelectedDate = computed(() => this.selectedDate());
 
+  innerTabs = computed(() => {
+    return [
+      {
+        link: 'table',
+        title: 'Table',
+        tooltip: '',
+        isDisabled: false,
+      },
+      {
+        link: 'team-of-the-week',
+        title: 'Team Of The Week',
+        tooltip: '',
+        isDisabled: false,
+      },
+      {
+        link: 'edit-statistics',
+        title: 'Edit Statistics',
+        tooltip: this.adminControl.getAdminControl().showProtectedPages ? '' : 'In order to see this page enable \'show protected pages\' in admin control',
+        isDisabled: !this.adminControl.getAdminControl().showProtectedPages
+      }
+    ]
+  })
   playersService = inject(PlayersService);
   adminControl = inject(AdminControlService);
   router = inject(Router);
+
   constructor() {
     this.getAllStatisticsDateOptions();
   }
@@ -52,7 +75,4 @@ export class StatisticsService {
     return this.playersService.isAdmin();
   }
 
-  shouldShowProtectedRoutes() {
-    return this.adminControl.getAdminControl().showProtectedPages;
-  }
 }

@@ -3,20 +3,12 @@
   padding: 20px;
 }
 
-.manage-players-links {
-  margin-bottom: 10px;
-  a {
-    width: 145px;
-  }
-}
 .manage-player-header {
   margin: 20px;
 }
 
-label >span {
-  margin-bottom: 10px;
-}
 
-span a {
-  display: block;
+app-inner-tabs {
+ display: flex;
+  justify-content: center;
 }

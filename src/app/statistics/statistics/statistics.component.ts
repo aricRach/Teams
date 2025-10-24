@@ -2,6 +2,7 @@ import {Component, inject} from '@angular/core';
 import {RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {StatisticsService} from '../services/statistics.service';
 import {MatTooltip} from '@angular/material/tooltip';
+import {InnerTabsComponent} from '../../shared/inner-tabs/inner-tabs.component';
 
 
 @Component({
@@ -11,6 +12,7 @@ import {MatTooltip} from '@angular/material/tooltip';
     RouterOutlet,
     RouterLinkActive,
     MatTooltip,
+    InnerTabsComponent
   ],
   templateUrl: './statistics.component.html',
   standalone: true,

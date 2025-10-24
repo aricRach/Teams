@@ -1,0 +1,15 @@
+<section class="statistic-links">
+  @for(tab of tabs(); track tab.link) {
+    @if(tab.tooltip) {
+      <div [matTooltip]="tab.tooltip">
+      <a class="active-btn link-btn statistic-link" [class.disabled]="tab.isDisabled"
+         routerLinkActive="active"
+         [routerLink]="tab.link">{{tab.title}}</a>
+      </div>
+    }
+    @else {
+      <a routerLinkActive="active" class="active-btn link-btn statistic-link" [routerLink]="tab.link">{{tab.title}}</a>
+    }
+  }
+</section>
+

@@ -10,10 +10,8 @@ section {
   gap: 10px;
 }
 
-.statistic-links {
-  margin-bottom: 10px;
-  .statistic-link {
-    display: block;
-    width: 145px;
-  }
+app-inner-tabs {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }

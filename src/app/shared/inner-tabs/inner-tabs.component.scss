@@ -1,0 +1,31 @@
+
+section {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.statistic-links {
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 450px;
+  .statistic-link {
+    display: block;
+    flex-basis: 30%;
+    a {
+      flex-basis: 30%;
+    }
+
+  }
+  div {
+    flex-basis: 30%;
+    display: inline-block;
+    margin-right: 10px;
+    a {
+      width: 100%;
+      display: block;
+    }
+  }
+
+}

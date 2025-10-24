@@ -11,6 +11,34 @@ export class ManagePlayersService {
 
   selectedPlayer = signal<any>(null);
 
+  innerTabs = computed(() => {
+    return [
+      {
+        link: 'player-progress',
+        title: 'Player progress',
+        tooltip: '',
+        isDisabled: false,
+      },
+      ...(
+        this.playersService.isAdmin() ?
+          [
+            {
+            link: 'edit-player',
+            title: 'Edit player',
+            tooltip: this.adminControlService.getAdminControl().showProtectedPages ? '' : "In order to see this page enable 'show protected pages' in admin control",
+            isDisabled: !this.adminControlService.getAdminControl().showProtectedPages,
+          },
+            {
+              link: 'edit-player-statistics',
+              title: 'Edit last statistics',
+              tooltip: this.adminControlService.getAdminControl().showProtectedPages ? '' : "In order to see this page enable 'show protected pages' in admin control",
+              isDisabled: !this.adminControlService.getAdminControl().showProtectedPages,
+            },
+          ]
+          : []
+      )
+    ]
+  })
   allPlayersArray = computed(() => {
     return [...this.playersService.flattenPlayers()]
   });
@@ -20,9 +48,6 @@ export class ManagePlayersService {
       ({value: p.id, alias: p.name}))];
   });
 
-  isAllowToViewEditPages = computed(() => this.adminControlService.getAdminControl().showProtectedPages)
-
-  isAdmin = computed(() => this.playersService.isAdmin())
 
   onChangePlayer(option: AutoCompleteOption ) {
     this.selectedPlayer.set(this.allPlayersArray().filter((p => p.id === option.value))[0]);
