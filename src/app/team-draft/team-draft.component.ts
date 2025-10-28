@@ -1,4 +1,4 @@
-import {Component, computed, ElementRef, inject, input, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, input, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {TeamDraftService} from './services/team-draft.service';
 import {NgIf} from '@angular/common';
 import {Subscription} from 'rxjs';
@@ -9,7 +9,7 @@ import {ChatComponent, ChatMessage} from 'ui';
 
 @Component({
   selector: 'app-team-draft',
-  imports: [NgIf, RouterModule, FormsModule, ChatComponent ],
+  imports: [RouterModule, FormsModule, ChatComponent ],
   templateUrl: './team-draft.component.html',
   styleUrl: './team-draft.component.scss'
 })

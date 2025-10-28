@@ -1,12 +1,11 @@
 import {Component, inject, input, OnInit} from '@angular/core';
 import {ReactivatePlayersService} from '../services/reactivate-players.service';
-import {JsonPipe} from '@angular/common';
 import {Player} from '../../players/models/player.model';
 import {AutoCompleteComponent} from 'ui';
 
 @Component({
   selector: 'app-reactivate-players',
-  imports: [JsonPipe, AutoCompleteComponent],
+  imports: [AutoCompleteComponent],
   providers: [ReactivatePlayersService],
   templateUrl: './reactivate-players.component.html',
   styleUrl: './reactivate-players.component.scss'

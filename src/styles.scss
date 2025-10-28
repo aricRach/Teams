@@ -71,7 +71,9 @@ footer {
   background: rgba(97, 97, 97, 0.9) !important;
   color: white;
   font-size: 14px;
-  text-align: center;
+}
+.mdc-tooltip--multiline .mat-mdc-tooltip-surface {
+  text-align: center !important;
 }
 
 a {
