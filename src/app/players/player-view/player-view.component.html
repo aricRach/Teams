@@ -1,3 +1,9 @@
 <div class="player-view-container">
 {{playerView()}}
+  @if(playerForm() === PlayerFormStatus.UP) {
+    <span class="up">^</span>
+  }
+  @if(playerForm() === PlayerFormStatus.DOWN) {
+    <span class="down">^</span>
+  }
 </div>

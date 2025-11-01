@@ -1,3 +1,16 @@
 .player-view-container {
   user-select: none;
 }
+
+.up {
+  color: #4caf50;
+  font-weight: bold;
+  display: inline-block;
+  transform: rotate(30deg);
+}
+.down {
+  color: red;
+  transform: rotate(145deg);
+  display: inline-block;
+  font-weight: bold;
+}
