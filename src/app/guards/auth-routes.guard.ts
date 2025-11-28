@@ -10,6 +10,5 @@ export const authRoutesGuard: CanActivateFn = (route, state) => {
     localStorage.removeItem('redirectTo');
     return true;
   }
-  router.navigate(['/']);
-  return false;
+  return router.navigate(['/']);
 };

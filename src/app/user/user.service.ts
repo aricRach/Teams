@@ -35,23 +35,23 @@ export class UserService {
       console.error("Firebase Auth is not available (Possibly SSR mode).");
       return;
     }
+    const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
     if(this.auth.currentUser) {
       this.user.set(this.auth.currentUser);
-      const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
-      localStorage.setItem('redirectTo', '');
       this.router.navigate([redirectTo]).then(() => {
+        localStorage.removeItem('redirectTo');
         // @ts-ignore
         this.popoutService.addSuccessPopOut(`welcome ${this.auth.currentUser.displayName}`)
       });
-
     } else {
       this.spinnerService.setIsLoading(true);
-      const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
-      localStorage.setItem('redirectTo', '');
       signInWithPopup(this.auth, this.provider)
         .then((result) => {
           this.user.set(result.user);
-          this.router.navigate([redirectTo]).then(() => this.spinnerService.setIsLoading(false));
+          this.router.navigate([redirectTo]).then(() => {
+            localStorage.removeItem('redirectTo');
+            this.spinnerService.setIsLoading(false)
+          });
         })
         .catch((error) => {
           this.spinnerService.setIsLoading(false);
