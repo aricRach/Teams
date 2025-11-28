@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {doc, Firestore, writeBatch} from '@angular/fire/firestore';
+import {doc, Firestore, setDoc, writeBatch} from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -21,5 +21,13 @@ export class EditStatisticsApiService {
       batch.set(statDocRef, stats, { merge: false });
     }
     await batch.commit();
+  }
+
+  async markTotwDateNotUpdated(groupId: string, date: string) {
+    const ref = doc(
+      this.firestore,
+      `groups/${groupId}/teamOfTheWeek/${date}`
+    );
+    await setDoc(ref, { shouldUpdate: true }, { merge: true });
   }
 }

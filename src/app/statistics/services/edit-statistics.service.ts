@@ -54,6 +54,7 @@ export class EditStatisticsService {
           };
         });
         await this.updateStatisticsForPlayers(updatedTeamStatistics, editTeamEvent.team);
+        await this.editStatisticsApiService.markTotwDateNotUpdated(this.playersService.selectedGroup().id, selectedDate).then()
       }
     })
   }
