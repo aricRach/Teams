@@ -46,7 +46,8 @@ export class PlayersApiService {
 
   getAllPlayers(groupId: string) {
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-    return collectionData(playersRef, { idField: "id" });
+    const activePlayersQuery = query(playersRef, where('isActive', '==', true));
+    return collectionData(activePlayersQuery, { idField: "id" });
   }
 
   /**

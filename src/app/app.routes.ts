@@ -29,6 +29,8 @@ import {exitFormGuard} from './guards/exit-form.guard';
 import {exitFantasyDraftGuard} from './fantasy/guards/exit-fantasy-draft.guard';
 import {adminControlGuard} from './guards/admin-control.guard';
 import {inactivePlayersResolver} from './manage-players/resolvers/inactive-players.resolver';
+import {RatePlayersComponent} from './players/rate-players/rate-players.component';
+import {getSpecificGroupPlayersResolver} from './resolvers/get-specific-group-players.resolver';
 
 export const routes: Routes = [
   {
@@ -202,11 +204,15 @@ export const routes: Routes = [
           }
         ]
       },
-      // {
-      //   path: 'rate-players',
-      //   component: RatePlayersComponent,
-      // },
     ]
+  },
+  {
+    path: 'rate-players/:groupId',
+    component: RatePlayersComponent,
+    resolve: {
+      allPlayers: getSpecificGroupPlayersResolver
+    },
+    canActivate: [authRoutesGuard]
   },
   {
     path: 'team-draft/:groupId/:sessionId',

@@ -54,9 +54,9 @@ export class PlayersService {
     }));
   }
 
-  getAllPlayers() {
+  getSpecificGroupPlayers(groupId: string) {
      this.spinnerService.setIsLoading(true);
-     return this.playersApiService.getAllPlayers(this.selectedGroup().id)
+     return this.playersApiService.getAllPlayers(groupId)
        .pipe(finalize(() => this.spinnerService.setIsLoading(false)));
   }
 
@@ -160,9 +160,9 @@ export class PlayersService {
     }
   }
 
-  async submitRatings(ratingData: Record<string, number>) {
+  async submitRatings(groupId: string, ratingData: Record<string, number>) {
    this.spinnerService.setIsLoading(true);
-   return this.playersApiService.submitRatings(ratingData, this.selectedGroup().id).then(() => {
+   return this.playersApiService.submitRatings(ratingData, groupId).then(() => {
      this.popoutService.addSuccessPopOut(`rating were successfully updated.`);
    }).catch(() => this.popoutService.addErrorPopOut(`cant save please try later`))
      .finally(() => this.spinnerService.setIsLoading(false));

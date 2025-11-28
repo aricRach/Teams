@@ -1,7 +1,8 @@
-import {Component, computed, inject, linkedSignal, signal} from '@angular/core';
+import {Component, inject, input, linkedSignal} from '@angular/core';
 import {PlayersService} from '../players.service';
-import {FormControl, FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {JsonPipe, NgForOf, NgIf} from '@angular/common';
+import {PopupsService} from 'ui';
 
 @Component({
   selector: 'app-rate-players',
@@ -19,24 +20,37 @@ import {JsonPipe, NgForOf, NgIf} from '@angular/common';
 export class RatePlayersComponent {
 
   playersService = inject(PlayersService);
-  allPlayers = computed(() => this.playersService.flattenPlayers())
+  popupsService = inject(PopupsService);
+  groupId = input<string>('');
+  allPlayers = input<any>();
 
-  ratings = linkedSignal<Record<string, FormControl>>(() => {
-    const r = {}
-    const players = this.allPlayers();
-    players.forEach(player => {
-      // @ts-ignore
-      r[player.name] = new FormControl(5);
+  ratings = linkedSignal(() => {
+    const group: Record<string, FormControl> = {};
+
+    this.allPlayers().forEach((player: any) => {
+      group[player.name] = new FormControl(
+        5,
+        [
+          Validators.required,
+          Validators.min(5),
+          Validators.max(10)
+        ]
+      );
     });
-    return r
 
-  })
+    return new FormGroup(group);
+  });
 
   submitRatings() {
-    let ratingsObj = {} as Record<string, number>;
-    for (const playerName in this.ratings()) {
-      ratingsObj[playerName] = Number(this.ratings()[playerName].value);
+    const form = this.ratings();
+
+    if (form.invalid) {
+      this.popupsService.addErrorPopOut('Rating must be between 5 and 10');
+      return;
     }
-    this.playersService.submitRatings(ratingsObj).then();
+
+    const ratingsObj = form.value as Record<string, number>;
+
+    this.playersService.submitRatings(this.groupId(), ratingsObj).then();
   }
 }
