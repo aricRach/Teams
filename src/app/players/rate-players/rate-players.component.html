@@ -1,24 +1,30 @@
-<div *ngIf="ratings()" class="container">
-  <h2>Rate Players</h2>
+@if(isSubmitted()) {
+  <h1 class="center">Thank you</h1>
+} @else {
+  <div class="container">
+    <h2>Rate Players</h2>
+    <form [formGroup]="ratings()" (ngSubmit)="submitRatings()">
+      @for(player of allPlayers(); track player.id) {
+        <div class="player">
+          <span>{{ player.name }}</span>
+          <select [formControlName]="player.id" class="rating-select">
+            @for(num of [5,6,7,8,9,10, 'dont know']; track $index) {
+              <option [ngValue]="num">
+                {{ num }}
+              </option>
+            }
+          </select>
+        </div>
+      }
 
-  <form [formGroup]="ratings()" (ngSubmit)="submitRatings()">
+      <button
+        type="submit"
+        class="submit-btn"
+        [disabled]="ratings().invalid">
+        Submit Ratings
+      </button>
 
-    <div *ngFor="let player of allPlayers()" class="player">
-      <span>{{ player.name }}</span>
+    </form>
+  </div>
 
-      <select [formControlName]="player.id" class="rating-select">
-        <option *ngFor="let num of [5,6,7,8,9,10, 'dont know']" [ngValue]="num">
-        {{ num }}
-        </option>
-      </select>
-    </div>
-
-    <button
-      type="submit"
-      class="submit-btn"
-      [disabled]="ratings().invalid">
-      Submit Ratings
-    </button>
-
-  </form>
-</div>
+}

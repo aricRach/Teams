@@ -1,4 +1,4 @@
-import {Component, inject, input, linkedSignal} from '@angular/core';
+import {Component, inject, input, linkedSignal, signal} from '@angular/core';
 import {PlayersService} from '../players.service';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {JsonPipe, NgForOf, NgIf} from '@angular/common';
@@ -23,6 +23,7 @@ export class RatePlayersComponent {
   popupsService = inject(PopupsService);
   groupId = input<string>('');
   allPlayers = input<any>();
+  isSubmitted = signal(false);
 
   ratings = linkedSignal(() => {
     const group: Record<string, FormControl> = {};
@@ -61,6 +62,6 @@ export class RatePlayersComponent {
         };
       }
     });
-    this.playersService.submitRatings(this.groupId(), finalRatings).then();
+    this.playersService.submitRatings(this.groupId(), finalRatings).then(() => this.isSubmitted.set(true));
   }
 }
