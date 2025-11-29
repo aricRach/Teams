@@ -160,7 +160,7 @@ export class PlayersService {
     }
   }
 
-  async submitRatings(groupId: string, ratingData: Record<string, number>) {
+  async submitRatings(groupId: string, ratingData: Record<string, { name: string; rating: number}>) {
    this.spinnerService.setIsLoading(true);
    return this.playersApiService.submitRatings(ratingData, groupId).then(() => {
      this.popoutService.addSuccessPopOut(`rating were successfully updated.`);

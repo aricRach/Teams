@@ -28,7 +28,7 @@ export class RatePlayersComponent {
     const group: Record<string, FormControl> = {};
 
     this.allPlayers().forEach((player: any) => {
-      group[player.name] = new FormControl(
+      group[player.id] = new FormControl(
         5,
         [
           Validators.required,
@@ -49,8 +49,18 @@ export class RatePlayersComponent {
       return;
     }
 
-    const ratingsObj = form.value as Record<string, number>;
+    const rawRatings = form.value;
 
-    this.playersService.submitRatings(this.groupId(), ratingsObj).then();
+    const finalRatings: Record<string, { name: string; rating: number }> = {};
+
+    this.allPlayers().forEach((player: any) => {
+      if(!isNaN(rawRatings[player.id])) {
+        finalRatings[player.id] = {
+          name: player.name,
+          rating: rawRatings[player.id]
+        };
+      }
+    });
+    this.playersService.submitRatings(this.groupId(), finalRatings).then();
   }
 }

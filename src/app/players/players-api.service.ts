@@ -186,14 +186,14 @@ export class PlayersApiService {
     return await getDocs(q);
   }
 
-  async submitRatings(ratingData: Record<string, number>, groupId: string) {
+  async submitRatings(ratingData: Record<string, { name: string; rating: number}>, groupId: string) {
     const user = this.auth.currentUser;
     if (!user) {
       return Promise.reject();
     }
 
     const ratingDocRef = doc(this.firestore, `groups/${groupId}/ratings/${user.email}`);
-    return await setDoc(ratingDocRef, ratingData, { merge: true });
+    return await setDoc(ratingDocRef, ratingData);
   }
 
   async setPlayerActiveStatus(groupId: string, playerId: string, isActive: boolean) {
