@@ -10,6 +10,10 @@ import {AuditTrailService} from '../../audit-trail/services/audit-trail.service'
 import {shuffleArray} from '../../utils/array-utils';
 import {ModalComponent} from '../../../modals/modal/modal.component';
 import {AdminControlService} from '../../user/admin-control.service';
+import {balancedTeamsSmallSize, balanceTeams} from './balance-teams';
+import {NotDividableError} from '../errors/not-dividable-error';
+import {PopupsService} from 'ui';
+import {SpinnerService} from '../../spinner.service';
 
 @Component({
   selector: 'app-players-drag-drop-table',
@@ -19,6 +23,8 @@ import {AdminControlService} from '../../user/admin-control.service';
   styleUrl: './players-drag-drop-table.component.scss'
 })
 export class PlayersDragDropTableComponent {
+
+  popupsService = inject(PopupsService);
 
   isLocked = input.required();
   dateStatistics = input<string>();
@@ -151,38 +157,27 @@ export class PlayersDragDropTableComponent {
   }
 
   makeBalancedTeams() {
-    const teams = this.clonedTeams();
-    const numberOfTeams = this.playersService.numberOfTeams();
-    const includeGuests = true; //this.adminControlService.getAdminControl().includeGuests;
-    const teamEntries = Object.entries(teams).slice(1, numberOfTeams + 1); // all active teams except "allPlayers"
-    const players = this.playersService.flattenPlayers(true, includeGuests, Object.fromEntries(teamEntries));
-
-    const shuffledPlayers = shuffleArray(players);
-    shuffledPlayers.sort((a, b) => b.rating - a.rating);
-
-    // Initialize team structures
-    const teamMap: Record<string, { players: Player[], totalRating: number }> = {};
-    teamEntries.forEach(([teamKey]) => {
-      teamMap[teamKey] = { players: [], totalRating: 0 };
-    });
-
-    shuffledPlayers.forEach((player, index) => {
-      const teamIndex = index % numberOfTeams;
-      const [teamKey] = teamEntries[teamIndex];
-      teamMap[teamKey].players.push(player);
-      teamMap[teamKey].totalRating += player.rating;
-    });
-
-    // shuffle balanced teams to avoid knowing level of each player.
-    for(const teamKey in teamMap) {
-      const currentTeam = teamMap[teamKey];
-      currentTeam.players = shuffleArray(currentTeam.players);
-    }
-
-    this.playersService.setTeams({...teams, ...teamMap});
+      const teams = this.clonedTeams();
+      const numberOfTeams = this.playersService.numberOfTeams();
+      const includeGuests = true;
+      const teamEntries = Object.entries(teams).slice(1, numberOfTeams + 1);
+      const players = this.playersService.flattenPlayers(true, includeGuests, Object.fromEntries(teamEntries));
+      if(numberOfTeams <= 3 && players.length <= 18) {
+        try {
+          const teamMap = balancedTeamsSmallSize(shuffleArray(players), teamEntries, numberOfTeams);
+          this.playersService.setTeams({...teams, ...teamMap});
+        } catch (e) {
+          if(e instanceof NotDividableError) {
+            this.popupsService.addErrorPopOut(e.message);
+          }
+        }
+      } else {
+        const teamMap = balanceTeams(shuffleArray(players), teamEntries, numberOfTeams);
+        this.playersService.setTeams({...teams, ...teamMap});
+      }
   }
 
-   setBalancedTeamsModal(confirm : boolean) {
+    setBalancedTeamsModal(confirm : boolean) {
     if(confirm) {
       this.makeBalancedTeams();
     }

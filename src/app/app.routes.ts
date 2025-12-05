@@ -157,6 +157,15 @@ export const routes: Routes = [
             },
             data: { breadcrumb: 'Reactivate Players' },
           },
+          {
+            path: 'community-ratings',
+            loadComponent: () =>
+              import('./manage-players/community-ratings/community-ratings.component').then(
+                (m) => m.CommunityRatingsComponent
+              ),
+            canActivate: [groupAdminGuard, adminControlGuard],
+            data: { breadcrumb: 'Community Ratings' },
+          },
         ]
       },
       {

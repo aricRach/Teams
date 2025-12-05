@@ -1,0 +1,12 @@
+<section>
+    <app-grid
+      [changeToListInSmallScreens]="false"
+      [showPaginator]="false"
+      [config]="communityRatingsService.config()"
+      [columns]="communityRatingsService.columns()"
+      [dataRows]="communityRatingsService.dataRows()"
+      [actions]="[]"></app-grid>
+  </section>
+<div class="center">
+  <button (click)="communityRatingsService.updateCommunityRatings()">Submit</button>
+</div>

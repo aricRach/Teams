@@ -1,0 +1,10 @@
+section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+app-grid {
+  display: block;
+  max-width: 500px;
+}

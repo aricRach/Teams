@@ -1,5 +1,6 @@
-import {Component, signal} from '@angular/core';
+import {Component, computed, inject, signal} from '@angular/core';
 import {LandingPageComponent, NavigationItemType} from 'ui';
+import {AdminControlService} from '../../user/admin-control.service';
 
 @Component({
   selector: 'app-players-landing-page',
@@ -9,10 +10,17 @@ import {LandingPageComponent, NavigationItemType} from 'ui';
 })
 export class PlayersLandingPageComponent {
 
-  pages = signal(
+  adminControlService = inject(AdminControlService);
+
+  showRating = computed(() => {
+    return this.adminControlService.getAdminControl().showRating
+  })
+  pages = computed(() =>
     [
-      { alias: 'Register Players', link: '/home/players/register-players', show: true, type: NavigationItemType.LINK },
-      { alias: 'Players Hub', link: '/home/players/manage-players/player-progress', show: true, type: NavigationItemType.LINK },
-      { alias: 'Reactivate Players', link: '/home/players/reactivate-players', show: true, type: NavigationItemType.LINK },
+      { alias: 'Add Players', link: '/home/players/register-players', type: NavigationItemType.LINK },
+      { alias: 'Players Hub', link: '/home/players/manage-players/player-progress', type: NavigationItemType.LINK },
+      { alias: 'Reactivate Players', link: '/home/players/reactivate-players', type: NavigationItemType.LINK },
+      { alias: 'Community Ratings', link: '/home/players/community-ratings', disabled: !this.showRating(),
+        tooltip: this.showRating() ? '' : 'In order to see this page enable show protected pages in admin control', type: NavigationItemType.LINK },
     ])
 }
