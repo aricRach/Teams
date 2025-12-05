@@ -5,5 +5,7 @@ import {Auth} from "@angular/fire/auth";
 export const signInPageGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
-  return !auth.currentUser ? true : router.navigate(['/select-group']);
+  const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
+
+  return !auth.currentUser ? true : router.navigate([redirectTo]);
 };
