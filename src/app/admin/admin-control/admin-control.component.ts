@@ -1,6 +1,7 @@
 import {Component, HostListener, inject, output, signal} from '@angular/core';
 import {AdminControlService} from '../../user/admin-control.service';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {PlayersService} from '../../players/players.service';
 
 @Component({
   selector: 'app-admin.svg-control',
@@ -11,6 +12,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 export class AdminControlComponent {
 
   adminControlService = inject(AdminControlService);
+  playersService = inject(PlayersService);
 
   isAllowed = signal(false);
 
@@ -63,5 +65,9 @@ export class AdminControlComponent {
         this.submitAdminControl();
       }, 500)
     }
+  }
+
+  deleteAll() {
+    this.playersService.deleteAllStatsAndSpecialCollections();
   }
 }

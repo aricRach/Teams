@@ -20,7 +20,7 @@ export class SelectGroupComponent {
   private auth = inject(Auth);
   isAdmin = computed(() => this.playersService.isAdmin())
   groupChangedSubmitted = signal(false);
-  selectedGroup!: {admins: string[], id: string};
+  selectedGroup!: {admins: string[], id: string, createdBy: string};
   numberOfTeams = 3;
 
   private get currentUserEmail(): string | null {

@@ -14,7 +14,7 @@ import {
   writeBatch
 } from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
-import {Observable, switchMap} from 'rxjs';
+import {Observable, of, switchMap} from 'rxjs';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
 import {Player} from './models/player.model';
 
@@ -237,6 +237,40 @@ export class PlayersApiService {
   async setFantasyMetaIsActive(groupId: string, isActive: boolean) {
     const metaRef = doc(this.firestore, `groups/${groupId}/fantasyDrafts/meta`);
     await updateDoc(metaRef, { isActive });
+  }
+
+
+  async deleteAllStatsAndSpecialCollections(groupId: string) {
+    const batch = writeBatch(this.firestore);
+
+    // --- 1. Delete all player statistics ---
+    const playersCol = collection(this.firestore, `groups/${groupId}/players`);
+    const playersSnap = await getDocs(playersCol);
+
+    for (const playerDoc of playersSnap.docs) {
+      const statsCol = collection(
+        this.firestore,
+        `groups/${groupId}/players/${playerDoc.id}/statistics`
+      );
+      const statsSnap = await getDocs(statsCol);
+
+      statsSnap.forEach(statDoc => {
+        batch.delete(statDoc.ref);
+      });
+    }
+
+    // // --- 2. Delete all Team Of The Week ---
+    const totwCol = collection(this.firestore, `groups/${groupId}/teamOfTheWeek`);
+    const totwSnap = await getDocs(totwCol);
+    totwSnap.forEach(doc => batch.delete(doc.ref));
+
+    // // --- 3. Delete all Fantasy Drafts ---
+    const fantasyCol = collection(this.firestore, `groups/${groupId}/fantasyDrafts`);
+    const fantasySnap = await getDocs(fantasyCol);
+    fantasySnap.forEach(doc => batch.delete(doc.ref));
+
+    // --- Commit ---
+    await batch.commit();
   }
 }
 

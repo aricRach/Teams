@@ -11,14 +11,18 @@ label {
   margin: 15px;
 }
 
-div {
-  margin-top: 30px;
-}
-
 input {
   text-align: center;
 }
 
 .invalid {
   border-color: red;
+}
+
+.continue {
+  margin-top: 30px;
+}
+.delete-all {
+  margin-top: 30px;
+  font-size: 10px;
 }

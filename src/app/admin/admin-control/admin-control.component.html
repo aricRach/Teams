@@ -3,6 +3,10 @@
 @if(isAllowed()) {
   <form [formGroup]="adminForm" (ngSubmit)="submitAdminControl()">
 
+    <div class="center">
+      <button (click)="selectAll()">Toggle all</button>
+    </div>
+
     <label>
       <input type="checkbox" formControlName="showRating" />
       Show Rating
@@ -33,15 +37,18 @@
     </div>
   </form>
 
-  <div class="center">
-    <button (click)="selectAll()">Toggle all</button>
 
-  </div>
+
+  @if(playersService.isGroupCreator()) {
+    <button (click)="deleteAll()" class="delete-all alert-btn active-btn">Delete All Statistics TOTW and Fantasy Data</button>
+  }
 } @else {
   <form [formGroup]="codeForm" (ngSubmit)="submitCode()">
     <input [class.invalid]="codeForm.invalid && codeForm.dirty" placeholder="admin code" formControlName="code">
     <div class="center">
-      <button class="submit-btn active-btn">Continue</button>
+      <button class="continue submit-btn active-btn">Continue</button>
     </div>
   </form>
 }
+
+
