@@ -1,6 +1,14 @@
 <div class="center">
   <h1>Fantasy</h1>
 </div>
+<ul>
+  <li>goal = 3 points</li>
+  <li>win  = 2 points</li>
+</ul>
+<ul>
+  <li>conceded < 5 = +3 bonus</li>
+  <li>captain = *2 points</li>
+</ul>
 <div class="center gap-10 statistic-links">
   @if(fantasyMeta()?.isActive) {
     <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="draft" [queryParams]="{reload: reloadParam()}">Draft</a>

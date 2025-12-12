@@ -68,13 +68,13 @@ export class FantasyAnalyticsService {
 
     userPicks.playerIds
       .slice(0, this.fantasyMetaData().numberOfPicks)
-      .forEach((id) => {
-        const fantasyPlayer = playersMap.get(id + "_" + date);
+      .forEach((selectedPlayerId) => {
+        const fantasyPlayer = playersMap.get(selectedPlayerId + "_" + date);
         if (!fantasyPlayer) return;
 
-      rawPlayerPoints.set(id, (rawPlayerPoints.get(id) || 0) + fantasyPlayer.points);
+      rawPlayerPoints.set(selectedPlayerId, (rawPlayerPoints.get(selectedPlayerId) || 0) + fantasyPlayer.points);
 
-      if (id === userPicks.captain) {
+      if (selectedPlayerId === userPicks.captain) {
         points += fantasyPlayer.points * 2;
         descriptions.push(`${fantasyPlayer.playerName}(C)->${fantasyPlayer.points * 2}`);
       } else {

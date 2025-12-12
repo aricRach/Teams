@@ -33,7 +33,7 @@
           </div>
         }
         @if (adminControlService.getAdminControl().showRating && enableShowRatings()) {
-          <h5>{{ totalRatings()?.[teamKey] }}</h5>
+          <h5>{{ totalRatings()?.[teamKey]?.toFixed(2) }}</h5>
         }
 
         <div

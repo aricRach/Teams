@@ -4,6 +4,7 @@ import {TeamOfTheWeekApiService} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
 import {PopupsService} from 'ui';
 import {SpinnerService} from '../../spinner.service';
+import {shuffleArray} from '../../utils/array-utils';
 
 
 export interface PlayerWeekStates {
@@ -61,8 +62,10 @@ export class TeamOfTheWeekService {
   reGenerateTeamOfTheWeek(date: string) {
     this.spinnerService.setIsLoading(true);
     const weekStates = this.calculateWeekStates(date);
-     this.teamOfTheWeekApiService.generateAiTotw(date, weekStates.players, weekStates.teamSize, true).then(data => {
+     this.teamOfTheWeekApiService.generateAiTotw(date, shuffleArray(weekStates.players), weekStates.teamSize, true).then(data => {
        this.totwData.set(data)
+     }).catch((e) => {
+       console.error(e)
      }).finally(() => {
       this.spinnerService.setIsLoading(false)
     });

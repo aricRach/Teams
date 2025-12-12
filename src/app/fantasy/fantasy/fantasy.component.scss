@@ -3,6 +3,12 @@
   padding: 40px 0;
 }
 
+ul {
+  display: flex;
+  justify-content: center;
+  gap: 35px;
+}
+
 .statistic-links {
   margin-bottom: 10px;
   .statistic-link {
