@@ -28,7 +28,7 @@
     "ng2-charts": "^8.0.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
-    "ui": "file:ui-0.0.1.tgz",
+    "ui": "file:ui-0.0.2.tgz",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

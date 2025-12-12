@@ -76,10 +76,10 @@ export class FantasyAnalyticsService {
 
       if (selectedPlayerId === userPicks.captain) {
         points += fantasyPlayer.points * 2;
-        descriptions.push(`${fantasyPlayer.playerName}(C)->${fantasyPlayer.points * 2}`);
+        descriptions.push(`${fantasyPlayer.playerName}(C)-${fantasyPlayer.points * 2}`);
       } else {
         points += fantasyPlayer.points;
-        descriptions.push(`${fantasyPlayer.playerName}->${fantasyPlayer.points}`);
+        descriptions.push(`${fantasyPlayer.playerName}-${fantasyPlayer.points}`);
       }
     });
 
@@ -135,13 +135,13 @@ export class FantasyAnalyticsService {
         .slice(0, 2)
         .map(([id, points]) => {
           const playerName = this.allPlayers().find((p) => p.id === id)?.name || id;
-          return `${playerName}->${points}`;
+          return `${playerName}-${points}`;
         });
 
       return {
         name: userName,
         points,
-        description: `Top picks (no captain effect): ${topPlayers.join(", ")}`,
+        description: `Top picks (no captain effect):<br> ${topPlayers.join(", ")}`,
       };
     });
   }

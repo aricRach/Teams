@@ -12,7 +12,7 @@
       (cdkDropListDropped)="fantasyDraftService.onDropToSlot($event, i)"
     >
       @if (player) {
-        <button (click)="fantasyDraftService.setCaptain(player.id)" [disabled]="fantasyDraftService.captain() === player.id"
+        <button (click)="fantasyDraftService.setCaptain(player.id)"
                 [class.selected-captain]="fantasyDraftService.captain() === player.id">C</button>
         <div class="player-card selected" cdkDrag [cdkDragData]="player">
           {{ player.name }}
