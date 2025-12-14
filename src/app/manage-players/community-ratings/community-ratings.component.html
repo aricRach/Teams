@@ -1,12 +1,29 @@
-<section>
-    <app-grid
-      [changeToListInSmallScreens]="false"
-      [showPaginator]="false"
-      [config]="communityRatingsService.config()"
-      [columns]="communityRatingsService.columns()"
-      [dataRows]="communityRatingsService.dataRows()"
-      [actions]="[]"></app-grid>
-  </section>
-<div class="center">
-  <button (click)="communityRatingsService.updateCommunityRatings()">Submit</button>
+<div>
+  <header class="in-row center">
+    <h5>share this link: {{communityRatingsService.inviteUrl()}}</h5>
+    <button class="whatsapp-btn" (click)="communityRatingsService.shareOnWhatsApp()">
+      <img src="assets/icons/whatsapp.svg" alt="whatsapp">
+    </button>
+  </header>
+
+  <main>
+  @if(communityRatingsService.dataRows().length > 0) {
+    <section>
+      <app-grid
+        [changeToListInSmallScreens]="false"
+        [showPaginator]="false"
+        [config]="communityRatingsService.config()"
+        [columns]="communityRatingsService.columns()"
+        [dataRows]="communityRatingsService.dataRows()"
+        [actions]="[]"></app-grid>
+    </section>
+    <div class="center">
+      <button class="active-btn submit-btn" (click)="communityRatingsService.updateCommunityRatings()">Submit</button>
+    </div>
+  } @else {
+
+    <h2>There are no available ratings - please ask your team to rate the players</h2>
+  }
+  </main>
 </div>
+

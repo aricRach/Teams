@@ -28,7 +28,7 @@ export class CreateDraftSessionComponent implements OnDestroy{
   sessionUrlToShow = linkedSignal(() => {
     const existingSession = this.existingSession() || '';
     if(existingSession) {
-      return this.createDraftSessionService.buildUrl(existingSession.id);
+      return this.createDraftSessionService.buildTeamDraftUrl(existingSession.id);
     }
     return '';
   });
@@ -117,7 +117,7 @@ export class CreateDraftSessionComponent implements OnDestroy{
    const formValue = this.form.getRawValue();
    const sessionId  = await this.createDraftSessionService.createSession(shuffleArray(formValue.captains), formValue.isSnakeMode);
    this.activeSession.set(sessionId);
-   this.sessionUrlToShow.set(this.createDraftSessionService.buildUrl(sessionId));
+   this.sessionUrlToShow.set(this.createDraftSessionService.buildTeamDraftUrl(sessionId));
   }
 
   comparePlayers = (a: Player, b: Player) => a?.id === b?.id;

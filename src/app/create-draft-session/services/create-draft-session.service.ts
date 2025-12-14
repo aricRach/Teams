@@ -112,9 +112,15 @@ export class CreateDraftSessionService {
     return docRef.id; // sessionId
   }
 
-  buildUrl(sessionId: string) {
+  buildTeamDraftUrl(sessionId: string) {
     const domain = environment.domain;
     return `${domain}/#/team-draft/${this.playersService.selectedGroup().id}/${sessionId}`;
+  }
+
+  shareTeamDraftOnWhatsApp(sessionId: string) {
+    const link = this.buildTeamDraftUrl(sessionId);
+    const message = `Join the team draft 👇\n${link}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   }
 
   updateCaptainsOptions(captainsControlArray: { captainEmail: string; player: Player }[]) {

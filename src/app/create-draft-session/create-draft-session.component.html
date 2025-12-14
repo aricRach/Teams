@@ -1,8 +1,14 @@
 
 <h2>Create Draft Session</h2>
 @if(sessionUrlToShow()) {
-  <div>Send the following link to the relevant players:</div>
-  <div class="invite-url">{{sessionUrlToShow()}}</div>
+  <p>Send the following link to the relevant players:</p>
+  <div class="in-row center">
+    <div class="invite-url">{{sessionUrlToShow()}}</div>
+    <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(existingSession()?.id || '')">
+      <img src="assets/icons/whatsapp.svg" alt="whatsapp">
+    </button>
+
+  </div>
   <a class="link-btn team-draft-link" [routerLink]="sessionRouterLink()">Go To Team Draft</a>
 
   <button class="active-btn alert-btn" (click)="createDraftSessionService.removeSession(activeSession())">delete session</button>

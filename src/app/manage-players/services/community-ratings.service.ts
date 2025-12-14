@@ -5,6 +5,7 @@ import {CommunityRatingsApiService} from './community-ratings-api.service';
 import {SpinnerService} from '../../spinner.service';
 import {Router} from '@angular/router';
 import {ModalsService} from 'ui';
+import {environment} from '../../../environments/environment';
 
 export interface PlayerRating {
   name: string;
@@ -22,6 +23,18 @@ export class CommunityRatingsService {
   spinnerService = inject(SpinnerService);
   router = inject(Router);
   modalsService = inject(ModalsService);
+
+  shareOnWhatsApp() {
+    let domain = environment.domain;
+
+    const groupId = this.playersService.selectedGroup().id;
+    const link = `${domain}/#/rate-players/${groupId}`;
+
+    const message = `Rate the players here:\n${link}`;
+    const encodedMessage = encodeURIComponent(message);
+
+    window.open(`https://wa.me/?text=${encodedMessage}`, '_blank');
+  }
 
   ratings = signal<RatingsMap>({} as RatingsMap);
   dataRows = computed(() => {
@@ -56,6 +69,8 @@ export class CommunityRatingsService {
   config = signal({
     numberOfColumns: 3
   })
+
+  inviteUrl = signal(`${environment.domain}/#/rate-players/${this.playersService.selectedGroup().id}`);
 
   setRatings(ratings: RatingsMap) {
     this.ratings.set(ratings)
