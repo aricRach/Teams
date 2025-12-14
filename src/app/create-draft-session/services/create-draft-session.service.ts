@@ -119,7 +119,7 @@ export class CreateDraftSessionService {
 
   shareTeamDraftOnWhatsApp(sessionId: string) {
     const link = this.buildTeamDraftUrl(sessionId);
-    const message = `Join the team draft 👇\n${link}`;
+    const message = `Join the team draft \n${link}`;
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
   }
 
