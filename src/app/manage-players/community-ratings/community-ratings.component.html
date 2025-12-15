@@ -1,6 +1,7 @@
 <div>
+  <div class="center">share this link in your group to rate players:</div>
   <header class="in-row center">
-    <div>share this link in your group:<br> {{communityRatingsService.inviteUrl()}}</div>
+    <div>{{communityRatingsService.inviteUrl()}}</div>
     <button class="whatsapp-btn" (click)="communityRatingsService.shareOnWhatsApp()">
       <img src="assets/icons/whatsapp.svg" alt="whatsapp">
     </button>
