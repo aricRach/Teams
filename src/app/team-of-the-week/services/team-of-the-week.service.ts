@@ -2,7 +2,7 @@ import {computed, inject, Injectable, linkedSignal, resource} from '@angular/cor
 import {PlayersService} from '../../players/players.service';
 import {TeamOfTheWeekApiService} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
-import {PopupsService} from 'ui';
+import {ModalsService, PopupsService} from 'ui';
 import {SpinnerService} from '../../spinner.service';
 import {shuffleArray} from '../../utils/array-utils';
 
@@ -25,6 +25,7 @@ export class TeamOfTheWeekService {
   teamOfTheWeekApiService = inject(TeamOfTheWeekApiService);
   popupsService = inject(PopupsService);
   spinnerService = inject(SpinnerService);
+  modalsService = inject(ModalsService);
 
   totwResource = resource({
     request: () => ({date: this.statisticService.getSelectedDate()}),
@@ -59,15 +60,24 @@ export class TeamOfTheWeekService {
     }
   }
 
-  reGenerateTeamOfTheWeek(date: string) {
-    this.spinnerService.setIsLoading(true);
-    const weekStates = this.calculateWeekStates(date);
-     this.teamOfTheWeekApiService.generateAiTotw(date, shuffleArray(weekStates.players), weekStates.teamSize, true).then(data => {
-       this.totwData.set(data)
-     }).catch((e) => {
-       console.error(e)
-     }).finally(() => {
-      this.spinnerService.setIsLoading(false)
-    });
+  reGenerateTeamOfTheWeek() {
+    this.modalsService.openConfirmModal({
+      title: 'ReGenerate Team',
+      description: `By confirm you will regenerate team of the week.<br>current selection will be changed.`,
+    }).afterClosed().subscribe((confirm) => {
+      if(confirm) {
+        const date = this.statisticService.getSelectedDate();
+        this.spinnerService.setIsLoading(true);
+        const weekStates = this.calculateWeekStates(date);
+        this.teamOfTheWeekApiService.generateAiTotw(date, shuffleArray(weekStates.players), weekStates.teamSize, true).then(data => {
+          this.totwData.set(data)
+        }).catch((e) => {
+          console.error(e)
+        }).finally(() => {
+          this.spinnerService.setIsLoading(false)
+        });
+      }
+    })
+
   }
 }

@@ -1,6 +1,5 @@
 import {Component, computed, inject} from '@angular/core';
 import {TeamOfTheWeekService} from './services/team-of-the-week.service';
-import {JsonPipe} from '@angular/common';
 
 interface PlayerPerformance {
   position: 'striker' | 'midfielder' | 'defender';
@@ -47,8 +46,4 @@ export class TeamOfTheWeekComponent {
 
   totwDescription = computed(() : PlayerPerformance[] => this.teamOfTheWeekService.totwData()?.explanation.sort((a: PlayerPerformance, b: PlayerPerformance) => this.positionOrder[a.position] - this.positionOrder[b.position]))
 
-
-  async reGenerateTotw() {
-   await this.teamOfTheWeekService.reGenerateTeamOfTheWeek(this.teamOfTheWeekService.statisticService.getSelectedDate())
-  }
 }
