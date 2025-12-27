@@ -10,4 +10,6 @@ export const environment = {
   },
   gatewayServiceBaseUrl: 'https://teams-backend-ai-microservice.onrender.com',
   domain: 'https://teams-rach.netlify.app',
+  storageCloudName: 'aric',
+  storageUploadPreset: 'aric-preset'
 };
