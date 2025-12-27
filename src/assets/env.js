@@ -6,4 +6,6 @@
   window["env"]["NG_APP_FIREBASE_STORAGE_BUCKET"] = "${NG_APP_FIREBASE_STORAGE_BUCKET}";
   window["env"]["NG_APP_FIREBASE_MESSAGING_SENDER_ID"] = "${NG_APP_FIREBASE_MESSAGING_SENDER_ID}";
   window["env"]["NG_APP_FIREBASE_APP_ID"] = "${NG_APP_FIREBASE_APP_ID}";
+  window["env"]["storageCloudName"] = "${storageCloudName}";
+  window["env"]["storageUploadPreset"] = "${storageUploadPreset}";
 })(this);
