@@ -12,10 +12,11 @@ import {AuditTrailService} from '../audit-trail/services/audit-trail.service';
 import {AuditTrailComponent} from '../audit-trail/audit-trail.component';
 import {AdminControlService} from '../user/admin-control.service';
 import {AddNewPlayerComponent} from '../add-new-player/add-new-player.component';
+import {CaptureMediaComponent} from '../media/capture-media/capture-media.component';
 
 @Component({
   selector: 'app-game',
-  imports: [ReactiveFormsModule, CommonModule, PlayersDragDropTableComponent,
+  imports: [ReactiveFormsModule, CommonModule, PlayersDragDropTableComponent, CaptureMediaComponent,
     StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent, AuditTrailComponent, AddNewPlayerComponent],
   templateUrl: './game.component.html',
   standalone: true,

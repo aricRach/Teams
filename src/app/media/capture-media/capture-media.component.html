@@ -1,0 +1,13 @@
+<input
+  #mediaInput
+  type="file"
+  accept="image/*,video/*"
+  hidden
+  (change)="onSelect($event)"
+/>
+
+<img
+  src="assets/icons/camera.svg"
+alt="Upload media"
+(click)="mediaInput.click()"
+/>

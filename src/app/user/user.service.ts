@@ -1,7 +1,7 @@
 import {Injectable, PLATFORM_ID, Inject, signal, inject} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { getAuth, GoogleAuthProvider, signInWithPopup, Auth } from 'firebase/auth';
-import { initializeApp, FirebaseApp } from 'firebase/app';
+import {Auth, signInWithPopup, GoogleAuthProvider, getAuth} from '@angular/fire/auth'
+import { initializeApp, FirebaseApp } from '@angular/fire/app';
 import { environment } from '../../environments/environment';
 import {Router} from '@angular/router';
 import {SpinnerService} from '../spinner.service';

@@ -31,6 +31,7 @@ import {adminControlGuard} from './guards/admin-control.guard';
 import {inactivePlayersResolver} from './manage-players/resolvers/inactive-players.resolver';
 import {RatePlayersComponent} from './players/rate-players/rate-players.component';
 import {getSpecificGroupPlayersResolver} from './resolvers/get-specific-group-players.resolver';
+import {groupOwnerGuard} from './guards/group-owner.guard';
 
 export const routes: Routes = [
   {
@@ -213,6 +214,11 @@ export const routes: Routes = [
           }
         ]
       },
+      {
+        path: 'gallery',
+        loadComponent: () => import('./gallery/gallery.component').then(m => m.GalleryComponent),
+        canActivate: [groupOwnerGuard]
+      }
     ]
   },
   {

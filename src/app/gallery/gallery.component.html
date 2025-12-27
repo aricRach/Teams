@@ -1,0 +1,26 @@
+<header>
+  @if( (assets$ | async)?.length === 0) {
+    <h1 class="center">There is no available media</h1>
+  }
+  <p class="center">Here you can view or download the media.
+    <br> It will be automatically deleted after one week.</p>
+</header>
+
+<main>
+    @for(asset of assets$ | async; track asset.url) {
+      @if(asset?.url) {
+        <div class="asset-card">
+          <button class="download-btn" (click)="downloadAsset(asset)">
+            <img alt="download" src="assets/icons/download.svg">
+          </button>
+          @if(asset.type === 'image') {
+            <img [src]="asset.url" alt="asset" class="media"/>
+          }
+          @if(asset.type === 'video') {
+            <video controls class="media" [src]="asset.url"></video>
+          }
+
+        </div>
+      }
+    }
+</main>

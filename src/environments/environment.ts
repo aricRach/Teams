@@ -11,4 +11,6 @@
     },
     gatewayServiceBaseUrl: 'http://localhost:3002',
     domain: 'http://localhost:4200',
+    storageCloudName: 'aric',
+    storageUploadPreset: 'aric-preset'
   }

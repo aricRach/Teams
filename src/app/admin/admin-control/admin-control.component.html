@@ -39,7 +39,7 @@
 
 
 
-  @if(playersService.isGroupCreator()) {
+  @if(playersService.isGroupOwner()) {
     <button (click)="deleteAll()" class="delete-all alert-btn active-btn">Delete All Statistics TOTW and Fantasy Data</button>
   }
 } @else {

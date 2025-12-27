@@ -25,9 +25,13 @@
 
 
 <button class="button-icon" (click)="isMovePlayersLocked.set(!this.isMovePlayersLocked())">
-  <img alt="login" [src]=lockIcon() height="30" width="30">
+  <img alt="lock" [src]=lockIcon() height="30" width="30">
 </button>
 
+@if(playersService.isGroupOwner()) {
+  <app-capture-media></app-capture-media>
+
+}
 <app-players-drag-drop-table
   [enableShowRatings]="true"
   [clonedTeams]="teams()"

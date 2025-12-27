@@ -27,7 +27,7 @@ export class PlayersService {
   numberOfTeams = signal<number>(2);
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
-  isGroupCreator = signal(false);
+  isGroupOwner = signal(false);
   private teams = signal<{[key: string]: { players: Player[] }}>(structuredClone(skeleton));
   private inActivePlayers = signal<null | Player[]>(null);
   allPlayersLabel = 'allPlayers';
@@ -270,7 +270,7 @@ export class PlayersService {
   selectGroup(selectedGroup: {admins: string[]; id: string, createdBy?: string}, email: string) {
     this.selectedGroup.set(selectedGroup);
     this.isAdmin.set(selectedGroup.admins.includes(email));
-    this.isGroupCreator.set(selectedGroup.createdBy === email)
+    this.isGroupOwner.set(selectedGroup.createdBy === email)
   }
 
   setNumberOfTeams(numberOfTeams: number) {

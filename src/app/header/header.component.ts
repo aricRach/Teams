@@ -58,6 +58,12 @@ export class HeaderComponent {
       alias: 'Fantasy',
       show: !!this.playersService.selectedGroup(),
       link: '/home/fantasy'
+    },
+    {
+      action: MenuAction.NAVIGATE,
+      alias: 'Gallery',
+      show: !!this.playersService.selectedGroup() && this.playersService.isGroupOwner(),
+      link: '/home/gallery'
     }
   ])
 

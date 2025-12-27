@@ -1,15 +1,14 @@
 <div>
-  <div class="center gap statistics-button">
-      @if(showStatistics()) {
-        <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
-      } @else {
-        <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
-      }
+<!--  <div class="center gap statistics-button">-->
+<!--      @if(showStatistics()) {-->
+<!--        <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>-->
+<!--      } @else {-->
+<!--        <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>-->
+<!--      }-->
 
     @if(adminControlService.getAdminControl().showMakeBalanceTeams && enableMakeBalancedTeams()) {
       <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
     }
-  </div>
   <div class="all-teams-container">
     @for (teamKey of teamKeys(); track teamKey) {
       <div class="list-container">
