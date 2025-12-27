@@ -1,9 +1,18 @@
-img {
-  cursor: pointer;
-  opacity: 0.8;
-  transition: opacity 0.2s ease;
-}
 
-img:hover {
-  opacity: 1;
+main {
+display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+
+  img {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+
+  img:hover {
+    opacity: 1;
+  }
+
 }

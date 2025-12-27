@@ -1,13 +1,8 @@
-<input
-  #mediaInput
-  type="file"
-  accept="image/*,video/*"
-  hidden
-  (change)="onSelect($event)"
-/>
 
-<img
-  src="assets/icons/camera.svg"
-alt="Upload media"
-(click)="mediaInput.click()"
-/>
+<main>
+  <input #photoInput type="file" accept="image/*" capture="environment" hidden (change)="onSelect($event)">
+  <img src="assets/icons/camera.svg" alt="Take photo" (click)="photoInput.click()">
+
+  <input #videoInput type="file" accept="video/*" capture hidden (change)="onSelect($event)">
+  <img src="assets/icons/video.svg" alt="Record video" (click)="videoInput.click()">
+</main>
