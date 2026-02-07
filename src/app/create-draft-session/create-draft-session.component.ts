@@ -3,7 +3,7 @@ import {CreateDraftSessionService, TeamDraftSession} from './services/create-dra
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RangePipe} from '../pipes/range.pipe';
 import {skip, startWith, Subject, takeUntil} from 'rxjs';
-import {CommonModule} from '@angular/common';
+
 import {Player} from "../players/models/player.model";
 import {shuffleArray} from "../utils/array-utils";
 import {RouterModule} from '@angular/router';
@@ -12,7 +12,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-create-draft-session',
-  imports: [FormsModule, RangePipe, ReactiveFormsModule, CommonModule, RouterModule, MatTooltipModule],
+  imports: [FormsModule, RangePipe, ReactiveFormsModule, RouterModule, MatTooltipModule],
   providers: [CreateDraftSessionService],
   templateUrl: './create-draft-session.component.html',
   styleUrl: './create-draft-session.component.scss'

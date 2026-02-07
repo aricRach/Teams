@@ -3,7 +3,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {PlayersService} from '../players/players.service';
 import {GameDetails, GameDetailsComponent} from '../game-details/game-details.component';
 import {currentDate} from '../utils/date-utils';
-import {CommonModule} from '@angular/common';
+
 import {PlayersDragDropTableComponent} from '../players/players-drag-drop-table/players-drag-drop-table.component';
 import {StopwatchComponent} from '../stopwatch/stopwatch.component';
 import {ModalComponent} from '../../modals/modal/modal.component';
@@ -16,8 +16,7 @@ import {CaptureMediaComponent} from '../media/capture-media/capture-media.compon
 
 @Component({
   selector: 'app-game',
-  imports: [ReactiveFormsModule, CommonModule, PlayersDragDropTableComponent, CaptureMediaComponent,
-    StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent, AuditTrailComponent, AddNewPlayerComponent],
+  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent, AuditTrailComponent, AddNewPlayerComponent],
   templateUrl: './game.component.html',
   standalone: true,
   styleUrl: './game.component.scss'

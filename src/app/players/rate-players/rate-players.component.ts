@@ -1,7 +1,7 @@
 import {Component, inject, input, linkedSignal, signal} from '@angular/core';
 import {PlayersService} from '../players.service';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {JsonPipe, NgForOf, NgIf} from '@angular/common';
+import { JsonPipe } from '@angular/common';
 import {PopupsService} from 'ui';
 
 @Component({
@@ -9,10 +9,8 @@ import {PopupsService} from 'ui';
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    NgIf,
-    NgForOf,
     JsonPipe
-  ],
+],
   templateUrl: './rate-players.component.html',
   standalone: true,
   styleUrl: './rate-players.component.scss'

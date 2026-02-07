@@ -2,10 +2,12 @@
   <h3>Actions History</h3>
   @if(auditTrailService.auditTrail().length) {
     <ul>
-      <li *ngFor="let log of auditTrailService.auditTrail()">
-        <span>{{ log.actionDetails }}</span>
-        <span class="date">{{ log.date }}</span>
-      </li>
+      @for (log of auditTrailService.auditTrail(); track log) {
+        <li>
+          <span>{{ log.actionDetails }}</span>
+          <span class="date">{{ log.date }}</span>
+        </li>
+      }
     </ul>
   } @else {
     <p>No actions were logged in this session.</p>

@@ -1,17 +1,18 @@
-<div class="modal-backdrop" *ngIf="isVisible">
-  <div class="modal-container">
-
-    <ng-content></ng-content>
-    @if(showCloseIcon()) {
-      <button class="close-icon" (click)="close.emit()">×</button>
-    }
-    <div class="modal-buttons gap">
-    @if(showSubmitButton()) {
-      <button (click)="submit.emit()">submit</button>
-    }
-    @if(showCloseButton()) {
-      <button (click)="close.emit()">close</button>
-    }
+@if (isVisible) {
+  <div class="modal-backdrop">
+    <div class="modal-container">
+      <ng-content></ng-content>
+      @if(showCloseIcon()) {
+        <button class="close-icon" (click)="close.emit()">×</button>
+      }
+      <div class="modal-buttons gap">
+        @if(showSubmitButton()) {
+          <button (click)="submit.emit()">submit</button>
+        }
+        @if(showCloseButton()) {
+          <button (click)="close.emit()">close</button>
+        }
+      </div>
     </div>
   </div>
-</div>
+}

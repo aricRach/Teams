@@ -1,14 +1,14 @@
 <div>
-<!--  <div class="center gap statistics-button">-->
-<!--      @if(showStatistics()) {-->
-<!--        <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>-->
-<!--      } @else {-->
-<!--        <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>-->
-<!--      }-->
+  <!--  <div class="center gap statistics-button">-->
+  <!--      @if(showStatistics()) {-->
+  <!--        <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>-->
+  <!--      } @else {-->
+  <!--        <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>-->
+  <!--      }-->
 
-    @if(adminControlService.getAdminControl().showMakeBalanceTeams && enableMakeBalancedTeams()) {
-      <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
-    }
+  @if(adminControlService.getAdminControl().showMakeBalanceTeams && enableMakeBalancedTeams()) {
+    <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
+  }
   <div class="all-teams-container">
     @for (teamKey of teamKeys(); track teamKey) {
       <div class="list-container">
@@ -43,7 +43,7 @@
           [cdkDropListConnectedTo]="dropListRefs()"
           class="list"
           (cdkDropListDropped)="drop($event)"
-        >
+          >
           @for (item of clonedTeams()?.[teamKey]?.players; track item) {
             <app-player-view
               [dateStatistics]="dateStatistics()"
@@ -71,7 +71,7 @@
     [cdkDropListConnectedTo]="teamKeys()"
     class="box available-player"
     (cdkDropListDropped)="drop($event)"
-  >
+    >
     @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
       <div class="player">
         @if (!adminControlService.getAdminControl().showRating) {
@@ -79,25 +79,25 @@
         } @else {
           <div class="box" cdkDrag>{{ item.name }} - {{ item.rating }}</div>
         }
-<!--        <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>-->
+        <!--        <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>-->
       </div>
     }
   </div>
 
 </div>
 
-<div
-  class="set-goal-modal"
-  *ngIf="isSetGoalModalVisible()"
-  [ngStyle]="{'top.px': modalPosition().y, 'left.px': modalPosition().x}">
-
-  <div>Goals: {{getGoalModalDataByPlayer()}}</div>
-  <div class="goal-set-container">
-    <button (click)="setGoalModalClicked(true)">+</button>
-    <button (click)="setGoalModalClicked(false)">-</button>
-    <button (click)="setGoals()">set</button>
+@if (isSetGoalModalVisible()) {
+  <div
+    class="set-goal-modal"
+    [ngStyle]="{'top.px': modalPosition().y, 'left.px': modalPosition().x}">
+    <div>Goals: {{getGoalModalDataByPlayer()}}</div>
+    <div class="goal-set-container">
+      <button (click)="setGoalModalClicked(true)">+</button>
+      <button (click)="setGoalModalClicked(false)">-</button>
+      <button (click)="setGoals()">set</button>
+    </div>
   </div>
-</div>
+}
 
 
 @if(makeBalancedTeamsModalVisible()) {

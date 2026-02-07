@@ -1,6 +1,6 @@
 import {Component, computed, inject, input, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
 import {TeamDraftService} from './services/team-draft.service';
-import {NgIf} from '@angular/common';
+
 import {Subscription} from 'rxjs';
 import {RouterModule} from '@angular/router';
 import {TeamDraftSession} from '../create-draft-session/services/create-draft-session.service';

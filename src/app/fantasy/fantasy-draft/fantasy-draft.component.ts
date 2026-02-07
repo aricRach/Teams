@@ -1,14 +1,14 @@
 import {Component, inject, OnInit} from '@angular/core';
 import {FantasyDraftService} from '../services/fantasy-draft.service';
 import {PlayersService} from '../../players/players.service';
-import {CommonModule} from '@angular/common';
+
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {FantasyMeta} from '../services/fantasy-api.service';
 import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-fantasy-draft',
-  imports: [CommonModule, DragDropModule],
+  imports: [DragDropModule],
   providers: [FantasyDraftService],
   templateUrl: './fantasy-draft.component.html',
   styleUrl: './fantasy-draft.component.scss'

@@ -1,9 +1,9 @@
 import {Component, input, output} from '@angular/core';
-import {CommonModule} from '@angular/common';
+
 
 @Component({
   selector: 'app-modal',
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './modal.component.html',
   standalone: true,
   styleUrl: './modal.component.scss'
