@@ -1,10 +1,11 @@
-<div>
-  <div class="center">share this link in your group to rate players:</div>
-  <header class="in-row center">
+  <header>
+    <div class="center">share this link in your group to rate players:</div>
+    <section>
     <div>{{communityRatingsService.inviteUrl()}}</div>
     <button class="whatsapp-btn" (click)="communityRatingsService.shareOnWhatsApp()">
       <img src="assets/icons/whatsapp.svg" alt="whatsapp">
     </button>
+    </section>
   </header>
 
   <main>
@@ -26,5 +27,13 @@
     <h2>There are no available ratings - please ask your team to rate the players</h2>
   }
   </main>
-</div>
+
+  @if(communityRatingsService.dataRows().length > 0) {
+    <footer>
+    <section>
+      <button (click)="communityRatingsService.deleteRatings()" class="alert-btn active-btn">Delete current community ratings</button>
+    </section>
+  </footer>
+  }
+
 

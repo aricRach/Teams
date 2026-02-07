@@ -113,7 +113,7 @@ export class CommunityRatingsService {
 
   updateCommunityRatings() {
     this.modalsService.openConfirmModal({
-      title: 'Are you sure?',
+      title: 'Update ratings?',
       description: 'By confirm all the existing ratings of this players will be override.'
     }).afterClosed().subscribe((confirm) => {
       if(confirm) {
@@ -122,6 +122,26 @@ export class CommunityRatingsService {
           .then(() => {
             this.router.navigate(['/home/players'])
           })
+          .finally(() => {
+            this.spinnerService.setIsLoading(false);
+          });
+      }
+    })
+  }
+
+  deleteRatings() {
+    this.modalsService.openConfirmModal({
+      title: 'Clean current community ratings?',
+      description: 'By confirm all the previous ratings will be removed and will not count in calculating the average.'
+    }).afterClosed().subscribe((confirm) => {
+      if(confirm) {
+        this.spinnerService.setIsLoading(true);
+        this.communityRatingsApiService.deleteAllRatings(this.playersService.selectedGroup().id)
+          .then(() => {
+            this.router.navigate(['/home/players'])
+          }).catch(e => {
+          console.log(e)
+        })
           .finally(() => {
             this.spinnerService.setIsLoading(false);
           });

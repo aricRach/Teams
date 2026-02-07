@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {collection, collectionData, doc, Firestore, writeBatch} from '@angular/fire/firestore';
+import {collection, collectionData, doc, Firestore, getDocs, writeBatch} from '@angular/fire/firestore';
 
 @Injectable({
   providedIn: 'root'
@@ -23,6 +23,21 @@ export class CommunityRatingsApiService {
         updatedAt: new Date()
       });
     }
+    await batch.commit();
+  }
+
+  async deleteAllRatings(groupId: string): Promise<void> {
+    const ratingsRef = collection(this.firestore, `groups/${groupId}/ratings`);
+    const snapshot = await getDocs(ratingsRef);
+
+    if (snapshot.empty) return;
+
+    const batch = writeBatch(this.firestore);
+
+    snapshot.docs.forEach(docSnap => {
+      batch.delete(docSnap.ref);
+    });
+
     await batch.commit();
   }
 }
