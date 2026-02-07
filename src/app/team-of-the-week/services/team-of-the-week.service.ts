@@ -28,8 +28,11 @@ export class TeamOfTheWeekService {
   modalsService = inject(ModalsService);
 
   totwResource = resource({
-    request: () => ({date: this.statisticService.getSelectedDate()}),
-    loader: ({request}) => this.getTeamOfTheWeek(request.date)
+    params: () => ({
+      date: this.statisticService.getSelectedDate()
+    }),
+    loader: ({ params }) =>
+      this.getTeamOfTheWeek(params.date)
   });
 
   totwData = linkedSignal(() => this.totwResource.value());
