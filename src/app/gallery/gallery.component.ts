@@ -2,10 +2,11 @@ import {Component, inject, OnInit} from '@angular/core';
 import {Observable} from 'rxjs';
 import {MediaService} from '../media/media.service';
 import {AsyncPipe} from '@angular/common';
+import {CaptureMediaComponent} from '../media/capture-media/capture-media.component';
 
 @Component({
   selector: 'app-gallery',
-  imports: [AsyncPipe],
+  imports: [AsyncPipe, CaptureMediaComponent],
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.scss'
 })
