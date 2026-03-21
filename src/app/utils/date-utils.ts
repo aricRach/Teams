@@ -24,3 +24,26 @@ export const compareDates = (a: string, b: string) => {
   const dateB = new Date(yearB, monthB - 1, dayB);
   return dateA.getTime() - dateB.getTime();
 }
+
+export const compareDateWithToday= (dateString: string | undefined) => {
+  if(!dateString) return -1;
+  // 1. Split the "13-12-2025" string
+  const [day, month, year] = dateString.split('-').map(Number);
+
+  // 2. Create the Date object (Note: Months are 0-indexed, so subtract 1)
+  const targetDate = new Date(year, month - 1, day);
+
+  // 3. Get the current date and reset time to midnight for an accurate day-to-day comparison
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  targetDate.setHours(0, 0, 0, 0);
+
+  // 4. Compare
+  if (targetDate.getTime() === today.getTime()) {
+    return 0; // Dates are equal
+  } else if (targetDate.getTime() < today.getTime()) {
+    return -1; // Provided date is in the past
+  } else {
+    return 1; // Provided date is in the future
+  }
+}

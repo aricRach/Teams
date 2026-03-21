@@ -10,7 +10,7 @@
   <li>captain = X2</li>
 </ul>
 <div class="center gap-10 statistic-links">
-  @if(fantasyMeta()?.isActive) {
+  @if(canDraft()) {
     <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="draft" [queryParams]="{reload: reloadParam()}">Draft</a>
   }
   <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="analytics" [queryParams]="{reload: reloadParam()}">Analytics</a>
