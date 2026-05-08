@@ -19,7 +19,6 @@
             [checked]="playingTeams().includes(teamKey)"
             [disabled]="isLocked() || (!playingTeams().includes(teamKey) && playingTeams().length >= 2)"
             (change)="togglePlayingTeam(teamKey)">
-          Playing
         </label>
       </div>
       @if(editStatistics() ) {
