@@ -37,6 +37,12 @@ export class HeaderComponent {
     },
     {
       action: MenuAction.NAVIGATE,
+      alias: 'Matches',
+      show: !!this.playersService.selectedGroup(),
+      link: '/home/matches'
+    },
+    {
+      action: MenuAction.NAVIGATE,
       alias: 'Players',
       show: !!this.playersService.selectedGroup() && !this.playersService.isAdmin(),
       link: '/home/players/manage-players'

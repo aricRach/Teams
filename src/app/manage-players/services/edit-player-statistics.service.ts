@@ -54,7 +54,21 @@ export class EditPlayerStatisticsService {
   editLastStatistics(lastStatisticsForm: FormGroup<any>) {
     const formValues = lastStatisticsForm.getRawValue();
     const updatedPlayer = this.managePlayersService.selectedPlayer();
-    updatedPlayer.statistics[this.lastDayPlayedStatistics().date] =convertFormValuesToNumbers(formValues);
+
+    const defaultStats = {
+      games: 0,
+      goals: 0,
+      wins: 0,
+      draws: 0,
+      loses: 0,
+      goalsConceded: 0
+    };
+
+    updatedPlayer.statistics[this.lastDayPlayedStatistics().date] = {
+      ...defaultStats,
+      ...convertFormValuesToNumbers(formValues)
+    };
+
     this.playersService.updatePlayerStats(updatedPlayer).then(() => {
       this.teamOfTheWeekApiService.markTotwDateNotUpdated(this.lastDayPlayedStatistics().date).then()
     });

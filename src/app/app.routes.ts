@@ -12,6 +12,7 @@ import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './manage-players/edit-player/edit-player.component';
 import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
 import {PlayersStatisticsTableComponent} from './players-statistics-table/players-statistics-table.component';
+import {MatchesComponent} from './match-event-manager/matches/matches.component';
 import {TeamDraftComponent} from './team-draft/team-draft.component';
 import {CreateDraftSessionComponent} from './create-draft-session/create-draft-session.component';
 import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
@@ -57,12 +58,14 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        component: GameComponent
+        component: GameComponent,
+        canDeactivate: [exitFormGuard]
       },
       {
         path: 'game',
         component: GameComponent,
         canActivate: [groupAdminGuard],
+        canDeactivate: [exitFormGuard],
         data: { breadcrumb: 'Game' },
       },
       {
@@ -92,6 +95,11 @@ export const routes: Routes = [
             canActivate: [groupAdminGuard, adminControlGuard],
           }
         ]
+      },
+      {
+        path: 'matches',
+        component: MatchesComponent,
+        data: { breadcrumb: 'Matches' },
       },
       {
         path: 'players',

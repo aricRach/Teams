@@ -1,9 +1,10 @@
 <div class="stopwatch-container">
   <div class="time-display">{{ formattedTime }}</div>
   <div class="controls">
-    <button (click)="start()" [disabled]="running">Start</button>
+    <button (click)="start()" [disabled]="running || disabled()"
+      [matTooltip]="disabled() ? disabledTooltip() : ''">Start</button>
     <button (click)="pause()" [disabled]="!running">Pause</button>
     <button (click)="reset()">Reset</button>
-    <button (click)="endGame()">End</button>
+    <button (click)="endGame()" [disabled]="time === 0">End</button>
   </div>
 </div>

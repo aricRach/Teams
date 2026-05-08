@@ -45,18 +45,18 @@ export class PlayersStatisticsTableService {
       const dataByDate = this.playersService.flattenPlayers().map((player: Player) => {
         if(player.statistics[date] && player.statistics[date].games > 0) {
           const name = player.name;
-          const goals = player.statistics[date].goals;
-          const wins = player.statistics[date].wins
-          const games = player.statistics[date].games;
+          const goals = player.statistics[date].goals || 0;
+          const wins = player.statistics[date].wins || 0;
+          const games = player.statistics[date].games || 0;
           if (goals > maxGoals) {
             maxGoals = goals;
           }
           return {
-            name: {value: name},
+            name: { value: name },
             goals: { value: goals },
             wins: { value: wins },
-            games: { value: games },
-          }
+            games: { value: games }
+          };
         }
         return null;
       })
@@ -77,11 +77,11 @@ export class PlayersStatisticsTableService {
       .map((player: Player) => {
         const {goals, games, hasPlayed, wins} = Object.values(player.statistics).reduce(
           (acc, stat) => {
-            if (stat.games > 0) {
+            if ((stat.games || 0) > 0) {
               acc.hasPlayed = true;
-              acc.goals += stat.goals;
-              acc.wins += stat.wins;
-              acc.games += stat.games;
+              acc.goals += stat.goals || 0;
+              acc.wins += stat.wins || 0;
+              acc.games += stat.games || 0;
             }
             return acc;
           },

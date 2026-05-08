@@ -1,0 +1,158 @@
+.controls,
+.add-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.event-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.scorer {
+  font-weight: 600;
+}
+
+.scorer-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  input {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.team-hint {
+  font-size: 0.8em;
+  color: #777;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.minute {
+  min-width: 50px;
+}
+
+.danger {
+  background: #c0392b;
+  color: #fff;
+}
+
+.empty {
+  color: #777;
+  font-style: italic;
+}
+
+.edit-match-form {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  >div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .warning-box {
+    display: flex;
+    line-height: 2;
+  }
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
+  label {
+    margin-right: 5px
+  }
+}
+
+.in-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.gap {
+  gap: 12px;
+}
+
+.draft-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  justify-content: center;
+}
+
+.warning-box {
+  background: #fff3cd;
+  color: #856404;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #ffeeba;
+  margin-top: 12px;
+  font-size: 0.9em;
+}
+
+button.primary {
+  background: #27ae60;
+  color: white;
+}
+
+button.edit-btn {
+  background: #2980b9;
+  color: white;
+}
+
+button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.time-input-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  .error-msg {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    font-size: 0.7rem;
+    color: #e74c3c;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+}
+
+input.invalid {
+  border-color: #e74c3c;
+  outline-color: #e74c3c;
+}
+
+.time-input {
+  width: 60px;
+}

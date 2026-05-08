@@ -1,0 +1,144 @@
+<div class="events-manager">
+  <h3>Match Events</h3>
+
+  <div class="controls">
+    <label for="matchSelect">Match</label>
+    <select id="matchSelect" [value]="selectedMatchId()" (change)="onSelectMatch($any($event.target).value)">
+      @for (option of matchOptions(); track option.id) {
+      <option [value]="option.id">
+        {{ option.label }}
+      </option>
+      }
+    </select>
+    @if (!isEditingMatch() && selectedMatchId()) {
+    <button class="edit-btn" (click)='startEditingMatch()'>Edit Match Result & Stats</button>
+    }
+  </div>
+
+  @if (isEditingMatch() && localMatch()) {
+  <div class="edit-match-form">
+    <h4>Editing Match Result</h4>
+    <div>
+      <div>
+        <label>Status</label>
+        <select [formField]='draftMatchForm.status' (change)='updateLocalMatch({status: $any($event.target).value})'>
+          <option value="completed">Completed</option>
+          <option value="live">Live</option>
+          <option value="abandoned">Abandoned</option>
+        </select>
+      </div>
+
+      @if (draftMatchModel().status === 'completed') {
+      <div>
+        <label>Type</label>
+        <select [formField]='draftMatchForm.gameStatus'
+          (change)='updateLocalMatch({gameStatus: $any($event.target).value})'>
+          <option value="decided">Decided</option>
+          <option value="draw">Draw</option>
+        </select>
+      </div>
+      }
+    </div>
+
+    @if (draftMatchModel().status === 'completed' && draftMatchModel().gameStatus === 'decided') {
+    <div>
+      <div>
+        <label>Winner</label>
+        <select [formField]='draftMatchForm.winner' (change)='updateLocalMatch({winner: $any($event.target).value})'>
+          @for (team of localMatchTeams(); track team) {
+          <option [value]="team">{{ team }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label>Loser</label>
+        <select [formField]='draftMatchForm.loser' (change)='updateLocalMatch({loser: $any($event.target).value})'>
+          @for (team of localMatchTeams(); track team) {
+          <option [value]="team">{{ team }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    }
+
+    @if (!isTallyConsistent()) {
+    <div class="warning-box">
+      ⚠️ Warning: The goal tally ({{goalEvents().length}} goals) does not match the selected result.
+      Please add or remove goal events to align with the winner/draw status.
+    </div>
+    }
+  </div>
+  }
+
+  @if(selectedMatchId() && isEditingMatch() && !editingEvent() && localMatch()?.status !== 'abandoned') {
+  <div class="add-row add-forgotten">
+    <label class="add-label">Add missed goal</label>
+    <select [formField]="eventForm.playerId">
+      <option value="" disabled selected>Player</option>
+      @for (player of rosterPlayers(); track player.id) {
+      <option [value]="player.id">{{ player.name }} ({{ player.team }})</option>
+      }
+    </select>
+
+    <div class="time-input-container">
+      <input type="text" placeholder="MM:SS" class="time-input"
+        [class.invalid]="eventForm.time().invalid() && eventForm.time().dirty()" [formField]="eventForm.time" />
+      @if (eventForm.time().invalid() && eventForm.time().dirty()) {
+      <span class="error-msg">Format MM:SS (e.g. 12:45)</span>
+      }
+    </div>
+
+    <button type="button" [disabled]="eventForm().invalid()" (click)="addForgottenGoalEvent()">Add</button>
+  </div>
+  }
+
+  @if (selectedMatchId()) {
+  <div class="events-list">
+    @if(goalEvents().length === 0) {
+    <div class="empty">No goal events for this match yet.</div>
+    }
+
+    @for (event of goalEvents(); track event) {
+    <div class="event-row">
+      @if(editingEvent() === event) {
+      <div class="scorer-edit">
+        <select [formField]="eventForm.playerId">
+          <option value="" disabled selected>Player</option>
+          @for (player of rosterPlayers(); track player.id) {
+          <option [value]="player.id">{{ player.name }} ({{ player.team }})</option>
+          }
+        </select>
+      </div>
+      <div class="time-input-container">
+        <input type="text" class="time-input" [class.invalid]="eventForm.time().invalid()"
+          [formField]="eventForm.time" />
+        @if (eventForm.time().invalid()) {
+        <span class="error-msg">MM:SS format required</span>
+        }
+      </div>
+      <button [disabled]="eventForm().invalid()" (click)="saveEdit(event)">Save</button>
+      <button (click)="cancelEdit()">Cancel</button>
+      } @else {
+      <span class="scorer">{{ event.playerNameSnapshot || 'Unknown scorer' }} ({{ event.teamKey }})</span>
+      <span class="minute timer">{{ formatEventTime(event) }}</span>
+
+      @if (isEditingMatch() && localMatch()?.status !== 'abandoned') {
+      <button (click)="startEdit(event)">Edit</button>
+      <button class="danger" (click)="removeEvent(event)">Remove</button>
+      }
+      }
+    </div>
+    }
+  </div>
+  } @else {
+  <div class="empty">No matches found yet. Complete a game to create one.</div>
+  }
+</div>
+
+@if(isEditingMatch()) {
+<div class="draft-actions">
+  <button class="primary" [disabled]="!isTallyConsistent() || draftMatchModel().status === 'live'"
+    (click)="saveEditingMatch()">Save All Changes</button>
+  <button (click)="cancelEditingMatch()">Back</button>
+</div>
+}

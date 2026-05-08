@@ -1,25 +1,29 @@
 @if(adminControlService.isAdminModeEnabled()) {
-  <div class="center">
-    <button class="action-btn active-btn" (click)="adminControlService.cleanAdminControlState()">Revert admin mode</button>
-  </div>
+<div class="center">
+  <button class="action-btn active-btn" (click)="adminControlService.cleanAdminControlState()">Revert admin
+    mode</button>
+</div>
 }
 <div class="in-row center gap">
-  <h1 >Teams</h1>
+  <h1>Teams</h1>
 </div>
 
 <div class="space-between save-buttons gap">
   @if(adminControlService.getAdminControl().showSaveButtons) {
-    <div>
-      <button (click)="load()">Load local data</button>
-      <button (click)="save()">Save local data </button>
-    </div>
-      <button (click)="saveGlobal()">Save Global</button>
+  <div>
+    <button (click)="load()">Load local data</button>
+    <button (click)="save()">Save local data </button>
+  </div>
+  <button (click)="saveGlobal()">Save Global</button>
   }
 </div>
 
 <div class="audit-trail-button">
   <button class="button-icon" (click)="isAuditTrailModalVisible.set(true)">
     <img alt="login" src="assets/icons/audit-trail.svg" height="30" width="30">
+  </button>
+  <button class="button-icon" (click)="isEventsModalVisible.set(true)">
+    Events
   </button>
 </div>
 
@@ -29,28 +33,24 @@
 </button>
 
 @if(playersService.isGroupOwner()) {
-  <app-capture-media></app-capture-media>
+<app-capture-media></app-capture-media>
 
 }
-<app-players-drag-drop-table
-  [enableShowRatings]="true"
-  [clonedTeams]="teams()"
-  [isLocked]="isMovePlayersLocked()"
-  (dropPlayer)="updateTeams($event)"
-/>
+<app-players-drag-drop-table [enableShowRatings]="true" [clonedTeams]="teams()" [isLocked]="isMovePlayersLocked()"
+  (recordGoalEvent)="recordGoalFromTimerHandler($event)" [playingTeams]="playingTeams()"
+  (playingTeamsChange)="playingTeams.set($event)" (dropPlayer)="updateTeams($event)" />
 
-<app-stopwatch (timeStartEvent)="isMovePlayersLocked.set(true)"
-               (timeEndEvent)="isTeamWinModalVisible.set(true)"/>
-
-@if(isTeamWinModalVisible()) {
-  <app-modal [showCloseIcon]="true" [showSubmitButton]="false" [showCloseButton]="false" (close)="isTeamWinModalVisible.set(false)">
-    <app-game-details (endGame)="endGame($event)" [originalTeamNames]="originalTeamNames()"></app-game-details>
-  </app-modal>
-}
+<app-stopwatch [disabled]="playingTeams().length !== 2" [disabledTooltip]="'Please select 2 teams'"
+  (timeStartEvent)="onTimerStart()" (timeResetEvent)="onTimerReset()" (timeEndEvent)="endGameFromTimer()" />
 
 @if(isAuditTrailModalVisible()) {
-  <app-modal [showSubmitButton]="false"
-             (close)="isAuditTrailModalVisible.set(false)">
-    <app-audit-trail></app-audit-trail>
-  </app-modal>
+<app-modal [showSubmitButton]="false" (close)="isAuditTrailModalVisible.set(false)">
+  <app-audit-trail></app-audit-trail>
+</app-modal>
+}
+
+@if(isEventsModalVisible()) {
+<app-modal [showSubmitButton]="false" [showCloseButton]="false" (close)="isEventsModalVisible.set(false)">
+  <app-match-events-manager [playingTeamKeys]="playingTeams()"></app-match-events-manager>
+</app-modal>
 }
