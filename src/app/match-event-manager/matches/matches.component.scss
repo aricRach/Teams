@@ -1,14 +1,15 @@
-.matches-container {
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   padding: 24px;
-  max-width: 1200px;
-  margin: 0 auto;
-
+}
   h2 {
     margin-bottom: 20px;
     font-size: 2rem;
     text-align: center;
   }
-}
 
 .date-selector {
   display: flex;
@@ -55,15 +56,18 @@
   color: #666;
 }
 
-
 :host ::ng-deep {
   .card-container {
-    width: 350px !important;
     height: auto !important;
   }
-
+  .card-container .cardContent {
+    width: auto !important;
+  }
   .card-container .front-color .row-content:first-of-type {
     text-decoration: underline;
     justify-content: center !important;
+  }
+  .card-container .front-color .row-content {
+    margin: 10px auto !important;
   }
 }
