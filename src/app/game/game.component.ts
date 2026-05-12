@@ -11,13 +11,12 @@ import { AdminControlService } from '../user/admin-control.service';
 import { AddNewPlayerComponent } from '../add-new-player/add-new-player.component';
 import { CaptureMediaComponent } from '../media/capture-media/capture-media.component';
 import { MatchEventsManagerService } from '../match-event-manager/services/match-events-manager.service';
-import { MatchEventsManagerComponent } from '../match-event-manager/match-events-manager/match-events-manager.component';
 import {GameService} from './game.service';
 import {NavigationService} from '../shared/navigation/navigation.service';
 
 @Component({
   selector: 'app-game',
-  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, AuditTrailComponent, AddNewPlayerComponent, MatchEventsManagerComponent],
+  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, AuditTrailComponent, AddNewPlayerComponent],
   templateUrl: './game.component.html',
   standalone: true,
   providers: [GameService],
@@ -36,7 +35,6 @@ export class GameComponent {
   private stopwatchRef = viewChild(StopwatchComponent);
 
   protected isAuditTrailModalVisible = signal(false);
-  protected isEventsModalVisible = signal(false);
 
   lockIcon = computed(() =>
     this.isMovePlayersLocked() ? 'assets/icons/unlock.svg' : 'assets/icons/lock.svg')

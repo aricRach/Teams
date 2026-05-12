@@ -13,6 +13,8 @@ import {EditPlayerComponent} from './manage-players/edit-player/edit-player.comp
 import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
 import {PlayersStatisticsTableComponent} from './players-statistics-table/players-statistics-table.component';
 import {MatchesComponent} from './match-event-manager/matches/matches.component';
+import {MatchesTimelineComponent} from './match-event-manager/matches-timeline/matches-timeline.component';
+import {MatchEventsManagerComponent} from './match-event-manager/match-events-manager/match-events-manager.component';
 import {TeamDraftComponent} from './team-draft/team-draft.component';
 import {CreateDraftSessionComponent} from './create-draft-session/create-draft-session.component';
 import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
@@ -100,6 +102,23 @@ export const routes: Routes = [
         path: 'matches',
         component: MatchesComponent,
         data: { breadcrumb: 'Matches' },
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'timeline'
+          },
+          {
+            path: 'timeline',
+            component: MatchesTimelineComponent,
+            data: { breadcrumb: 'Timeline' },
+          },
+          {
+            path: 'manage-events',
+            component: MatchEventsManagerComponent,
+            data: { breadcrumb: 'Manage Events' },
+          },
+        ]
       },
       {
         path: 'players',

@@ -86,7 +86,7 @@ export class MatchEventsApiService {
 
   getEvents(groupId: string, matchId: string): Observable<MatchEventRecord[]> {
     const eventsRef = collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`);
-    const q = query(eventsRef, orderBy('createdAt', 'asc'));
+    const q = query(eventsRef, orderBy('payload.timerMs', 'asc'));
     return collectionData(q, { idField: 'id' }) as unknown as Observable<MatchEventRecord[]>;
   }
 

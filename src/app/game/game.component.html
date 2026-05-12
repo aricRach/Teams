@@ -22,9 +22,6 @@
   <button class="button-icon" (click)="isAuditTrailModalVisible.set(true)">
     <img alt="login" src="assets/icons/audit-trail.svg" height="30" width="30">
   </button>
-  <button class="button-icon" (click)="isEventsModalVisible.set(true)">
-    Events
-  </button>
 </div>
 
 
@@ -49,8 +46,4 @@
 </app-modal>
 }
 
-@if(isEventsModalVisible()) {
-<app-modal [showSubmitButton]="false" [showCloseButton]="false" (close)="isEventsModalVisible.set(false)">
-  <app-match-events-manager [playingTeamKeys]="playingTeams()"></app-match-events-manager>
-</app-modal>
-}
+
