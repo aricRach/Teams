@@ -6,9 +6,7 @@ import {rxResource} from '@angular/core/rxjs-interop';
 import {forkJoin, map, of, take} from 'rxjs';
 import {formatDateToString} from '../../utils/date-utils';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable()
 export class MatchTimelineService {
 
   playersService = inject(PlayersService);

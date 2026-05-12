@@ -35,6 +35,7 @@ export class PlayersService {
 
    computedTeams = computed(() =>  JSON.parse(JSON.stringify(this.teams()))) // use only in drag-drop-component.
 
+  selectedTeamsKeys = computed(() => Object.keys(this.teams()))
   setTeams(teams: any) {
     this.teams.set({...teams});
   }

@@ -29,7 +29,7 @@ export class MatchEventsManagerComponent {
 
   user = toSignal(authState(this.auth));
 
-  playingTeamKeys = input<string[]>([]);
+  playingTeamKeys = computed(() => this.playersService.selectedTeamsKeys())
 
   // ── Matches: live Firestore stream, re-runs when the group changes ──────────
   private matchesResource = rxResource({
