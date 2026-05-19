@@ -61,25 +61,3 @@ small {
   font-size: 1.2rem;
   color: #666;
 }
-
-:host ::ng-deep {
-  .card-container {
-    height: auto !important;
-    width: auto !important;
-  }
-  .card-container .cardContent {
-    width: 100% !important;
-  }
-  .card-container .front-color .row-content:first-of-type {
-    text-decoration: underline;
-    justify-content: center !important;
-  }
-  .card-container .front-color .row-content {
-    margin: 10px auto !important;
-  }
-
-  .card-container .front-color .row-content {
-    width: 350px !important;
-    height: auto !important;
-  }
-}
