@@ -1,5 +1,5 @@
 import {computed, inject, Injectable} from '@angular/core';
-import {Player} from '../../players/models/player.model';
+import {Player, PLAYER_NAME_MAX_LENGTH} from '../../players/models/player.model';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {PlayersService} from '../../players/players.service';
 import {SpinnerService} from '../../spinner.service';
@@ -25,8 +25,8 @@ export class AddNewPlayerService {
 
   constructor() {
     this.playerForm = this.fb.group({
-      name: new FormControl('', [Validators.required]),
-      rating: new FormControl('', [Validators.required]),
+      name: new FormControl('', [Validators.required, Validators.maxLength(PLAYER_NAME_MAX_LENGTH)]),
+      rating: new FormControl('', [Validators.required, Validators.min(1), Validators.max(10)]),
       email: new FormControl('', [Validators.email]),
       isGuest: new FormControl(false)
     });

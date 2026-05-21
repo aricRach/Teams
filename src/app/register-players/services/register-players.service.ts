@@ -5,7 +5,7 @@ import {PlayersService} from '../../players/players.service';
 import {MembersService} from '../../admin/services/members.service';
 import {DuplicatePlayerError} from '../../players/errors/duplicate-player-error';
 import {SpinnerService} from '../../spinner.service';
-import {Statistics} from '../../players/models/player.model';
+import {Statistics, PLAYER_NAME_MAX_LENGTH} from '../../players/models/player.model';
 import {Router} from '@angular/router';
 import {NavigationService} from '../../shared/navigation/navigation.service';
 import {FormArray, FormBuilder, Validators} from '@angular/forms';
@@ -47,8 +47,8 @@ export class RegisterPlayersService {
 
   createPlayerRow() {
     return this.fb.group({
-      name: ['', Validators.required],
-      rating: ['', [Validators.required, Validators.min(0), Validators.max(10)]],
+      name: ['', [Validators.required, Validators.maxLength(PLAYER_NAME_MAX_LENGTH)]],
+      rating: ['', [Validators.required, Validators.min(1), Validators.max(10)]],
       email: ['', Validators.email],
       isGuest: [false]
     });

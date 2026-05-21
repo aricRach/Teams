@@ -1,6 +1,7 @@
 import {computed, inject} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {DynamicComponentsTypes, FormField, genericValidators, ModalsService, subInputType} from 'ui';
+import {PLAYER_NAME_MAX_LENGTH} from '../../players/models/player.model';
 import {FormGroup, Validators} from '@angular/forms';
 import {ManagePlayersService} from './manage-players.service';
 
@@ -29,7 +30,14 @@ export class EditPlayerService {
         disabled: this.shouldDisabledFields(),
         value: this.selectedPlayer()?.name,
         dynamicComponent: DynamicComponentsTypes.INPUT,
-        validators: genericValidators.required,
+        validators: {
+          ...genericValidators.required,
+          maxlength: {
+            validatorFn: Validators.maxLength(PLAYER_NAME_MAX_LENGTH),
+            errorMsg: `Name must be at most ${PLAYER_NAME_MAX_LENGTH} characters`,
+            hint: { maximumLength: PLAYER_NAME_MAX_LENGTH },
+          },
+        },
       },
       {
         alias: 'rating:',
@@ -38,7 +46,11 @@ export class EditPlayerService {
         value: this.selectedPlayer()?.rating,
         dynamicComponent: DynamicComponentsTypes.INPUT,
         subInputType: subInputType.NUMBER,
-        validators: {...genericValidators.required, ...genericValidators.positiveNumber},
+        validators: {
+          ...genericValidators.required,
+          min: { validatorFn: Validators.min(1), errorMsg: 'Rating must be at least 1' },
+          max: { validatorFn: Validators.max(10), errorMsg: 'Rating must be at most 10' },
+        },
       },
       {
         alias: 'email:',

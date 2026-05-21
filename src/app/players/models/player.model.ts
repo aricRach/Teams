@@ -1,3 +1,5 @@
+export const PLAYER_NAME_MAX_LENGTH = 16;
+
 export interface Player {
   id: string,
   team: TeamsOptions;

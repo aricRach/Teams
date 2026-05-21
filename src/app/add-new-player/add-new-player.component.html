@@ -4,10 +4,16 @@
   (ngSubmit)="submitAddNewPlayer()"
 >
   <label>
-    <input required #nameField formControlName="name" placeholder="Player Name">
+    <input required #nameField formControlName="name" placeholder="Player Name" [maxlength]="playerNameMaxLength">
   </label>
   <label>
-    <input required formControlName="rating" type="number" placeholder="Rating">
+    <input required formControlName="rating" type="number" placeholder="Rating (1-10)" min="1" max="10">
+    @if (addNewPlayerService.playerForm.get('rating')?.invalid && addNewPlayerService.playerForm.get('rating')?.touched) {
+      <div class="input-error">
+        @if (addNewPlayerService.playerForm.get('rating')?.hasError('required')) { Rating is required }
+        @if (addNewPlayerService.playerForm.get('rating')?.hasError('min') || addNewPlayerService.playerForm.get('rating')?.hasError('max')) { Rating must be between 1 and 10 }
+      </div>
+    }
   </label>
   <label>
     <input formControlName="email" type="email" placeholder="Email">
