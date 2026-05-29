@@ -2,30 +2,29 @@ import {inject, linkedSignal} from '@angular/core';
 import {StatisticsService} from './statistics.service';
 import {PlayersService} from '../../players/players.service';
 import {ModalsService, PopupsService} from 'ui';
-import {Player, TeamsOptions} from '../../players/models/player.model';
-import {EditStatisticsApiService} from './edit-statistics-api.service';
+import {Player, Statistics, TeamsOptions} from '../../players/models/player.model';
 import {SpinnerService} from '../../spinner.service';
+import {Auth} from '@angular/fire/auth';
+import {AllMatchDataService} from '../../match-event-manager/services/all-match-data.service';
+import {MatchEventsApiService} from '../../match-event-manager/services/match-events-api.service';
+import {ComputedStatisticsService} from './computed-statistics.service';
 
 export class EditStatisticsService {
 
   statisticsService = inject(StatisticsService);
-  editStatisticsApiService = inject(EditStatisticsApiService);
   spinnerService = inject(SpinnerService);
   playersService = inject(PlayersService);
   modalsService = inject(ModalsService);
   popupsService = inject(PopupsService);
+  private auth = inject(Auth);
+  private allMatchDataService = inject(AllMatchDataService);
+  private matchEventsApiService = inject(MatchEventsApiService);
+  computedStatsService = inject(ComputedStatisticsService);
 
   teams = linkedSignal(() => this.playersService.getTeams())
 
   async deleteDayStatistics() {
-    this.modalsService.openConfirmModal({
-      description: `Are you sure you want to <b>delete</b><br> <b>${this.statisticsService.getSelectedDate()}</b> for all players?`
-    }).afterClosed().subscribe((res) => {
-      if(res) {
-        this.statisticsService.deleteAllDayStatistics();
-
-      }
-    })
+    this.popupsService.addErrorPopOut('Deleting a day is not supported. Edit match events directly.');
   }
 
   async updateTeamStatistics(editTeamEvent: { players: Player[], team: TeamsOptions, name: string; number: number }): Promise<void> {
@@ -34,68 +33,28 @@ export class EditStatisticsService {
       height: 400,
       description: `Are you sure you want to perform this action?<br>All the team players will be affected.<br>${editTeamEvent.players.map(p => `<b>${p.name}</b>`).join('<br>')}`
     }).afterClosed().subscribe(async (res) => {
-      if(res) {
-        const statKey = editTeamEvent.name
-        const team = editTeamEvent.team
+      if (res) {
+        const statKey = editTeamEvent.name as keyof Statistics;
         const selectedDate = this.statisticsService.getSelectedDate();
-        const updatedTeamStatistics = editTeamEvent.players.map(player => {
-          const currentStats = player.statistics[selectedDate] || {};
-          // @ts-ignore
-          const currentValue = currentStats[statKey] || 0;
-          const newValue = editTeamEvent.number < 0 && currentValue === 0 ? 0 : currentValue + editTeamEvent.number;
-          return {
-            id: player.id,
-            date: selectedDate,
-            stats: {
-              ...currentStats,
-              [statKey]: newValue,
-            },
-            team
-          };
-        });
-        await this.updateStatisticsForPlayers(updatedTeamStatistics, editTeamEvent.team);
-        await this.editStatisticsApiService.markTotwDateNotUpdated(this.playersService.selectedGroup().id, selectedDate).then()
+        const groupId = this.playersService.selectedGroup().id;
+        const createdBy = this.auth.currentUser?.email || '';
+
+        this.spinnerService.setIsLoading(true);
+        try {
+          const matchId = await this.allMatchDataService.getOrCreateCorrectionMatch(groupId, selectedDate, createdBy);
+          await Promise.all(editTeamEvent.players.map(player =>
+            this.matchEventsApiService.addEvent(groupId, matchId, {
+              type: 'stat_correction',
+              source: 'manual',
+              createdBy,
+              payload: {playerId: player.id, delta: {[statKey]: editTeamEvent.number}, dateKey: selectedDate}
+            })
+          ));
+          this.popupsService.addSuccessPopOut(`${editTeamEvent.team} was updated successfully.`);
+        } finally {
+          this.spinnerService.setIsLoading(false);
+        }
       }
-    })
+    });
   }
-
-  async updateStatisticsForPlayers(updates: { id: string; team: string, date: string; stats: Record<string, any> }[], team: string): Promise<void> {
-    this.spinnerService.setIsLoading(true);
-    this.editStatisticsApiService.updateStatisticsForPlayers(this.playersService.selectedGroup().id, updates)
-      .then(() => {
-        this.applyStatisticsUpdatesToTeams(updates, team)
-        this.popupsService.addSuccessPopOut(`${team} was updated successfully.`)
-      })
-      .finally(() => {
-        this.spinnerService.setIsLoading(false);
-      })
-  }
-  applyStatisticsUpdatesToTeams(updates: { id: string; team: string, date: string; stats: Record<string, any> }[], team: string): void {
-    const allPlayersMap = new Map<string, Player>(
-      this.playersService.flattenPlayers().map(player => [player.id, player])
-    );
-
-    const teamToUpdate = { ...this.teams()[team] };
-    const newTeam: Player[] = [];
-
-    for (const p of updates) {
-      const player = allPlayersMap.get(p.id);
-      if (!player) continue;
-
-      const updatedPlayer: Player = {
-        ...player,
-        // @ts-ignore
-        statistics: {
-          ...player.statistics,
-          [p.date]: p.stats,
-        },
-      };
-
-      newTeam.push(updatedPlayer);
-    }
-    teamToUpdate.players = newTeam;
-    this.teams.set({...this.teams(), [team]: teamToUpdate});
-    this.playersService.setTeams({...this.teams(), [team]: teamToUpdate});
-  }
-
 }

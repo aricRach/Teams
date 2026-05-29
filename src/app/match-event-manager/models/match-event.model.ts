@@ -1,4 +1,4 @@
-export type MatchStatus = 'live' | 'completed' | 'abandoned';
+export type MatchStatus = 'live' | 'completed' | 'abandoned' | 'correction';
 
 export type MatchEventType =
   | 'match_started'
@@ -6,6 +6,7 @@ export type MatchEventType =
   | 'team_result'
   | 'player_goal'
   | 'player_assist'
+  | 'stat_correction'
   | 'custom';
 
 export interface MatchRecord {

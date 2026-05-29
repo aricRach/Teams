@@ -10,14 +10,12 @@ import {
   query,
   serverTimestamp,
   setDoc,
+  Timestamp,
   updateDoc,
   where,
-  writeBatch,
-  increment
+  writeBatch
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
-import { currentDate } from '../../utils/date-utils';
-import { Player } from '../../players/models/player.model';
 import { MatchEventRecord, MatchRecord } from '../models/match-event.model';
 
 @Injectable({
@@ -84,9 +82,17 @@ export class MatchEventsApiService {
     return collectionData(q, { idField: 'id' }) as unknown as Observable<MatchRecord[]>;
   }
 
+  // For the matches timeline — orders by game minute, excludes events without timerMs (e.g. stat_correction)
   getEvents(groupId: string, matchId: string): Observable<MatchEventRecord[]> {
     const eventsRef = collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`);
     const q = query(eventsRef, orderBy('payload.timerMs', 'asc'));
+    return collectionData(q, { idField: 'id' }) as unknown as Observable<MatchEventRecord[]>;
+  }
+
+  // For statistics computation — orders by createdAt so all event types are included
+  getAllEvents(groupId: string, matchId: string): Observable<MatchEventRecord[]> {
+    const eventsRef = collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`);
+    const q = query(eventsRef, orderBy('createdAt', 'asc'));
     return collectionData(q, { idField: 'id' }) as unknown as Observable<MatchEventRecord[]>;
   }
 
@@ -103,54 +109,19 @@ export class MatchEventsApiService {
     await setDoc(ref, { deletedAt: serverTimestamp() }, { merge: true });
   }
 
-  async applyMatchResultToPlayerStatistics(
-    groupId: string,
-    winners: Player[],
-    losers: Player[],
-    gameStatus: 'draw' | 'decided',
-    wonTeamScore: number,
-    loseTeamScore: number
-  ): Promise<void> {
-    const batch = writeBatch(this.firestore);
-    const dateKey = currentDate;
-
-    for (const player of winners) {
-      const currentStats = player.statistics?.[dateKey] || {};
-      const nextStats = {
-        ...currentStats,
-        wins: (currentStats.wins || 0) + (gameStatus === 'decided' ? 1 : 0),
-        games: (currentStats.games || 0) + 1,
-        draws: (currentStats.draws || 0) + (gameStatus === 'draw' ? 1 : 0),
-        goals: (currentStats.goals || 0),
-        loses: (currentStats.loses || 0),
-        goalsConceded: (currentStats.goalsConceded || 0) + loseTeamScore
-      };
-      const statRef = doc(this.firestore, `groups/${groupId}/players/${player.id}/statistics/${dateKey}`);
-      batch.set(statRef, nextStats, { merge: true });
-    }
-
-    for (const player of losers) {
-      const currentStats = player.statistics?.[dateKey] || {};
-      const nextStats = {
-        ...currentStats,
-        loses: (currentStats.loses || 0) + (gameStatus === 'decided' ? 1 : 0),
-        games: (currentStats.games || 0) + 1,
-        draws: (currentStats.draws || 0) + (gameStatus === 'draw' ? 1 : 0),
-        wins: (currentStats.wins || 0),
-        goals: (currentStats.goals || 0),
-        goalsConceded: (currentStats.goalsConceded || 0) + wonTeamScore
-      };
-      const statRef = doc(this.firestore, `groups/${groupId}/players/${player.id}/statistics/${dateKey}`);
-      batch.set(statRef, nextStats, { merge: true });
-    }
-
-    await batch.commit();
+  async createCorrectionMatch(groupId: string, dateKey: string, createdBy: string): Promise<string> {
+    const [day, month, year] = dateKey.split('-').map(Number);
+    const matchDate = new Date(year, month - 1, day, 12, 0, 0);
+    const matchesRef = collection(this.firestore, `groups/${groupId}/matches`);
+    const docRef = await addDoc(matchesRef, {
+      status: 'correction',
+      createdBy,
+      createdAt: Timestamp.fromDate(matchDate),
+      updatedAt: serverTimestamp()
+    });
+    return docRef.id;
   }
 
-  /**
-   * Performs an atomic update of a match document, its associated events, and player statistics.
-   * Uses Firestore increments for safe statistics updates.
-   */
   async applyAtomicMatchSync(
     groupId: string,
     matchId: string,
@@ -159,22 +130,15 @@ export class MatchEventsApiService {
       add: Omit<MatchEventRecord, 'id'>[];
       update: { id: string; patch: Partial<MatchEventRecord> }[];
       deleteIds: string[];
-    },
-    playerStatsChanges: {
-      playerId: string;
-      statsDelta: Record<string, number>;
-    }[],
-    dateKey: string = currentDate
+    }
   ): Promise<void> {
     const batch = writeBatch(this.firestore);
 
-    // 1. Update Match Doc
     if (matchPatch) {
       const matchRef = doc(this.firestore, `groups/${groupId}/matches/${matchId}`);
       batch.update(matchRef, { ...matchPatch, updatedAt: serverTimestamp() });
     }
 
-    // 2. Process Event Changes
     eventChanges.add.forEach((event) => {
       const ref = doc(collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`));
       batch.set(ref, {
@@ -198,16 +162,6 @@ export class MatchEventsApiService {
         deletedAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });
-    });
-
-    // 3. Update Player Statistics using Atomicity (Increments)
-    playerStatsChanges.forEach(({ playerId, statsDelta }) => {
-      const statRef = doc(this.firestore, `groups/${groupId}/players/${playerId}/statistics/${dateKey}`);
-      const updateObj: any = {};
-      for (const [key, value] of Object.entries(statsDelta)) {
-        updateObj[key] = increment(value);
-      }
-      batch.set(statRef, updateObj, { merge: true });
     });
 
     await batch.commit();

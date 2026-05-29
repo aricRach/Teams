@@ -1,5 +1,5 @@
 import {Component, computed, input} from '@angular/core';
-import {compareDates, currentDate} from '../../utils/date-utils';
+import {compareDates} from '../../utils/date-utils';
 import {Player, Statistics} from '../models/player.model';
 
 enum PlayerFormStatus {
@@ -19,15 +19,11 @@ export class PlayerViewComponent {
   showRating = input.required();
   player = input.required<Player>();
   showStatistics = input.required<boolean>();
-  dateStatistics = input<string>();
-
-  specificDateStats = computed(() => {
-    const day = this.dateStatistics() || currentDate;
-    return this.player().statistics?.[day];
-  });
+  dateStats = input<Statistics | undefined>();
+  allPlayerStats = input<Map<string, Statistics>>(new Map());
 
   playerView = computed(() => {
-    const stats = this.specificDateStats();
+    const stats = this.dateStats();
     if(!stats || !this.showStatistics()) {
       return !this.showRating() ? this.player().name : this.player().name + ' - rating - ' + this.player().rating;
     }
@@ -37,8 +33,8 @@ export class PlayerViewComponent {
   })
 
   playerForm = computed(() => {
-    const allStats = this.player().statistics;
-    return this.calculatePlayerForm(Object.entries(allStats))
+    const statsEntries = Array.from(this.allPlayerStats().entries()) as [string, Statistics][];
+    return this.calculatePlayerForm(statsEntries);
   })
 
   getDisplayValue(value: number) {

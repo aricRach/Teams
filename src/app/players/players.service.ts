@@ -7,13 +7,7 @@ import {PopupsService} from 'ui';
 import {skeleton} from './consts/teams-skeleton';
 import {MembersService} from '../admin/services/members.service';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
-import {currentDate} from '../utils/date-utils';
 
-export interface PlayerStatsUpdate {
-  id: string;
-  date: string;
-  stats: Record<string, any>;
-};
 @Injectable({
   providedIn: 'root'
 })
@@ -119,65 +113,6 @@ export class PlayersService {
        )
     }
 
-  async updatePlayerStats(editedPlayer: Player): Promise<void> {
-    this.spinnerService.setIsLoading(true);
-    try {
-      await this.playersApiService.updatePlayerStats(
-        this.selectedGroup().id,
-        editedPlayer.id,
-        editedPlayer.statistics
-      );
-      this.updatePlayerSignal(editedPlayer);
-      this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`);
-    } catch {
-      this.popoutService.addErrorPopOut(`Can't save to database. Please try again later or save locally.`);
-    } finally {
-      this.spinnerService.setIsLoading(false);
-    }
-  }
-
-  /**
-   * Bump `goals` for one date (e.g. each +1 goal during a live match).
-   */
-  async adjustPlayerGoalsForDate(
-    playerId: string,
-    delta: number,
-    dateKey: string = currentDate
-  ): Promise<void> {
-    const groupId = this.selectedGroup()?.id;
-    if (!groupId || !delta) {
-      return;
-    }
-
-    const teams = this.getTeams();
-    let updatedPlayer: Player | null = null;
-
-    for (const teamKey of Object.keys(teams)) {
-      const team = teams[teamKey];
-      const idx = team.players?.findIndex((p: Player) => p.id === playerId) ?? -1;
-      if (idx > -1) {
-        const p = team.players[idx];
-        const statistics = {...p.statistics};
-        const day = {...(statistics[dateKey] || {})};
-        day.goals = Math.max(0, (day.goals || 0) + delta);
-        statistics[dateKey] = day;
-        updatedPlayer = {...p, statistics};
-        break;
-      }
-    }
-
-    if (!updatedPlayer) {
-      return;
-    }
-
-    try {
-      await this.playersApiService.updatePlayerStats(groupId, updatedPlayer.id, updatedPlayer.statistics);
-      this.updatePlayerSignal(updatedPlayer);
-    } catch {
-      this.popoutService.addErrorPopOut(`Can't save goals. Try again.`);
-    }
-  }
-
   async updatePlayerDetails(player: Player, editedPlayer: Player): Promise<void> {
     this.spinnerService.setIsLoading(true);
 
@@ -238,17 +173,6 @@ export class PlayersService {
    return this.playersApiService.getDraftSessionsByCreator(this.selectedGroup().id).finally(() => {
      this.spinnerService.setIsLoading(false)
    })
-  }
-
-  async deleteDayStatistics(day: string) {
-     this.spinnerService.setIsLoading(true);
-     return this.playersApiService.deleteDayStatistics(this.selectedGroup().id, day)
-       .catch(() => {
-       this.popoutService.addErrorPopOut('Something went wrong, please try again later')
-     })
-       .finally(()=> {
-       this.spinnerService.setIsLoading(false)
-     })
   }
 
   removeDraftSession(sessionId: string) {

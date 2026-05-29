@@ -1,6 +1,6 @@
 ---
 name: Angular Best Practices
-description: Guidelines for Angular 18+ components including signal forms, state separation, and modern syntax.
+description: Guidelines for Angular 20+ components including signal forms, state separation, and modern syntax.
 ---
 
 # Angular Best Practices
@@ -35,3 +35,6 @@ Do not use inline `style="..."` assignments inside the HTML. All styling impleme
 
 ### 8. Meaningfull names
 Use meaningful names for variables and functions. Avoid using abbreviations or short names.
+
+### 9. Smart and Dumb Components
+Maintain a clear separation between smart (container) components and dumb (presentational) components.

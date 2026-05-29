@@ -1,8 +1,9 @@
-import {inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable} from '@angular/core';
 import {firstValueFrom} from 'rxjs';
 import {PlayersService} from '../players/players.service';
 import {GameDetails, GameStatus, MatchEventsManagerService} from '../match-event-manager/services/match-events-manager.service';
 import {NavigationService} from '../shared/navigation/navigation.service';
+import {ComputedStatisticsService} from '../statistics/services/computed-statistics.service';
 
 @Injectable()
 export class GameService {
@@ -10,6 +11,9 @@ export class GameService {
   playersService = inject(PlayersService);
   matchEventsService = inject(MatchEventsManagerService);
   navigationService = inject(NavigationService);
+  computedStatsService = inject(ComputedStatisticsService);
+
+  computedStats = computed(() => this.computedStatsService.statsMap())
 
   async endGame(teams: any) {
     let team1Score = 0;

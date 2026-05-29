@@ -2,16 +2,26 @@ import {computed, inject, Injectable} from '@angular/core';
 import {ManagePlayersService} from './manage-players.service';
 import {FormGroup} from '@angular/forms';
 import {convertFormValuesToNumbers} from '../../utils/form-utils';
-import {DynamicComponentsTypes, FormField, genericValidators, subInputType} from 'ui';
+import {DynamicComponentsTypes, FormField, genericValidators, PopupsService, subInputType} from 'ui';
 import {PlayersService} from '../../players/players.service';
-import {TeamOfTheWeekApiService} from '../../team-of-the-week/services/team-of-the-week-api.service';
+import {Auth} from '@angular/fire/auth';
+import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
+import {AllMatchDataService} from '../../match-event-manager/services/all-match-data.service';
+import {MatchEventsApiService} from '../../match-event-manager/services/match-events-api.service';
+import {Statistics} from '../../players/models/player.model';
+import {SpinnerService} from '../../spinner.service';
 
 @Injectable()
 export class EditPlayerStatisticsService {
 
   managePlayersService = inject(ManagePlayersService);
   playersService = inject(PlayersService);
-  teamOfTheWeekApiService = inject(TeamOfTheWeekApiService);
+  private auth = inject(Auth);
+  private computedStatsService = inject(ComputedStatisticsService);
+  private allMatchDataService = inject(AllMatchDataService);
+  private matchEventsApiService = inject(MatchEventsApiService);
+  private popupsService = inject(PopupsService);
+  private spinnerService = inject(SpinnerService);
 
   lastDayPlayedStatistics = computed(() => {
     return this.managePlayersService.selectedPlayer() ? this.getLastDayStatistics(this.managePlayersService.selectedPlayer()) : null;
@@ -27,58 +37,68 @@ export class EditPlayerStatisticsService {
   })
 
   getLastDayStatistics(playerData: any): any {
-    if (!playerData || !playerData.statistics) {
-      throw new Error("Invalid player data");
-    }
+    if (!playerData?.id) return null;
 
-    const statistics = playerData.statistics;
-    const dates = Object.keys(statistics);
+    const playerDateMap = this.computedStatsService.statsForPlayer(playerData.id);
+    const dates = Array.from(playerDateMap.keys());
 
-    if (dates.length === 0) {
-      return null
-    }
+    if (dates.length === 0) return null;
 
-    // Find the latest date
-    const lastDate = dates.reduce((latest, current) => {
-      return new Date(current.split("-").reverse().join("-")) > new Date(latest.split("-").reverse().join("-"))
-        ? current
-        : latest;
-    });
+    const lastDate = dates.reduce((latest, current) =>
+      new Date(current.split('-').reverse().join('-')) > new Date(latest.split('-').reverse().join('-'))
+        ? current : latest
+    );
 
     return {
       date: lastDate,
-      statistics: statistics[lastDate],
+      statistics: playerDateMap.get(lastDate)!,
     };
   }
 
-  editLastStatistics(lastStatisticsForm: FormGroup<any>) {
-    const formValues = lastStatisticsForm.getRawValue();
-    const updatedPlayer = this.managePlayersService.selectedPlayer();
+  async editLastStatistics(lastStatisticsForm: FormGroup<any>): Promise<void> {
+    const formValues = convertFormValuesToNumbers(lastStatisticsForm.getRawValue());
+    const player = this.managePlayersService.selectedPlayer();
+    const lastDay = this.lastDayPlayedStatistics();
+    if (!lastDay || !player?.id) return;
 
-    const defaultStats = {
-      games: 0,
-      goals: 0,
-      wins: 0,
-      draws: 0,
-      loses: 0,
-      goalsConceded: 0
-    };
+    const groupId = this.playersService.selectedGroup()?.id;
+    if (!groupId) return;
 
-    updatedPlayer.statistics[this.lastDayPlayedStatistics().date] = {
-      ...defaultStats,
-      ...convertFormValuesToNumbers(formValues)
-    };
+    const currentStats: Statistics = lastDay.statistics || {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0};
+    const delta: Partial<Statistics> = {};
+    for (const key of ['goals', 'wins', 'loses', 'draws', 'games', 'goalsConceded'] as (keyof Statistics)[]) {
+      const d = (formValues[key] || 0) - (currentStats[key] || 0);
+      if (d !== 0) (delta as any)[key] = d;
+    }
 
-    this.playersService.updatePlayerStats(updatedPlayer).then(() => {
-      this.teamOfTheWeekApiService.markTotwDateNotUpdated(this.lastDayPlayedStatistics().date).then()
-    });
+    if (Object.keys(delta).length === 0) return;
+
+    const createdBy = this.auth.currentUser?.email || '';
+    const matchId = await this.allMatchDataService.getOrCreateCorrectionMatch(groupId, lastDay.date, createdBy);
+
+    this.spinnerService.setIsLoading(true);
+    try {
+      await this.matchEventsApiService.addEvent(groupId, matchId, {
+        type: 'stat_correction',
+        source: 'manual',
+        createdBy,
+        payload: {playerId: player.id, delta, dateKey: lastDay.date}
+      });
+      this.popupsService.addSuccessPopOut('Statistic updated successfully');
+    } catch (e) {
+      this.popupsService.addErrorPopOut('Cant save - please try again later');
+    } finally {
+      this.spinnerService.setIsLoading(false);
+    }
+
   }
 
   private buildEditGameStatsFields() {
-    if(this.managePlayersService.selectedPlayer() && !this.lastDayPlayedStatistics()) {
+    const lastDay = this.lastDayPlayedStatistics();
+    if (this.managePlayersService.selectedPlayer() && !lastDay) {
       return [];
     }
-    const statistic = this.managePlayersService.selectedPlayer()?.statistics[this.lastDayPlayedStatistics()['date']];
+    const statistic = lastDay?.statistics;
     return [
       {
         alias: 'games:',

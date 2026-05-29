@@ -2,13 +2,10 @@ import {Component, computed, HostListener, inject, input, linkedSignal, output, 
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
-import {GoalModalEvent, Player, TeamsOptions} from '../models/player.model';
+import {GoalModalEvent, Player, Statistics, TeamsOptions} from '../models/player.model';
 import {currentDate} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
-import {PlayersService} from '../players.service';
 import {ModalComponent} from '../../../modals/modal/modal.component';
-import {AdminControlService} from '../../user/admin-control.service';
-import {PopupsService} from 'ui';
 import {PlayersDragDropTableService} from './players-drag-drop-table.service';
 
 @Component({
@@ -21,7 +18,6 @@ import {PlayersDragDropTableService} from './players-drag-drop-table.service';
 })
 export class PlayersDragDropTableComponent {
 
-  popupsService = inject(PopupsService);
   playersDragDropTableService = inject(PlayersDragDropTableService);
   isLocked = input.required();
   dateStatistics = input<string>();
@@ -29,20 +25,31 @@ export class PlayersDragDropTableComponent {
   clonedTeams = input<any>();
   enableShowRatings = input(false);
   enableMakeBalancedTeams = input(true);
+  numberOfTeams = input<number>(Infinity);
+  playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
+  currentMatchId = input<string | null>(null);
   showStatisticsInput = input(false);
   showStatistics = linkedSignal(() => this.showStatisticsInput())
-  playersService = inject(PlayersService);
-  adminControlService = inject(AdminControlService);
 
-  setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent) ;
+  setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent);
   makeBalancedTeamsModalVisible = signal(false);
-  getGoalModalDataByPlayer = linkedSignal(() =>
-    this.setGoalModalData().player?.statistics?.[currentDate]?.goals || 0)
+
+  // Resets to an empty map whenever currentMatchId changes (new game starts or game ends)
+  liveSessionGoals = linkedSignal<Map<string, number>>(() => { this.currentMatchId(); return new Map(); });
+
+  getGoalModalDataByPlayer = linkedSignal(() => {
+    const playerId = this.setGoalModalData().player?.id ?? '';
+    return (this.playerStatsMap().get(playerId)?.get(currentDate)?.goals || 0)
+         + (this.liveSessionGoals().get(playerId) || 0);
+  });
   isGoalIncreased = computed(() => {
     return this.getGoalModalDataByPlayer() >= this.originalGoals() + 1
   })
-  originalGoals = linkedSignal(() =>
-    this.setGoalModalData().player?.statistics?.[currentDate]?.goals || 0)
+  originalGoals = linkedSignal(() => {
+    const playerId = this.setGoalModalData().player?.id ?? '';
+    return (this.playerStatsMap().get(playerId)?.get(currentDate)?.goals || 0)
+         + (this.liveSessionGoals().get(playerId) || 0);
+  });
   isSetGoalModalVisible = signal(false);
 
   modalPosition = signal({ x: 0, y: 0 });
@@ -50,9 +57,10 @@ export class PlayersDragDropTableComponent {
   totalRatings = linkedSignal(() => this.setTotalRatingToAllTeams());
 
   recordGoalEvent = output<{player: Player, teamKey: string}>();
+  removePlayer = output<{team: string, index: number}>();
 
   readonly teamKeys = computed(() =>
-    Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.playersService.numberOfTeams()) as TeamsOptions[]
+    Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.numberOfTeams()) as TeamsOptions[]
   );
 
   readonly dropListRefs = computed(() =>
@@ -115,9 +123,7 @@ export class PlayersDragDropTableComponent {
   }
 
   removeFromList(team: string, index: number) {
-    const allTeams = this.playersService.getTeams();
-    allTeams[team]?.players.splice(index, 1);
-    this.playersService.setTeams(allTeams);
+    this.removePlayer.emit({team, index});
   }
 
   openSetGoalModal(event: { position: {pageX: number, pageY: number}}, data: {player: any; team: string}): void {
@@ -144,15 +150,15 @@ export class PlayersDragDropTableComponent {
   }
 
   setGoals() {
-    const teamKey = this.setGoalModalData().team;
-    const team = this.playersService.getTeams()[teamKey];
-    const playerIndex = team.players.findIndex((player: Player) => player.name === this.setGoalModalData().player.name);
-    if (playerIndex >= 0) {
-        const player = team.players[playerIndex];
-        this.recordGoalEvent.emit({player, teamKey})
-      }
-      this.closeSetGoalModal();
+    const { player, team: teamKey } = this.setGoalModalData();
+    if (player) {
+      this.recordGoalEvent.emit({player, teamKey});
+      const updated = new Map(this.liveSessionGoals());
+      updated.set(player.id, (updated.get(player.id) || 0) + 1);
+      this.liveSessionGoals.set(updated);
     }
+    this.closeSetGoalModal();
+  }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
@@ -162,6 +168,14 @@ export class PlayersDragDropTableComponent {
         this.isSetGoalModalVisible.set(false);
       }
     }
+  }
+
+  getPlayerDateStats(playerId: string): Statistics | undefined {
+    return this.playerStatsMap().get(playerId)?.get(this.dateStatistics() || currentDate);
+  }
+
+  getPlayerStats(playerId: string): Map<string, Statistics> {
+    return this.playerStatsMap().get(playerId) ?? new Map();
   }
 
   makeBalancedTeams() {

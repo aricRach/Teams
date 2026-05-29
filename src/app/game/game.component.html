@@ -33,9 +33,18 @@
 <app-capture-media></app-capture-media>
 
 }
-<app-players-drag-drop-table [enableShowRatings]="true" [clonedTeams]="teams()" [isLocked]="isMovePlayersLocked()"
-  (recordGoalEvent)="recordGoalFromTimerHandler($event)" [playingTeams]="playingTeams()"
-  (playingTeamsChange)="playingTeams.set($event)" (dropPlayer)="updateTeams($event)" />
+<app-players-drag-drop-table
+  [clonedTeams]="teams()"
+  [isLocked]="isMovePlayersLocked()"
+  [numberOfTeams]="playersService.numberOfTeams()"
+  [enableShowRatings]="adminControlService.getAdminControl().showRating"
+  [enableMakeBalancedTeams]="adminControlService.getAdminControl().showMakeBalanceTeams"
+  [playerStatsMap]="gameService.computedStats()"
+  [currentMatchId]="matchEventsService.liveMatchId()"
+  [playingTeams]="playingTeams()"
+  (recordGoalEvent)="recordGoalFromTimerHandler($event)"
+  (playingTeamsChange)="playingTeams.set($event)"
+  (dropPlayer)="updateTeams($event)" />
 
 <app-stopwatch [disabled]="playingTeams().length !== 2" [disabledTooltip]="'Please select 2 teams'"
   (timeStartEvent)="onTimerStart()" (timeResetEvent)="onTimerReset()" (timeEndEvent)="endGameFromTimer()" />

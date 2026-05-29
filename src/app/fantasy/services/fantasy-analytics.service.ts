@@ -3,12 +3,14 @@ import {PlayersService} from '../../players/players.service';
 import {FantasyData, FantasyMeta} from './fantasy-api.service';
 import {SpinnerService} from '../../spinner.service';
 import {Player, Statistics} from '../../players/models/player.model';
+import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
 
 @Injectable()
 export class FantasyAnalyticsService {
 
   playersService = inject(PlayersService);
   spinnerService = inject(SpinnerService);
+  private computedStatsService = inject(ComputedStatisticsService);
 
   allUniqueDates = signal([] as string[]);
   selectAllLabel = signal('Select All');
@@ -40,14 +42,20 @@ export class FantasyAnalyticsService {
   })
 
   allPlayersPointsMap = computed(() => {
+    const statsMap = this.computedStatsService.statsMap();
     const allPlayers = this.allPlayers();
-    return new Map(
-      allPlayers.flatMap((p) =>
-        Object.entries(p.statistics).filter(([date, stats]: [string, Statistics]) => stats.games > 0).map(([date, stats]: [string, Statistics]) => {
-          return [p.id + '_' + date, { playerName: p.name, points: this.calculatePoints(stats), date }];
-        })
-      )
-    );
+    const result = new Map<string, {playerName: string; points: number; date: string}>();
+    for (const player of allPlayers) {
+      if (!player.id) continue;
+      const playerDateMap = statsMap.get(player.id);
+      if (!playerDateMap) continue;
+      for (const [date, stats] of playerDateMap.entries()) {
+        if (stats.games > 0) {
+          result.set(player.id + '_' + date, {playerName: player.name, points: this.calculatePoints(stats), date});
+        }
+      }
+    }
+    return result;
   })
 
    calculatePoints(stats: { goals: number; wins: number; goalsConceded: number }): number {
@@ -166,19 +174,22 @@ export class FantasyAnalyticsService {
 
   setAllFantasyDates(fantasyData: FantasyData) {
     const fantasyDates = new Set(Object.keys(fantasyData).filter((key) => key !== 'meta'));
-    this.allUniqueDates.set(
-      [this.selectAllLabel(), ...Array.from(new Set(
-        this.allPlayers()
-          .flatMap(player =>
-            Object.entries(player.statistics)
-              .filter(([_, stats]) => stats.games > 0)
-              .map(([date, _]) => date)
-              .filter(date => fantasyDates.has(date))
-          ).sort((d1, d2) =>
-          d1.split('-').reverse().join('').localeCompare(d2.split('-').reverse().join(''))
-        )
-      ))]
-    );
+    const statsMap = this.computedStatsService.statsMap();
+    const dates = new Set<string>();
+    for (const player of this.allPlayers()) {
+      if (!player.id) continue;
+      const playerMap = statsMap.get(player.id);
+      if (!playerMap) continue;
+      for (const [date, stats] of playerMap.entries()) {
+        if (stats.games > 0 && fantasyDates.has(date)) dates.add(date);
+      }
+    }
+    this.allUniqueDates.set([
+      this.selectAllLabel(),
+      ...Array.from(dates).sort((d1, d2) =>
+        d1.split('-').reverse().join('').localeCompare(d2.split('-').reverse().join(''))
+      )
+    ]);
   }
 
   setSelectedDate(event: Event) {

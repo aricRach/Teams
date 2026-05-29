@@ -3,6 +3,7 @@ import {ChartData, ChartDataset, ChartOptions} from 'chart.js';
 import {PlayersService} from '../../players/players.service';
 import {Player} from '../../players/models/player.model';
 import {ManagePlayersService} from './manage-players.service';
+import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
 
 export enum ViewMode{
   WIN = 'win',
@@ -12,6 +13,7 @@ export enum ViewMode{
 export class PlayerProgressChartService {
   managePlayersService = inject(ManagePlayersService);
   playersService = inject(PlayersService);
+  private computedStatsService = inject(ComputedStatisticsService);
   statToShow = signal<'goals' | 'wins'>('goals');
   lineChartOptions = computed((): ChartOptions<'line'> => {
     return {
@@ -77,15 +79,12 @@ export class PlayerProgressChartService {
     const players = comparedPlayer ? [player, comparedPlayer as Player] : [player];
     const colors = ['blue', 'green'];
     const datasets = players.map((p, i) => {
-      const data = Object.entries(p.statistics)
-        .filter(([_, stats]) => Object.keys(stats).length > 0 && stats.games > 0)
+      const playerStats = this.computedStatsService.statsForPlayer(p.id);
+      const data = Array.from(playerStats.entries())
+        .filter(([_, stats]) => stats.games > 0)
         .map(([dateStr, stats]) => {
           const [day, month, year] = dateStr.split('-').map(Number);
-          const date = new Date(year, month - 1, day);
-          return {
-            x: date,
-            y: stats[statType] ?? 0,
-          };
+          return {x: new Date(year, month - 1, day), y: stats[statType] ?? 0};
         })
         .sort((a, b) => a.x.getTime() - b.x.getTime())
         .slice(-9);

@@ -5,6 +5,7 @@ import {StatisticsService} from '../../statistics/services/statistics.service';
 import {ModalsService, PopupsService} from 'ui';
 import {SpinnerService} from '../../spinner.service';
 import {shuffleArray} from '../../utils/array-utils';
+import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
 
 
 export interface PlayerWeekStates {
@@ -26,6 +27,7 @@ export class TeamOfTheWeekService {
   popupsService = inject(PopupsService);
   spinnerService = inject(SpinnerService);
   modalsService = inject(ModalsService);
+  private computedStatsService = inject(ComputedStatisticsService);
 
   totwResource = resource({
     params: () => ({
@@ -41,13 +43,19 @@ export class TeamOfTheWeekService {
 
   calculateWeekStates(date: string) {
     const allPlayers = this.playersService.flattenPlayers();
-    const setOfTeams = new Set();
-    const players =  allPlayers.filter((player) => !!player.statistics[date] && player.statistics[date].games > 0).map(player => {
-      const dateStats = player.statistics[date];
-      setOfTeams.add(player.team)
-        return {name: player.name, team: player.team, totalGoals: dateStats.goals, totalGames: dateStats.games, totalWins: dateStats.wins, totalGoalsConceded: dateStats.goalsConceded}
-    })
-    return {players, teamSize:  Math.ceil(players.length/setOfTeams.size)}
+    const statsMap = this.computedStatsService.statsMap();
+    const setOfTeams = new Set<string>();
+    const players = allPlayers
+      .filter(player => {
+        const s = statsMap.get(player.id)?.get(date);
+        return s && s.games > 0;
+      })
+      .map(player => {
+        const s = statsMap.get(player.id)!.get(date)!;
+        setOfTeams.add(player.team);
+        return {name: player.name, team: player.team, totalGoals: s.goals, totalGames: s.games, totalWins: s.wins, totalGoalsConceded: s.goalsConceded};
+      });
+    return {players, teamSize: Math.ceil(players.length / setOfTeams.size)};
   }
 
   getTeamOfTheWeek(date: string) {

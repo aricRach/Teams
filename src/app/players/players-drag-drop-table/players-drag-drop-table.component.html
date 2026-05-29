@@ -6,7 +6,7 @@
   <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
   }
 
-  @if(adminControlService.getAdminControl().showMakeBalanceTeams && enableMakeBalancedTeams()) {
+  @if(enableMakeBalancedTeams()) {
   <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
   }
   <div class="all-teams-container">
@@ -51,7 +51,7 @@
         }
       </div>
       }
-      @if (adminControlService.getAdminControl().showRating && enableShowRatings()) {
+      @if (enableShowRatings()) {
       <h5>{{ totalRatings()?.[teamKey]?.toFixed(2) }}</h5>
       }
 
@@ -59,8 +59,13 @@
         [cdkDropListData]="clonedTeams()?.[teamKey]?.players" [cdkDropListConnectedTo]="dropListRefs()" class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of clonedTeams()?.[teamKey]?.players; track item) {
-        <app-player-view [dateStatistics]="dateStatistics()" [showStatistics]="showStatistics()" [player]="item"
-          [showRating]="adminControlService.getAdminControl().showRating && enableShowRatings()" appDoubleClick
+        <app-player-view
+          [player]="item"
+          [showStatistics]="showStatistics()"
+          [showRating]="enableShowRatings()"
+          [dateStats]="getPlayerDateStats(item.id)"
+          [allPlayerStats]="getPlayerStats(item.id)"
+          appDoubleClick
           [doubleClickDisabled]="!isLocked() || !playingTeams().includes(teamKey)"
           (doubleClicked)="openSetGoalModal($event, {player: item, team: teamKey})" class="box"
           cdkDrag></app-player-view>
@@ -76,7 +81,7 @@
     class="box available-player" (cdkDropListDropped)="drop($event)">
     @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
     <div class="player">
-      @if (!adminControlService.getAdminControl().showRating) {
+      @if (!enableShowRatings()) {
       <div class="box" cdkDrag>{{ item.name }}</div>
       } @else {
       <div class="box" cdkDrag>{{ item.name }} - {{ item.rating }}</div>
