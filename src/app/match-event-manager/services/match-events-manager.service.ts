@@ -78,21 +78,20 @@ export class MatchEventsManagerService {
 
   async abandonLiveMatchOnReset(): Promise<void> {
     const selectedGroup = this.playersService.selectedGroup();
-    const id = this.liveMatchId();
+    const matchId = this.liveMatchId();
     // Clear immediately so a quick reset → start can create a new match without racing.
     this.liveMatchId.set(null);
-    if (!selectedGroup?.id || !id) return;
+    if (!selectedGroup?.id || !matchId) return;
     try {
-      const eventsObs = this.matchEventsApiService.getEvents(selectedGroup.id, id);
+      const eventsObs = this.matchEventsApiService.getEvents(selectedGroup.id, matchId);
       const events = await firstValueFrom(eventsObs);
 
-      for (const event of events) {
-        if (!event.deletedAt && event.type === 'player_goal' && event.id) {
-          await this.matchEventsApiService.deleteEvent(selectedGroup.id, id, event.id);
-        }
-      }
+      const goalEventIdsToDelete = events
+        .filter(event => !event.deletedAt && event.type === 'player_goal' && event.id)
+        .map(event => event.id!);
+      await this.matchEventsApiService.deleteEvents(selectedGroup.id, matchId, goalEventIdsToDelete);
 
-      await this.matchEventsApiService.updateMatch(selectedGroup.id, id, {
+      await this.matchEventsApiService.updateMatch(selectedGroup.id, matchId, {
         status: 'abandoned',
         endedAt: new Date()
       });

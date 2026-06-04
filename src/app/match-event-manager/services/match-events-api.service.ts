@@ -65,6 +65,15 @@ export class MatchEventsApiService {
     });
   }
 
+  async updateMatches(groupId: string, matchIds: string[], patch: Partial<MatchRecord>): Promise<void> {
+    const batch = writeBatch(this.firestore);
+    for (const matchId of matchIds) {
+      const ref = doc(this.firestore, `groups/${groupId}/matches/${matchId}`);
+      batch.update(ref, {...patch, updatedAt: serverTimestamp()});
+    }
+    await batch.commit();
+  }
+
   async addEvent(groupId: string, matchId: string, event: Omit<MatchEventRecord, 'id'>): Promise<string> {
     const eventsRef = collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`);
     const eventDoc = {
@@ -107,6 +116,27 @@ export class MatchEventsApiService {
   async deleteEvent(groupId: string, matchId: string, eventId: string): Promise<void> {
     const ref = doc(this.firestore, `groups/${groupId}/matches/${matchId}/events/${eventId}`);
     await setDoc(ref, { deletedAt: serverTimestamp() }, { merge: true });
+  }
+
+  async deleteEvents(groupId: string, matchId: string, eventIds: string[]): Promise<void> {
+    if (!eventIds.length) return;
+    const batch = writeBatch(this.firestore);
+    for (const eventId of eventIds) {
+      const eventRef = doc(this.firestore, `groups/${groupId}/matches/${matchId}/events/${eventId}`);
+      batch.set(eventRef, { deletedAt: serverTimestamp() }, { merge: true });
+    }
+    await batch.commit();
+  }
+
+  async addEvents(groupId: string, matchId: string, events: Omit<MatchEventRecord, 'id'>[]): Promise<void> {
+    if (!events.length) return;
+    const batch = writeBatch(this.firestore);
+    const eventsRef = collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`);
+    for (const event of events) {
+      const eventRef = doc(eventsRef);
+      batch.set(eventRef, { ...event, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
+    }
+    await batch.commit();
   }
 
   async createCorrectionMatch(groupId: string, dateKey: string, createdBy: string): Promise<string> {

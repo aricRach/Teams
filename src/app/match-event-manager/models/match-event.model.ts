@@ -1,4 +1,4 @@
-export type MatchStatus = 'live' | 'completed' | 'abandoned' | 'correction';
+export type MatchStatus = 'live' | 'completed' | 'abandoned' | 'correction' | 'voided';
 
 export type MatchEventType =
   | 'match_started'

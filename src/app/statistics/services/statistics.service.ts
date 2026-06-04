@@ -47,10 +47,9 @@ export class StatisticsService {
     this.selectedDate.set(date);
   }
 
-  deleteAllDayStatistics() {
+  refreshTable() {
     this.selectedDate.set(this.selectAllLabel());
     this.router.navigate(['home', 'statistics', 'table']);
-    return Promise.resolve();
   }
 
   isAdmin() {
