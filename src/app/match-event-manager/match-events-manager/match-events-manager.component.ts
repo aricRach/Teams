@@ -76,6 +76,10 @@ export class MatchEventsManagerComponent {
   // Auto-selects the first match; user can override via the dropdown
   selectedMatchId = linkedSignal(() => this.matches()[0]?.id ?? '');
 
+  selectedMatchLabel = computed(() =>
+    this.matchOptions().find(o => o.id === this.selectedMatchId())?.label ?? ''
+  );
+
   // ── Events: live Firestore stream, re-runs when group or selected match changes
   private eventsResource = rxResource({
     params: () => ({

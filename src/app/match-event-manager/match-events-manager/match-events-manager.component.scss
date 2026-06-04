@@ -1,3 +1,17 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  max-width: 680px;
+}
+
+.events-manager {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 .controls,
 .add-row {
   display: flex;
@@ -17,6 +31,17 @@
     background-color: #fff;
     font-size: inherit;
     cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .match-full-label {
+    flex: 0 0 100%;
+    font-size: 0.8em;
+    color: #555;
+    line-height: 1.4;
+    word-break: break-word;
   }
 
   .edit-btn {

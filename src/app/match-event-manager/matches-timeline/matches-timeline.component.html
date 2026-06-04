@@ -23,8 +23,8 @@
             [frontContent]="card.frontContent"
             [backStyle]="backStyle"
             [frontStyle]="frontStyle"
-            [width]="'350px'"
-            [height]="'350px'"
+            [width]="'min(350px, calc(100vw - 48px))'"
+            [height]="'min(350px, calc(100vw - 48px))'"
           ></lib-flip-card>
         </div>
       }

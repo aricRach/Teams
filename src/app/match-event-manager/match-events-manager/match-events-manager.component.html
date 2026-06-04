@@ -10,6 +10,9 @@
       </option>
       }
     </select>
+    @if (selectedMatchId()) {
+    <span class="match-full-label">{{ selectedMatchLabel() }}</span>
+    }
     @if (!isEditingMatch() && selectedMatchId()) {
     <button class="edit-btn" (click)='startEditingMatch()'>Edit Match Result & Stats</button>
     }
