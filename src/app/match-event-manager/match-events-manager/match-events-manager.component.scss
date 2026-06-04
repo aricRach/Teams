@@ -1,9 +1,35 @@
 .controls,
 .add-row {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   margin-bottom: 12px;
+}
+
+.controls {
+  select {
+    flex: 1 1 100%;
+    min-width: 0;
+    padding: 6px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    background-color: #fff;
+    font-size: inherit;
+    cursor: pointer;
+  }
+
+  .edit-btn {
+    flex: 1 1 auto;
+    white-space: nowrap;
+  }
+}
+
+.add-row {
+  select {
+    flex: 1 1 140px;
+    min-width: 0;
+  }
 }
 
 .events-list {
@@ -13,8 +39,8 @@
 }
 
 .event-row {
-  display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   align-items: center;
   padding: 8px;
@@ -23,13 +49,22 @@
 }
 
 .scorer {
+  flex: 1 1 160px;
   font-weight: 600;
+  min-width: 0;
 }
 
 .scorer-edit {
+  flex: 1 1 160px;
   display: flex;
   align-items: center;
   gap: 6px;
+  min-width: 0;
+
+  select {
+    flex: 1;
+    min-width: 0;
+  }
 
   input {
     flex: 1;
@@ -45,6 +80,7 @@
 }
 
 .minute {
+  flex: 0 0 auto;
   min-width: 50px;
 }
 
@@ -70,7 +106,8 @@
 
   >div {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 10px;
   }
 
   .warning-box {
@@ -100,9 +137,14 @@
 
 .draft-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 16px;
   justify-content: center;
+
+  button {
+    flex: 1 1 140px;
+  }
 }
 
 .warning-box {

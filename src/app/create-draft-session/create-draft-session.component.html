@@ -3,15 +3,15 @@
 </header>
 
   @if(sessionUrlToShow()) {
-    <section>
-    <p>Send the following link to the relevant players:</p>
+    <div class="share-draft">
+    <p class="center">Send the following link to the relevant players:</p>
     <div class="in-row center">
-      <div class="invite-url">{{sessionUrlToShow()}}</div>
+      <div class="invite-url ">{{sessionUrlToShow()}}</div>
       <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(existingSession()?.id || '')">
         <img src="assets/icons/whatsapp.svg" alt="whatsapp">
       </button>
     </div>
-    </section>
+    </div>
 
     <section>
       <a class="link-btn team-draft-link" [routerLink]="sessionRouterLink()">Go To Team Draft</a>
