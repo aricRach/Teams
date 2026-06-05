@@ -1,11 +1,19 @@
 import {CanActivateFn, Router} from '@angular/router';
 import {inject} from "@angular/core";
-import {Auth} from "@angular/fire/auth";
+import {Auth, authState} from "@angular/fire/auth";
+import {map, take} from 'rxjs';
 
 export const signInPageGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
-  const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
 
-  return !auth.currentUser ? true : router.navigate([redirectTo]);
+  return authState(auth).pipe(
+    take(1),
+    map(user => {
+      if (!user) return true;
+      const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
+      localStorage.removeItem('redirectTo');
+      return router.createUrlTree([redirectTo]);
+    })
+  );
 };

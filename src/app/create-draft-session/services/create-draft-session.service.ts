@@ -97,6 +97,7 @@ export class CreateDraftSessionService {
 
     const sessionsRef = collection(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamDraftSessions`);
     const docRef = await addDoc(sessionsRef, sessionData);
+    this.navigationService.unlockNavigation();
     return docRef.id; // sessionId
   }
 
