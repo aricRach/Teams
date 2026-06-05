@@ -7,7 +7,6 @@ import {getGroupPlayersResolver} from './resolvers/get-group-players.resolver';
 import {SignInComponent} from './user/sign-in/sign-in.component';
 import {getUserGroupsResolver} from './resolvers/get-user-groups.resolver';
 import {groupAdminGuard} from './guards/group-admin.guard';
-import {AuthGuard} from '@angular/fire/auth-guard';
 import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './manage-players/edit-player/edit-player.component';
 import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
@@ -49,12 +48,12 @@ export const routes: Routes = [
     resolve: {
       groups: getUserGroupsResolver
     },
-    canActivate: [AuthGuard],
+    canActivate: [authRoutesGuard],
   },
   {
     path: 'create-group',
     loadComponent: () => import('./create-group/create-group.component').then(m => m.CreateGroupComponent),
-    canActivate: [AuthGuard, superAdminGuard]
+    canActivate: [authRoutesGuard, superAdminGuard]
   },
   {
     path: 'home',
