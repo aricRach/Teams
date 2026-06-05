@@ -1,0 +1,58 @@
+<div class="create-group">
+  <h2>Create Group</h2>
+
+  <div class="field">
+    <label>Group Name</label>
+    <input type="text" placeholder="Group name" [formField]="createGroupService.nameForm.name" />
+    @if (createGroupService.nameForm.name().invalid() && createGroupService.nameForm.name().dirty()) {
+      <span class="error">Name is required</span>
+    }
+  </div>
+
+  <div class="field">
+    <label>Members</label>
+    <div class="chip-input">
+      <input
+        type="email"
+        placeholder="Enter email"
+        [value]="createGroupService.memberEmailInput()"
+        (input)="createGroupService.memberEmailInput.set($any($event.target).value)"
+        (keydown.enter)="createGroupService.addMember()"
+      />
+      <button type="button" class="add-btn" (click)="createGroupService.addMember()"
+        [disabled]="!createGroupService.isValidEmail(createGroupService.memberEmailInput())">+</button>
+    </div>
+    <div class="chips">
+      @for (email of createGroupService.members(); track email) {
+        <span class="chip">{{ email }}<button type="button" (click)="createGroupService.removeMember(email)">×</button></span>
+      }
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Admins</label>
+    <div class="chip-input">
+      <input
+        type="email"
+        placeholder="Enter email"
+        [value]="createGroupService.adminEmailInput()"
+        (input)="createGroupService.adminEmailInput.set($any($event.target).value)"
+        (keydown.enter)="createGroupService.addAdmin()"
+      />
+      <button type="button" class="add-btn" (click)="createGroupService.addAdmin()"
+        [disabled]="!createGroupService.isValidEmail(createGroupService.adminEmailInput())">+</button>
+    </div>
+    <div class="chips">
+      @for (email of createGroupService.admins(); track email) {
+        <span class="chip">{{ email }}<button type="button" (click)="createGroupService.removeAdmin(email)">×</button></span>
+      }
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="primary-btn" [disabled]="createGroupService.nameForm().invalid() || createGroupService.submitting()" (click)="createGroupService.submit()">
+      {{ createGroupService.submitting() ? 'Creating...' : 'Create Group' }}
+    </button>
+    <a routerLink="/select-group">Cancel</a>
+  </div>
+</div>

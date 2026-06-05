@@ -35,6 +35,7 @@ import {inactivePlayersResolver} from './manage-players/resolvers/inactive-playe
 import {RatePlayersComponent} from './players/rate-players/rate-players.component';
 import {getSpecificGroupPlayersResolver} from './resolvers/get-specific-group-players.resolver';
 import {groupOwnerGuard} from './guards/group-owner.guard';
+import {superAdminGuard} from './guards/super-admin.guard';
 
 export const routes: Routes = [
   {
@@ -49,6 +50,11 @@ export const routes: Routes = [
       groups: getUserGroupsResolver
     },
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'create-group',
+    loadComponent: () => import('./create-group/create-group.component').then(m => m.CreateGroupComponent),
+    canActivate: [AuthGuard, superAdminGuard]
   },
   {
     path: 'home',

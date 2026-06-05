@@ -1,6 +1,5 @@
 import {inject, Injectable} from '@angular/core';
 import {
-  addDoc,
   collection,
   collectionData,
   doc,
@@ -36,37 +35,6 @@ export class PlayersApiService {
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
     const activePlayersQuery = query(playersRef, where('isActive', '==', true));
     return collectionData(activePlayersQuery, { idField: "id" });
-  }
-
-  /**
-   * Create a new group with the authenticated user's email as admin.
-   * @param groupName Name of the group.
-   * @returns Promise with the created group ID.
-   */
-  async createGroup(groupName: string): Promise<string | null> {
-    const user = this.auth.currentUser;
-    if (!user) {
-      console.error("User not authenticated");
-      return null;
-    }
-
-    const groupRef = collection(this.firestore, 'groups');
-    const groupData = {
-      name: groupName,
-      createdBy: user.email,
-      members: [user.email], // readonly
-      admins: [user.email], // for manage
-      createdAt: new Date()
-    };
-
-    try {
-      const docRef = await addDoc(groupRef, groupData);
-      console.log("🎉 Group created with ID:", docRef.id);
-      return docRef.id;
-    } catch (error) {
-      console.error("❌ Error creating group:", error);
-      return null;
-    }
   }
 
   async savePlayers(groupId: string, players: any[]): Promise<boolean> {

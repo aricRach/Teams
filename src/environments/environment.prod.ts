@@ -11,5 +11,6 @@ export const environment = {
   gatewayServiceBaseUrl: 'https://teams-backend-ai-microservice.onrender.com',
   domain: 'https://teams-rach.netlify.app',
   storageCloudName: 'aric',
-  storageUploadPreset: 'aric-preset'
+  storageUploadPreset: 'aric-preset',
+  superAdminEmail: (window as any)['env']?.NG_APP_SUPER_ADMIN_EMAIL || 'aricrachmany@gmail.com'
 };
