@@ -1,21 +1,14 @@
 import {CanActivateFn, Router} from '@angular/router';
 import {inject} from '@angular/core';
-import {Auth, authState} from '@angular/fire/auth';
-import {map, take} from 'rxjs';
+import {Auth} from '@angular/fire/auth';
 
 export const authRoutesGuard: CanActivateFn = (route, state) => {
   const auth = inject(Auth);
   const router = inject(Router);
-
-  return authState(auth).pipe(
-    take(1),
-    map(user => {
-      if (user) {
-        localStorage.removeItem('redirectTo');
-        return true;
-      }
-      localStorage.setItem('redirectTo', state.url);
-      return router.createUrlTree(['/']);
-    })
-  );
+  if (auth.currentUser) {
+    localStorage.removeItem('redirectTo');
+    return true;
+  }
+  localStorage.setItem('redirectTo', state.url);
+  return router.createUrlTree(['/']);
 };

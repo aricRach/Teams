@@ -1,4 +1,4 @@
-import {ApplicationConfig, provideZoneChangeDetection} from '@angular/core';
+import {ApplicationConfig, inject, provideAppInitializer, provideZoneChangeDetection} from '@angular/core';
 import {provideRouter, withComponentInputBinding, withHashLocation, withRouterConfig} from '@angular/router';
 import '../app/shared/chart.config';
 
@@ -7,7 +7,7 @@ import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import {environment} from '../environments/environment';
 import {DatePipe} from '@angular/common';
-import {provideAuth, getAuth} from '@angular/fire/auth';
+import {provideAuth, getAuth, Auth} from '@angular/fire/auth';
 import {PopupsService} from 'ui';
 import {provideHttpClient, withInterceptors, withInterceptorsFromDi} from '@angular/common/http';
 import {authInterceptor} from './auth.interceptor';
@@ -28,6 +28,7 @@ export const appConfig: ApplicationConfig = {
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideFirestore(() => getFirestore()),
     provideAuth(() => getAuth()),
+    provideAppInitializer(() => inject(Auth).authStateReady()),
     provideHttpClient(withInterceptorsFromDi(), withInterceptors([authInterceptor])),
     DatePipe,
     provideNativeDateAdapter(),
