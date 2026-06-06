@@ -7,7 +7,7 @@
     <p class="center">Send the following link to the relevant players:</p>
     <div class="in-row center">
       <div class="invite-url ">{{sessionUrlToShow()}}</div>
-      <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(existingSession()?.id || '')">
+      <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(activeSession())">
         <img src="assets/icons/whatsapp.svg" alt="whatsapp">
       </button>
     </div>
