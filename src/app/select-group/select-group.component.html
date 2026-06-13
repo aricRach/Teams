@@ -46,9 +46,8 @@
 
 
 <footer>
-  <button class="active-btn action-btn" (click)="logout()">Logout</button>
-
   @if (isSuperAdmin) {
     <a routerLink="/create-group" class="link-btn">+ Create New Group</a>
   }
+  <button (click)="logout()">Logout</button>
 </footer>
