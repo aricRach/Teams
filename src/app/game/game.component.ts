@@ -87,6 +87,7 @@ export class GameComponent {
         team1: this.playingTeams()[0],
         team2: this.playingTeams()[1]
       });
+      this.playingTeams.set([]);
     }
   }
 
