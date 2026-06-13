@@ -25,19 +25,31 @@ export class TeamOfTheWeekApiService {
       `groups/${this.playersService.selectedGroup().id}/teamOfTheWeek/${date}`
     );
     try {
-    if(!createNew) {
       const snapshot = await getDoc(ref);
-      const snapshotData = snapshot.data();
-      if (snapshot.exists() && snapshotData && !snapshotData?.['shouldUpdate']) {
+      const snapshotData = snapshot.data() ?? {};
+
+      const totalTries: number = snapshotData['totalTries'] ?? 0;
+      const lastGeneratedDay: string | null = snapshotData['lastGeneratedDay'] ?? null;
+      const today = new Date().toISOString().slice(0, 10);
+
+      if (!createNew && snapshot.exists() && snapshotData && !snapshotData['shouldUpdate']) {
         return snapshotData;
       }
-    }
+
+      if (totalTries >= 5) {
+        throw new Error('LIMIT_TOTAL');
+      }
+      if (createNew && lastGeneratedDay === today) {
+        throw new Error('LIMIT_DAILY');
+      }
+
       const totwData: any = await firstValueFrom(this.httpClient.post(this.baseUrl, {players, teamSize}));
+      const result = {...totwData, shouldUpdate: false, totalTries: totalTries + 1, lastGeneratedDay: today};
 
       // Fire and forget
-      setDoc(ref, {...totwData, shouldUpdate: false}).catch(() => console.error('cant save'));
+      setDoc(ref, result).catch(() => console.error('cant save'));
 
-      return totwData;
+      return result;
     } catch (err) {
       console.error('Error generating team of the week:', err);
       throw err;

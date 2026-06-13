@@ -41,6 +41,17 @@ export class TeamOfTheWeekService {
 
   shouldShowReGenerate = computed(() => this.playersService.isAdmin() && this.statisticService.getSelectedDate() !== this.statisticService.selectAllLabel())
 
+  reGenerateDisabledReason = computed<string | null>(() => {
+    const data = this.totwData();
+    if (!data) return null;
+    const totalTries: number = data['totalTries'] ?? 0;
+    const lastGeneratedDay: string | null = data['lastGeneratedDay'] ?? null;
+    const today = new Date().toISOString().slice(0, 10);
+    if (totalTries >= 5) return 'Max 5 generates reached for this date';
+    if (lastGeneratedDay === today) return 'Already regenerated today';
+    return null;
+  });
+
   calculateWeekStates(date: string) {
     const allPlayers = this.playersService.flattenPlayers();
     const statsMap = this.computedStatsService.statsMap();
@@ -65,7 +76,7 @@ export class TeamOfTheWeekService {
     } else {
       this.spinnerService.setIsLoading(true);
       const weekStates = this.calculateWeekStates(date);
-      return this.teamOfTheWeekApiService.generateAiTotw(date, weekStates.players, weekStates.teamSize ).finally(() => {
+      return this.teamOfTheWeekApiService.generateAiTotw(date, weekStates.players, weekStates.teamSize).finally(() => {
         this.spinnerService.setIsLoading(false)
       });
     }
