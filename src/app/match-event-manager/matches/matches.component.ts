@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import {Component, inject} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { InnerTabsComponent, InnerTab } from '../../shared/inner-tabs/inner-tabs.component';
+import {MatchesService} from '../services/matches.service';
 
 @Component({
   selector: 'app-matches',
@@ -10,18 +11,6 @@ import { InnerTabsComponent, InnerTab } from '../../shared/inner-tabs/inner-tabs
   styleUrl: './matches.component.scss',
 })
 export class MatchesComponent {
-  readonly innerTabs: InnerTab[] = [
-    {
-      link: 'timeline',
-      title: 'Timeline',
-      tooltip: '',
-      isDisabled: false,
-    },
-    {
-      link: 'manage-events',
-      title: 'Manage Events',
-      tooltip: '',
-      isDisabled: false,
-    },
-  ];
+
+  matchesService = inject(MatchesService);
 }

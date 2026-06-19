@@ -121,6 +121,7 @@ export const routes: Routes = [
           {
             path: 'manage-events',
             component: MatchEventsManagerComponent,
+            canActivate: [groupAdminGuard],
             data: { breadcrumb: 'Manage Events' },
           },
         ]
