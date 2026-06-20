@@ -13,10 +13,11 @@ import { CaptureMediaComponent } from '../media/capture-media/capture-media.comp
 import { MatchEventsManagerService } from '../match-event-manager/services/match-events-manager.service';
 import {GameService} from './game.service';
 import {NavigationService} from '../shared/navigation/navigation.service';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-game',
-  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, AuditTrailComponent, AddNewPlayerComponent],
+  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, AuditTrailComponent, AddNewPlayerComponent, RouterLink],
   templateUrl: './game.component.html',
   standalone: true,
   providers: [GameService],
@@ -94,5 +95,9 @@ export class GameComponent {
   recordGoalFromTimerHandler = (goalRecord: {player: Player, teamKey: string}) => {
     const ms = this.stopwatchRef()?.getElapsedMs() ?? 0;
     void this.matchEventsService.recordPlayerGoalFromTimer(goalRecord.player, goalRecord.teamKey, ms);
+  }
+
+  revealTeams() {
+    void this.gameService.revealTeams();
   }
 }

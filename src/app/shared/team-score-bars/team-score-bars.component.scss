@@ -1,0 +1,48 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  --track-bg: rgba(255, 255, 255, 0.07);
+  --bar-height: 8px;
+  --label-size: 10px;
+}
+
+:host(.light) {
+  --track-bg: #e0e0e0;
+  --bar-height: 6px;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar-label {
+  font-size: var(--label-size);
+  font-weight: 700;
+  letter-spacing: 1px;
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.atk-label { color: #ef5350; }
+.def-label { color: #42a5f5; }
+
+.bar-track {
+  flex: 1;
+  height: var(--bar-height);
+  background: var(--track-bg);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.atk-fill { background: linear-gradient(90deg, #ef5350, #ff7043); }
+.def-fill { background: linear-gradient(90deg, #42a5f5, #26c6da); }

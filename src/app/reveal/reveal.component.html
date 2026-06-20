@@ -1,0 +1,88 @@
+<div class="reveal-container">
+
+  @if (reveal.phase() === 'loading') {
+    <div class="loading-screen">
+      <div class="loading-ball">⚽</div>
+      <h1 class="loading-title">Teams Reveal</h1>
+      <p class="loading-sub">Loading Teams...</p>
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  }
+
+  @if (reveal.phase() === 'team-reveal') {
+    <div class="team-reveal-screen">
+      <div class="team-indicator">
+        @for (team of reveal.teams(); track team.name; let i = $index) {
+          <div class="indicator-dot" [class.active]="i === reveal.teamIndex()"></div>
+        }
+      </div>
+
+      <div class="team-card">
+        <div class="team-name">{{ reveal.currentTeam()?.name }}</div>
+
+        <div class="team-rating">
+          <span class="rating-label">Overall Rating</span>
+          <span class="rating-value">{{ reveal.animatedRating() }}</span>
+        </div>
+
+        @if ((reveal.currentTeam()?.attackScore ?? 0) > 0 || (reveal.currentTeam()?.defenseScore ?? 0) > 0) {
+          <app-team-score-bars
+            class="team-bars"
+            [attackScore]="reveal.attackScore()"
+            [defenseScore]="reveal.defenseScore()" />
+        }
+
+        <div class="divider"></div>
+
+        <div class="formation">
+          @for (group of reveal.currentGroups(); track group.position) {
+            <div class="position-section">
+              <div class="position-label" [attr.data-pos]="group.position">{{ group.position }}</div>
+              <div class="position-players">
+                @for (player of group.players; track player.name; let j = $index) {
+                  <div class="player-chip" [class.visible]="group.startIndex + j < reveal.shownPlayers()">
+                    {{ player.name }}
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (reveal.phase() === 'all-teams') {
+    <div class="all-teams-screen">
+      <p class="all-teams-label">The Teams</p>
+      <div class="all-teams-grid">
+        @for (item of reveal.allTeamGroups(); track item.team.name; let i = $index) {
+          <div class="mini-card" [style.animation-delay]="(i * 120) + 'ms'">
+            <div class="mini-team-name">{{ item.team.name }}</div>
+            <div class="mini-rating">{{ item.team.rating }}</div>
+            @if (item.team.attackScore > 0 || item.team.defenseScore > 0) {
+              <app-team-score-bars
+                class="mini-bars"
+                [attackScore]="item.team.attackScore"
+                [defenseScore]="item.team.defenseScore" />
+            }
+            <div class="mini-divider"></div>
+            <div class="mini-formation">
+              @for (group of item.groups; track group.position) {
+                <div class="mini-position-section">
+                  <div class="mini-pos-label" [attr.data-pos]="group.position">{{ group.position }}</div>
+                  @for (player of group.players; track player.name) {
+                    <div class="mini-player-name">{{ player.name }}</div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>

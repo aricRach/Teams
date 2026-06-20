@@ -7,10 +7,11 @@ import {currentDate} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
 import {ModalComponent} from '../../../modals/modal/modal.component';
 import {PlayersDragDropTableService} from './players-drag-drop-table.service';
+import {TeamScoreBarsComponent} from '../../shared/team-score-bars/team-score-bars.component';
 
 @Component({
   selector: 'app-players-drag-drop-table',
-  imports: [DragDropModule, CommonModule, DoubleClickDirective, PlayerViewComponent, ModalComponent],
+  imports: [DragDropModule, CommonModule, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent],
   standalone: true,
   providers: [PlayersDragDropTableService],
   templateUrl: './players-drag-drop-table.component.html',

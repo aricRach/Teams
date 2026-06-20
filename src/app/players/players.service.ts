@@ -57,10 +57,10 @@ export class PlayersService {
        .pipe(finalize(() => this.spinnerService.setIsLoading(false)));
   }
 
-  savePlayers(specificTeams?: any) {
+  savePlayers(specificTeams?: any, silent = false) {
     this.spinnerService.setIsLoading(true);
     return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, true, specificTeams)).then(
-      () => this.popoutService.addSuccessPopOut('Data was saved successfully.'),
+      () => { if (!silent) this.popoutService.addSuccessPopOut('Data was saved successfully.'); },
     ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
       () =>  this.spinnerService.setIsLoading(false)
     );

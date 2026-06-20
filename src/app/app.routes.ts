@@ -35,7 +35,6 @@ import {RatePlayersComponent} from './players/rate-players/rate-players.componen
 import {getSpecificGroupPlayersResolver} from './resolvers/get-specific-group-players.resolver';
 import {groupOwnerGuard} from './guards/group-owner.guard';
 import {superAdminGuard} from './guards/super-admin.guard';
-
 export const routes: Routes = [
   {
     path: '',
@@ -266,5 +265,9 @@ export const routes: Routes = [
     path: 'team-draft/:groupId/:sessionId',
     component: TeamDraftComponent,
     canActivate: [authRoutesGuard]
+  },
+  {
+    path: 'reveal',
+    loadComponent: () => import('./reveal/reveal.component').then(m => m.RevealComponent),
   },
 ];
