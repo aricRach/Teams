@@ -1,6 +1,7 @@
 import {Component, ElementRef, inject, ViewChild} from '@angular/core';
 import {AddNewPlayerService} from './services/add-new-player.service';
 import {ReactiveFormsModule} from '@angular/forms';
+import {PLAYER_NAME_MAX_LENGTH} from '../players/models/player.model';
 
 @Component({
   selector: 'app-add-new-player',
@@ -13,6 +14,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 })
 export class AddNewPlayerComponent {
 
+  readonly playerNameMaxLength = PLAYER_NAME_MAX_LENGTH;
   addNewPlayerService = inject(AddNewPlayerService);
   @ViewChild('nameField') nameField!: ElementRef;
 

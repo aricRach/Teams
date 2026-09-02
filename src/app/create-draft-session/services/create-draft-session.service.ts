@@ -39,18 +39,6 @@ export class CreateDraftSessionService {
   navigationService = inject(NavigationService);
   checkedPlayers: Set<string> = new Set();
 
-  chunkedPlayers = computed(() => {
-    const players =  this.playersService.flattenPlayers().map((player) => {
-      return {name: player.name, id: player.id} as any
-    });
-    const chunkSize = 5;
-    const result: {name: string, id: string}[][] = [];
-    for (let i = 0; i < players.length; i += chunkSize) {
-      result.push(players.slice(i, i + chunkSize));
-    }
-    return result as {name: string, id: string}[][];
-  });
-
   allPlayers = computed(() => this.playersService.flattenPlayers().map((player) => {
     return {name: player.name, id: player.id, email: player.email || ''}
   }))
@@ -109,6 +97,7 @@ export class CreateDraftSessionService {
 
     const sessionsRef = collection(this.firestore, `groups/${this.playersService.selectedGroup().id}/teamDraftSessions`);
     const docRef = await addDoc(sessionsRef, sessionData);
+    this.navigationService.unlockNavigation();
     return docRef.id; // sessionId
   }
 

@@ -8,11 +8,6 @@ import {skeleton} from './consts/teams-skeleton';
 import {MembersService} from '../admin/services/members.service';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
 
-export interface PlayerStatsUpdate {
-  id: string;
-  date: string;
-  stats: Record<string, any>;
-};
 @Injectable({
   providedIn: 'root'
 })
@@ -34,6 +29,7 @@ export class PlayersService {
 
    computedTeams = computed(() =>  JSON.parse(JSON.stringify(this.teams()))) // use only in drag-drop-component.
 
+  selectedTeamsKeys = computed(() => Object.keys(this.teams()))
   setTeams(teams: any) {
     this.teams.set({...teams});
   }
@@ -61,10 +57,10 @@ export class PlayersService {
        .pipe(finalize(() => this.spinnerService.setIsLoading(false)));
   }
 
-  savePlayers(specificTeams?: any) {
+  savePlayers(specificTeams?: any, silent = false) {
     this.spinnerService.setIsLoading(true);
     return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, true, specificTeams)).then(
-      () => this.popoutService.addSuccessPopOut('Data was saved successfully.'),
+      () => { if (!silent) this.popoutService.addSuccessPopOut('Data was saved successfully.'); },
     ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
       () =>  this.spinnerService.setIsLoading(false)
     );
@@ -116,23 +112,6 @@ export class PlayersService {
         })
        )
     }
-
-  async updatePlayerStats(editedPlayer: Player): Promise<void> {
-    this.spinnerService.setIsLoading(true);
-    try {
-      await this.playersApiService.updatePlayerStats(
-        this.selectedGroup().id,
-        editedPlayer.id,
-        editedPlayer.statistics
-      );
-      this.updatePlayerSignal(editedPlayer);
-      this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`);
-    } catch {
-      this.popoutService.addErrorPopOut(`Can't save to database. Please try again later or save locally.`);
-    } finally {
-      this.spinnerService.setIsLoading(false);
-    }
-  }
 
   async updatePlayerDetails(player: Player, editedPlayer: Player): Promise<void> {
     this.spinnerService.setIsLoading(true);
@@ -194,17 +173,6 @@ export class PlayersService {
    return this.playersApiService.getDraftSessionsByCreator(this.selectedGroup().id).finally(() => {
      this.spinnerService.setIsLoading(false)
    })
-  }
-
-  async deleteDayStatistics(day: string) {
-     this.spinnerService.setIsLoading(true);
-     return this.playersApiService.deleteDayStatistics(this.selectedGroup().id, day)
-       .catch(() => {
-       this.popoutService.addErrorPopOut('Something went wrong, please try again later')
-     })
-       .finally(()=> {
-       this.spinnerService.setIsLoading(false)
-     })
   }
 
   removeDraftSession(sessionId: string) {

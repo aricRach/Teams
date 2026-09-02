@@ -7,11 +7,13 @@ import {getGroupPlayersResolver} from './resolvers/get-group-players.resolver';
 import {SignInComponent} from './user/sign-in/sign-in.component';
 import {getUserGroupsResolver} from './resolvers/get-user-groups.resolver';
 import {groupAdminGuard} from './guards/group-admin.guard';
-import {AuthGuard} from '@angular/fire/auth-guard';
 import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './manage-players/edit-player/edit-player.component';
 import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
 import {PlayersStatisticsTableComponent} from './players-statistics-table/players-statistics-table.component';
+import {MatchesComponent} from './match-event-manager/matches/matches.component';
+import {MatchesTimelineComponent} from './match-event-manager/matches-timeline/matches-timeline.component';
+import {MatchEventsManagerComponent} from './match-event-manager/match-events-manager/match-events-manager.component';
 import {TeamDraftComponent} from './team-draft/team-draft.component';
 import {CreateDraftSessionComponent} from './create-draft-session/create-draft-session.component';
 import {getDraftSessionsByOwnerResolver} from './create-draft-session/resolver/get-draft-sessions-by-owner.resolver';
@@ -32,7 +34,7 @@ import {inactivePlayersResolver} from './manage-players/resolvers/inactive-playe
 import {RatePlayersComponent} from './players/rate-players/rate-players.component';
 import {getSpecificGroupPlayersResolver} from './resolvers/get-specific-group-players.resolver';
 import {groupOwnerGuard} from './guards/group-owner.guard';
-
+import {superAdminGuard} from './guards/super-admin.guard';
 export const routes: Routes = [
   {
     path: '',
@@ -45,7 +47,12 @@ export const routes: Routes = [
     resolve: {
       groups: getUserGroupsResolver
     },
-    canActivate: [AuthGuard],
+    canActivate: [authRoutesGuard],
+  },
+  {
+    path: 'create-group',
+    loadComponent: () => import('./create-group/create-group.component').then(m => m.CreateGroupComponent),
+    canActivate: [authRoutesGuard, superAdminGuard]
   },
   {
     path: 'home',
@@ -57,12 +64,14 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        component: GameComponent
+        component: GameComponent,
+        canDeactivate: [exitFormGuard]
       },
       {
         path: 'game',
         component: GameComponent,
         canActivate: [groupAdminGuard],
+        canDeactivate: [exitFormGuard],
         data: { breadcrumb: 'Game' },
       },
       {
@@ -91,6 +100,29 @@ export const routes: Routes = [
             data: { breadcrumb: 'Edit Statistics' },
             canActivate: [groupAdminGuard, adminControlGuard],
           }
+        ]
+      },
+      {
+        path: 'matches',
+        component: MatchesComponent,
+        data: { breadcrumb: 'Matches' },
+        children: [
+          {
+            path: '',
+            pathMatch: 'full',
+            redirectTo: 'timeline'
+          },
+          {
+            path: 'timeline',
+            component: MatchesTimelineComponent,
+            data: { breadcrumb: 'Timeline' },
+          },
+          {
+            path: 'manage-events',
+            component: MatchEventsManagerComponent,
+            canActivate: [groupAdminGuard],
+            data: { breadcrumb: 'Manage Events' },
+          },
         ]
       },
       {
@@ -233,5 +265,9 @@ export const routes: Routes = [
     path: 'team-draft/:groupId/:sessionId',
     component: TeamDraftComponent,
     canActivate: [authRoutesGuard]
+  },
+  {
+    path: 'reveal',
+    loadComponent: () => import('./reveal/reveal.component').then(m => m.RevealComponent),
   },
 ];

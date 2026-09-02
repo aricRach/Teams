@@ -19,10 +19,14 @@
               type="text"
               formControlName="name"
               placeholder="Enter name"
+              [maxlength]="playerNameMaxLength"
               [class.invalid]="player.get('name')?.invalid && player.get('name')?.touched"
             />
             @if (player.get('name')?.invalid && player.get('name')?.touched) {
-              <div class="input-error">Name is required</div>
+              <div class="input-error">
+                @if (player.get('name')?.hasError('required')) { Name is required }
+                @if (player.get('name')?.hasError('maxlength')) { Max 12 characters }
+              </div>
             }
           </td>
 
@@ -30,11 +34,14 @@
             <input
               type="number"
               formControlName="rating"
-              placeholder="0-10"
+              placeholder="1-10"
               [class.invalid]="player.get('rating')?.invalid && player.get('rating')?.touched"
             />
             @if (player.get('rating')?.invalid && player.get('rating')?.touched) {
-              <div class="input-error">Rating required (0-10)</div>
+              <div class="input-error">
+                @if (player.get('rating')?.hasError('required')) { Rating is required }
+                @if (player.get('rating')?.hasError('min') || player.get('rating')?.hasError('max')) { Rating must be between 1 and 10 }
+              </div>
             }
           </td>
 

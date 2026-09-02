@@ -1,0 +1,18 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+}
+app-inner-tabs {
+  width: 100%;
+  justify-content: center;
+  display: flex;
+}
+
+  h2 {
+    margin-bottom: 20px;
+    font-size: 2rem;
+    text-align: center;
+  }

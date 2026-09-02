@@ -36,25 +36,30 @@ export class TeamDraftComponent implements OnInit, OnDestroy{
 
   ngOnInit(): void {
     this.currentUserEmail = this.teamDraftService.auth.currentUser?.email || '';
-   this.subscription.add(this.teamDraftService.getSession(this.sessionId(), this.groupId()).subscribe((data => {
-     if(data) {
-       this.session.set(data as TeamDraftSession);
-     } else {
-       this.teamDraftService.popupsService.addSuccessPopOut('session ended')
-       this.teamDraftService.router.navigate(['home']);
-     }
-   })));
+    this.subscription.add(this.teamDraftService.getSession(this.sessionId(), this.groupId()).subscribe({
+      next: (data) => {
+        if (data) {
+          this.session.set(data as TeamDraftSession);
+        } else {
+          this.session.set(null);
+        }
+      },
+      error: () => {
+        this.session.set(null);
+      }
+    }));
 
-   this.subscription.add(this.teamDraftService.getMessages(this.sessionId(), this.groupId())
-     .subscribe((msgs) => {
-       if(msgs.length > this.messages().length && this.messages().length > 0 && msgs[msgs.length - 1]['senderId'] !== this.teamDraftService.auth.currentUser?.email) {
-         this.notify.set(true)
-         window.setTimeout(() => {
-           this.notify.set(false)
-         }, 2000)
-       }
-       this.messages.set(msgs as ChatMessage[]);
-     }))
+    this.subscription.add(this.teamDraftService.getMessages(this.sessionId(), this.groupId())
+      .subscribe({
+        next: (msgs) => {
+          if (msgs.length > this.messages().length && this.messages().length > 0 && msgs[msgs.length - 1]['senderId'] !== this.teamDraftService.auth.currentUser?.email) {
+            this.notify.set(true);
+            window.setTimeout(() => { this.notify.set(false); }, 2000);
+          }
+          this.messages.set(msgs as ChatMessage[]);
+        },
+        error: () => {}
+      }));
   }
 
   async assignPlayer(player: {id: string, name: string}) {

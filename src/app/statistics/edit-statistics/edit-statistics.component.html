@@ -9,6 +9,7 @@
     [enableShowRatings]="false"
     [enableMakeBalancedTeams]="false"
     [dateStatistics]="editStatisticsService.statisticsService.getSelectedDate()"
+    [playerStatsMap]="editStatisticsService.computedStatsService.statsMap()"
     [isLocked]="false"
     (updateTeamStatistics)="editStatisticsService.updateTeamStatistics($event)"
   ></app-players-drag-drop-table>

@@ -1,0 +1,33 @@
+<div class="matches-container">
+  <h2>Matches Timeline</h2>
+
+  <div class="date-selector">
+    <label for="date-select">Select Date: </label>
+    <select id="date-select" [ngModel]="matchTimelineService.selectedDate()" (change)="matchTimelineService.onDateChange($event)">
+      @for (date of matchTimelineService.availableDates(); track date) {
+        <option [value]="date">{{ date }}</option>
+      }
+    </select>
+  </div>
+
+  <small><b>Click the match to see the goal scores</b></small>
+
+  <div class="flip-cards">
+    @if (matchTimelineService.flipCardsData().length === 0) {
+      <p class="no-matches">No matches found for selected date.</p>
+    } @else {
+      @for (card of matchTimelineService.flipCardsData(); track card) {
+        <div class="card">
+          <lib-flip-card
+            [backContent]="card.data"
+            [frontContent]="card.frontContent"
+            [backStyle]="backStyle"
+            [frontStyle]="frontStyle"
+            [width]="'min(350px, calc(100vw - 48px))'"
+            [height]="'min(350px, calc(100vw - 48px))'"
+          ></lib-flip-card>
+        </div>
+      }
+    }
+  </div>
+</div>

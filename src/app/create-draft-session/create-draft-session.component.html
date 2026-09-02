@@ -1,39 +1,49 @@
-
+<header>
 <h2>Create Draft Session</h2>
-@if(sessionUrlToShow()) {
-  <p>Send the following link to the relevant players:</p>
-  <div class="in-row center">
-    <div class="invite-url">{{sessionUrlToShow()}}</div>
-    <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(existingSession()?.id || '')">
-      <img src="assets/icons/whatsapp.svg" alt="whatsapp">
-    </button>
-  </div>
-  <a class="link-btn team-draft-link" [routerLink]="sessionRouterLink()">Go To Team Draft</a>
+</header>
 
-  <button class="active-btn alert-btn" (click)="createDraftSessionService.removeSession(activeSession())">delete session</button>
+  @if(sessionUrlToShow()) {
+    <div class="share-draft">
+    <p class="center">Send the following link to the relevant players:</p>
+    <div class="in-row center">
+      <div class="invite-url ">{{sessionUrlToShow()}}</div>
+      <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(activeSession())">
+        <img src="assets/icons/whatsapp.svg" alt="whatsapp">
+      </button>
+    </div>
+    </div>
 
-  @if(existingSession()?.status === 'completed') {
-    <button class="active-btn action-btn set-teams-after-draft" (click)="createDraftSessionService.finishTeamDraftSession(existingSession())">Submit and set teams</button>
-  }
-} @else{
-  <main>
-      <div class="number-of-selected-players"> selected players: {{this.createDraftSessionService.checkedPlayers.size}}</div>
-    <p class="check-players">
-      @for (columnArr of createDraftSessionService.chunkedPlayers(); track columnArr) {
-        <div class="players-column">
-          @for (player of columnArr; track player) {
-            <label class="select-player">
-              <input type="checkbox"
-                     [checked]="createDraftSessionService.checkedPlayers.has(player.id)"
-                     [value]="player"
-                     (change)="createDraftSessionService.togglePlayer(player, $event.target)"
-              />
-              {{ player.name }}
-            </label>
-          }
-        </div>
+    <section>
+      <a class="link-btn team-draft-link" [routerLink]="sessionRouterLink()">Go To Team Draft</a>
+
+      <button class="active-btn alert-btn" (click)="createDraftSessionService.removeSession(activeSession())">delete session</button>
+
+      @if(existingSession()?.status === 'completed') {
+        <button class="active-btn action-btn set-teams-after-draft" (click)="createDraftSessionService.finishTeamDraftSession(existingSession())">Submit and set teams</button>
       }
-    </p>
+    </section>
+
+  }
+
+@if(!sessionUrlToShow()){
+  <main>
+    <section>
+      <small>Choose the players that will be participate in the next meeting and the captains<br></small>
+      <small>Send the link to the captains and start the draft, the order of the selection is randomly</small>
+    </section>
+      <div class="number-of-selected-players"> selected players: {{this.createDraftSessionService.checkedPlayers.size}}</div>
+    <div class="check-players">
+      @for (player of createDraftSessionService.allPlayers(); track player.id) {
+        <label class="select-player">
+          <input type="checkbox"
+                 [checked]="createDraftSessionService.checkedPlayers.has(player.id)"
+                 [value]="player"
+                 (change)="createDraftSessionService.togglePlayer(player, $event.target)"
+          />
+          {{ player.name }}
+        </label>
+      }
+    </div>
 
     <section class="in-row center gap-10">
       <form [formGroup]="form" (ngSubmit)="submit()">

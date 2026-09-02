@@ -1,14 +1,16 @@
-import {Component, output} from '@angular/core';
+import { Component, output, input } from '@angular/core';
+import { MatTooltip } from "@angular/material/tooltip";
 
 @Component({
   selector: 'app-stopwatch',
-  imports: [],
+  imports: [MatTooltip],
   templateUrl: './stopwatch.component.html',
   standalone: true,
   styleUrl: './stopwatch.component.scss'
 })
 export class StopwatchComponent {
-
+  disabled = input(false);
+  disabledTooltip = input('');
   private startTime = 0;
   private pausedTime = 0;
   time = 0;
@@ -18,6 +20,7 @@ export class StopwatchComponent {
   timeEndEvent = output();
   timeStartEvent = output();
   timeStoppedEvent = output();
+  timeResetEvent = output();
 
   start(): void {
     if (!this.running) {
@@ -41,10 +44,16 @@ export class StopwatchComponent {
     this.pause();
     this.time = 0;
     this.pausedTime = 0;
+    this.timeResetEvent.emit();
+  }
+
+  /** Elapsed time in ms (matches displayed timer when running or paused). */
+  getElapsedMs(): number {
+    return this.time;
   }
 
   endGame(): void {
-    this.reset();
+    this.pause();
     this.timeEndEvent.emit();
   }
 

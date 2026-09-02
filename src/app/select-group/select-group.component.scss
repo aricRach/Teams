@@ -13,3 +13,14 @@
     text-align: center;
   }
 }
+
+footer {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  flex-direction: column;
+
+  button {
+    width: fit-content;
+  }
+}

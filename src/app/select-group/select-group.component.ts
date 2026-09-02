@@ -1,13 +1,13 @@
 import {Component, computed, inject, input, signal} from '@angular/core';
 import {PlayersService} from '../players/players.service';
 import {FormsModule} from '@angular/forms';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {Auth} from '@angular/fire/auth';
+import {environment} from '../../environments/environment';
 
 @Component({
   selector: 'app-select-group',
-  imports: [
-    FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './select-group.component.html',
   standalone: true,
   styleUrl: './select-group.component.scss'
@@ -18,7 +18,8 @@ export class SelectGroupComponent {
   playersService = inject(PlayersService);
   router = inject(Router);
   private auth = inject(Auth);
-  isAdmin = computed(() => this.playersService.isAdmin())
+  isAdmin = computed(() => this.playersService.isAdmin());
+  isSuperAdmin = this.auth.currentUser?.email === environment.superAdminEmail;
   groupChangedSubmitted = signal(false);
   selectedGroup!: {admins: string[], id: string, createdBy: string};
   numberOfTeams = 3;

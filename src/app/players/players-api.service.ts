@@ -1,8 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {
-  addDoc,
   collection,
-  collectionData, deleteDoc,
+  collectionData,
   doc,
   Firestore,
   getDoc,
@@ -14,7 +13,7 @@ import {
   writeBatch
 } from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
-import {Observable, of, switchMap} from 'rxjs';
+import {Observable} from 'rxjs';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
 import {Player} from './models/player.model';
 
@@ -29,56 +28,13 @@ export class PlayersApiService {
   getPlayers(groupId: string, activePlayers: boolean): Observable<any[]> {
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
     const activePlayersQuery = query(playersRef, where('isActive', '==', activePlayers));
-    const players$ = collectionData(activePlayersQuery, { idField: 'id' });
-    return players$.pipe(
-      switchMap((players: any[]) => {
-        const playersWithStats$ = players.map(async (player) => {
-          const statsRef = collection(this.firestore, `groups/${groupId}/players/${player.id}/statistics`);
-          const statsSnap = await getDocs(statsRef);
-          const statistics: Record<string, any> = {};
-          statsSnap.forEach(doc => statistics[doc.id] = doc.data());
-          return { ...player, statistics };
-        });
-        return Promise.all(playersWithStats$);
-      })
-    )
+    return collectionData(activePlayersQuery, {idField: 'id'}) as Observable<any[]>;
   }
 
   getAllPlayers(groupId: string) {
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
     const activePlayersQuery = query(playersRef, where('isActive', '==', true));
     return collectionData(activePlayersQuery, { idField: "id" });
-  }
-
-  /**
-   * Create a new group with the authenticated user's email as admin.
-   * @param groupName Name of the group.
-   * @returns Promise with the created group ID.
-   */
-  async createGroup(groupName: string): Promise<string | null> {
-    const user = this.auth.currentUser;
-    if (!user) {
-      console.error("User not authenticated");
-      return null;
-    }
-
-    const groupRef = collection(this.firestore, 'groups');
-    const groupData = {
-      name: groupName,
-      createdBy: user.email,
-      members: [user.email], // readonly
-      admins: [user.email], // for manage
-      createdAt: new Date()
-    };
-
-    try {
-      const docRef = await addDoc(groupRef, groupData);
-      console.log("🎉 Group created with ID:", docRef.id);
-      return docRef.id;
-    } catch (error) {
-      console.error("❌ Error creating group:", error);
-      return null;
-    }
   }
 
   async savePlayers(groupId: string, players: any[]): Promise<boolean> {
@@ -96,23 +52,19 @@ export class PlayersApiService {
     }
 
     const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-    const batch = writeBatch(this.firestore);
+    const allPlayersSnap = await getDocs(playersRef);
+    const playerNameToDocId = new Map<string, string>(
+      allPlayersSnap.docs.map(playerDoc => [(playerDoc.data() as any).name as string, playerDoc.id])
+    );
 
+    const batch = writeBatch(this.firestore);
     for (const player of players) {
       const { statistics, ...playerData } = player;
       const normalizedPlayerName = playerData.name.toLowerCase();
-      const q = query(playersRef, where("name", "==", normalizedPlayerName));
-      const querySnapshot = await getDocs(q);
-
-      const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${querySnapshot.docs[0].id}`);
+      const playerDocId = playerNameToDocId.get(normalizedPlayerName);
+      if (!playerDocId) continue;
+      const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${playerDocId}`);
       batch.set(playerDocRef, { ...playerData, name: normalizedPlayerName }, { merge: true });
-      // If there are statistics, write them to the subcollection
-      if (statistics && typeof statistics === 'object') {
-        for (const [date, statData] of Object.entries(statistics)) {
-          const statRef = doc(this.firestore, `${playerDocRef.path}/statistics/${date}`);
-          batch.set(statRef, statData as any, { merge: true });
-        }
-      }
     }
 
     await batch.commit();
@@ -131,23 +83,6 @@ export class PlayersApiService {
     const groupsCollection = collection(this.firestore, 'groups');
     const q = query(groupsCollection, or( where("createdBy", "==", user.email), where("admins", "array-contains", user.email), where("members", "array-contains", user.email) ))
     return collectionData(q, { idField: "id" });
-  }
-
-  async updatePlayerStats(groupId: string, playerId: string, statistics: any) {
-    const playerDocRef = doc(this.firestore, `groups/${groupId}/players/${playerId}`);
-
-    if (!statistics || typeof statistics !== 'object') {
-      throw new Error('Invalid statistics object');
-    }
-
-    const batch = writeBatch(this.firestore);
-
-    for (const [date, statData] of Object.entries(statistics)) {
-      const statRef = doc(this.firestore, `${playerDocRef.path}/statistics/${date}`);
-      batch.set(statRef, statData as any, { merge: true }); // merge to update fields without overwriting
-    }
-
-    return batch.commit();
   }
 
   async updatePlayerDetails(groupId: string, updatedPlayer: Player, player: Player) {
@@ -210,28 +145,28 @@ export class PlayersApiService {
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
 
-  async deleteDayStatistics(groupId: string, dateToDelete: string) {
-    const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-    const playersSnap = await getDocs(playersRef);
-
-    const batch = writeBatch(this.firestore);
-    for (const playerDoc of playersSnap.docs) {
-      const playerId = playerDoc.id;
-      const statRef = doc(this.firestore, `groups/${groupId}/players/${playerId}/statistics/${dateToDelete}`);
-      batch.delete(statRef);
-    }
-    await batch.commit();
-  }
+  // Dead code — stats are computed from match events; the statistics subcollection is no longer written.
+  // async deleteDayStatistics(groupId: string, dateToDelete: string) {
+  //   const playersRef = collection(this.firestore, `groups/${groupId}/players`);
+  //   const playersSnap = await getDocs(playersRef);
+  //   const batch = writeBatch(this.firestore);
+  //   for (const playerDoc of playersSnap.docs) {
+  //     const playerId = playerDoc.id;
+  //     const statRef = doc(this.firestore, `groups/${groupId}/players/${playerId}/statistics/${dateToDelete}`);
+  //     batch.delete(statRef);
+  //   }
+  //   await batch.commit();
+  // }
 
   async removeDraftSession(groupId: string, sessionId: string) {
     const sessionRef = doc(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}`);
     const messagesCollectionRef = collection(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}/messages`);
 
     const messagesSnapshot = await getDocs(messagesCollectionRef);
-    const deletePromises = messagesSnapshot.docs.map((msgDoc) => deleteDoc(msgDoc.ref));
-    await Promise.all(deletePromises);
-
-    return await deleteDoc(sessionRef);
+    const batch = writeBatch(this.firestore);
+    messagesSnapshot.docs.forEach(msgDoc => batch.delete(msgDoc.ref));
+    batch.delete(sessionRef);
+    await batch.commit();
   }
 
   async setFantasyMetaIsActive(groupId: string, isActive: boolean) {
@@ -247,27 +182,22 @@ export class PlayersApiService {
     const playersCol = collection(this.firestore, `groups/${groupId}/players`);
     const playersSnap = await getDocs(playersCol);
 
-    for (const playerDoc of playersSnap.docs) {
-      const statsCol = collection(
-        this.firestore,
-        `groups/${groupId}/players/${playerDoc.id}/statistics`
-      );
-      const statsSnap = await getDocs(statsCol);
-
-      statsSnap.forEach(statDoc => {
-        batch.delete(statDoc.ref);
-      });
-    }
+    const statsSnaps = await Promise.all(
+      playersSnap.docs.map(playerDoc =>
+        getDocs(collection(this.firestore, `groups/${groupId}/players/${playerDoc.id}/statistics`))
+      )
+    );
+    statsSnaps.forEach(statsSnap => statsSnap.forEach(statDoc => batch.delete(statDoc.ref)));
 
     // // --- 2. Delete all Team Of The Week ---
     const totwCol = collection(this.firestore, `groups/${groupId}/teamOfTheWeek`);
     const totwSnap = await getDocs(totwCol);
-    totwSnap.forEach(doc => batch.delete(doc.ref));
+    totwSnap.forEach(totwDoc => batch.delete(totwDoc.ref));
 
     // // --- 3. Delete all Fantasy Drafts ---
     const fantasyCol = collection(this.firestore, `groups/${groupId}/fantasyDrafts`);
     const fantasySnap = await getDocs(fantasyCol);
-    fantasySnap.forEach(doc => batch.delete(doc.ref));
+    fantasySnap.forEach(fantasyDoc => batch.delete(fantasyDoc.ref));
 
     // --- Commit ---
     await batch.commit();

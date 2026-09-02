@@ -1,35 +1,39 @@
-import {Component, computed, inject, signal} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {PlayersService} from '../players/players.service';
-import {GameDetails, GameDetailsComponent} from '../game-details/game-details.component';
-import {currentDate} from '../utils/date-utils';
+import {Component, computed, inject, signal, viewChild} from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { PlayersService } from '../players/players.service';
 
-import {PlayersDragDropTableComponent} from '../players/players-drag-drop-table/players-drag-drop-table.component';
-import {StopwatchComponent} from '../stopwatch/stopwatch.component';
-import {ModalComponent} from '../../modals/modal/modal.component';
-import {Player} from '../players/models/player.model';
-import {AuditTrailService} from '../audit-trail/services/audit-trail.service';
-import {AuditTrailComponent} from '../audit-trail/audit-trail.component';
-import {AdminControlService} from '../user/admin-control.service';
-import {AddNewPlayerComponent} from '../add-new-player/add-new-player.component';
-import {CaptureMediaComponent} from '../media/capture-media/capture-media.component';
+import { PlayersDragDropTableComponent } from '../players/players-drag-drop-table/players-drag-drop-table.component';
+import { StopwatchComponent } from '../stopwatch/stopwatch.component';
+import { ModalComponent } from '../../modals/modal/modal.component';
+import { Player } from '../players/models/player.model';
+import { AuditTrailComponent } from '../audit-trail/audit-trail.component';
+import { AdminControlService } from '../user/admin-control.service';
+import { AddNewPlayerComponent } from '../add-new-player/add-new-player.component';
+import { CaptureMediaComponent } from '../media/capture-media/capture-media.component';
+import { MatchEventsManagerService } from '../match-event-manager/services/match-events-manager.service';
+import {GameService} from './game.service';
+import {NavigationService} from '../shared/navigation/navigation.service';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-game',
-  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, GameDetailsComponent, AuditTrailComponent, AddNewPlayerComponent],
+  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, AuditTrailComponent, AddNewPlayerComponent, RouterLink],
   templateUrl: './game.component.html',
   standalone: true,
+  providers: [GameService],
   styleUrl: './game.component.scss'
 })
 export class GameComponent {
   playersService = inject(PlayersService);
-  auditTrailService = inject(AuditTrailService);
   adminControlService = inject(AdminControlService);
-  readonly originalTeamNames = computed(() =>
-    Object.keys(this.playersService.getTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.playersService.numberOfTeams())
-  );
+  matchEventsService = inject(MatchEventsManagerService);
+  gameService = inject(GameService);
+  navigationService = inject(NavigationService);
+
   isMovePlayersLocked = signal(false);
-  isTeamWinModalVisible = signal(false);
+  playingTeams = signal<string[]>([]);
+
+  private stopwatchRef = viewChild(StopwatchComponent);
 
   protected isAuditTrailModalVisible = signal(false);
 
@@ -43,84 +47,16 @@ export class GameComponent {
 
   load() {
     const savedTeams = localStorage.getItem(`teams-${this.playersService.selectedGroup().id}`);
-    if(savedTeams) {
+    if (savedTeams) {
       const teamsObj = JSON.parse(savedTeams);
-      this.playersService.setTeams({...teamsObj});
+      this.playersService.setTeams({ ...teamsObj });
     }
   }
 
-
-  async endGame(gameDetails: GameDetails) {
-    const teams = this.playersService.getTeams();
-    // @ts-ignore
-    const winners = teams[gameDetails.winner].players.map((player: Player) => {
-      const currentStats = player.statistics[currentDate] || {};
-      const goalsConceded = gameDetails.loseTeamScore;
-      const updatedStatistics = {
-        ...player.statistics,
-        [currentDate]: {
-          ...currentStats,
-          wins: (currentStats.wins || 0) + (gameDetails.gameStatus === 'decided' ? 1 : 0),
-          games: (currentStats.games || 0) + 1,
-          draws: (currentStats.draws || 0) + (gameDetails.gameStatus === 'decided' ? 0 : 1),
-          goals: (currentStats.goals || 0),
-          loses: (currentStats.loses || 0),
-          goalsConceded: (currentStats.goalsConceded || 0) + goalsConceded
-        },
-      };
-
-      return {
-        ...player,
-        statistics: updatedStatistics,
-      };
-    });
-
-    // @ts-ignore
-    const losers = teams[gameDetails.loser].players.map((player: Player) => {
-      const currentStats = player.statistics[currentDate] || {};
-      const goalsConceded = gameDetails.wonTeamScore;
-
-      const updatedStatistics = {
-        ...player.statistics,
-        [currentDate]: {
-          ...currentStats,
-          loses: (currentStats.loses || 0) + (gameDetails.gameStatus === 'decided' ? 1 : 0),
-          games: (currentStats.games || 0) + 1,
-          draws: (currentStats.draws || 0) + (gameDetails.gameStatus === 'decided' ? 0 : 1),
-          wins: (currentStats.wins || 0),
-          goals: (currentStats.goals || 0),
-          goalsConceded: (currentStats.goalsConceded || 0) + goalsConceded
-        },
-      };
-
-      return {
-        ...player,
-        statistics: updatedStatistics,
-      };
-    });
-
-    // Update the teams
-    this.playersService.setTeams({
-      ...teams,
-      // @ts-ignore
-      [gameDetails.winner]: {...teams[gameDetails.winner], players: winners},
-      // @ts-ignore
-      [gameDetails.loser]: {...teams[gameDetails.loser], players: losers},
-    });
-
-    this.isTeamWinModalVisible.set(false);
-    // save specific teams that played not good enough if i didnt clicked save global. because it is not saved my players moved from team to another team.
-    // it saved only the statistics.
-    // this.playersService.setPlayersIntoDataBase({[gameDetails.winner]: {players: winners}, [gameDetails.loser]: {players: losers}})
-    this.playersService.savePlayers().then(() => {
-      if (gameDetails.gameStatus === 'decided') {
-        this.auditTrailService.addAuditTrail(`winner: ${gameDetails.winner} - loser: ${gameDetails.loser}`)
-      } else {
-        this.auditTrailService.addAuditTrail(`draw: ${gameDetails.winner} - ${gameDetails.loser}`)
-      }
-    });
-
-    await this.playersService.setFantasyMetaIsActive(false);
+  async endGame(teams: any) {
+    await this.gameService.endGame(teams);
+    this.isMovePlayersLocked.set(false);
+    this.stopwatchRef()?.reset();
   }
 
   saveGlobal() {
@@ -129,5 +65,39 @@ export class GameComponent {
 
   updateTeams(teams: any) {
     this.playersService.setTeams(teams);
+  }
+
+  onTimerStart(): void {
+    if (this.playingTeams().length !== 2) {
+      return;
+    }
+    this.isMovePlayersLocked.set(true);
+    this.navigationService.lockNavigation();
+    void this.matchEventsService.onTimerStartedForMatch();
+  }
+
+  onTimerReset(): void {
+    void this.matchEventsService.abandonLiveMatchOnReset();
+    this.isMovePlayersLocked.set(false);
+    this.navigationService.unlockNavigation();
+  }
+
+  async endGameFromTimer() {
+    if (this.playingTeams().length === 2) {
+      await this.endGame({
+        team1: this.playingTeams()[0],
+        team2: this.playingTeams()[1]
+      });
+      this.playingTeams.set([]);
+    }
+  }
+
+  recordGoalFromTimerHandler = (goalRecord: {player: Player, teamKey: string}) => {
+    const ms = this.stopwatchRef()?.getElapsedMs() ?? 0;
+    void this.matchEventsService.recordPlayerGoalFromTimer(goalRecord.player, goalRecord.teamKey, ms);
+  }
+
+  revealTeams() {
+    void this.gameService.revealTeams();
   }
 }
