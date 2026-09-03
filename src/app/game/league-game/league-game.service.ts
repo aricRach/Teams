@@ -50,6 +50,17 @@ export class LeagueGameService implements OnDestroy {
   readonly slots = LEAGUE_SLOTS;
   readonly teamCount = LEAGUE_TEAM_COUNT;
 
+  /** Manual board move-lock, toggled via the lock button. Live-match teams are locked separately via `lockedTeamKeys`. */
+  readonly isMovePlayersLocked = signal(false);
+
+  readonly lockIcon = computed(() =>
+    this.isMovePlayersLocked() ? 'assets/icons/unlock.svg' : 'assets/icons/lock.svg'
+  );
+
+  toggleMovePlayersLock(): void {
+    this.isMovePlayersLocked.set(!this.isMovePlayersLocked());
+  }
+
   /** teamKey -> slot (1 | 2). Absent = on the bench. */
   readonly assignments = signal<Record<string, number>>({});
   readonly sessionId = signal<string | null>(null);
@@ -119,7 +130,7 @@ export class LeagueGameService implements OnDestroy {
   scorers(slot: number): PanelScorer[] {
     return this.eventsForSlot(slot)
       .filter((e) => e.type === 'player_goal' && !e.deletedAt)
-      .map((e) => ({ name: e.playerNameSnapshot ?? 'Goal', minute: e.minute }))
+      .map((e) => ({ name: e.playerNameSnapshot ?? 'Goal', minute: e.minute, teamKey: e.teamKey }))
       .sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
   }
 

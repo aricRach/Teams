@@ -17,11 +17,18 @@
     (timeStartEvent)="start.emit()" (timeResetEvent)="reset.emit()" (timeEndEvent)="end.emit()" />
 
   @if (scorers().length) {
-  <ul class="scorers">
-    @for (s of scorers(); track $index) {
-    <li>{{ s.name }}<span class="minute">{{ s.minute != null ? " " + s.minute + "'" : '' }}</span></li>
-    }
-  </ul>
+  <div class="scorers">
+    <ul class="scorers-col home">
+      @for (s of scorersFor(teamKeys()[0]); track $index) {
+      <li>{{ s.name }}<span class="minute">{{ s.minute != null ? " " + s.minute + "'" : '' }}</span></li>
+      }
+    </ul>
+    <ul class="scorers-col away">
+      @for (s of scorersFor(teamKeys()[1]); track $index) {
+      <li><span class="minute">{{ s.minute != null ? s.minute + "' " : '' }}</span>{{ s.name }}</li>
+      }
+    </ul>
+  </div>
   }
   } @else {
   <p class="hint">Pick 2 teams for Game {{ slot() }} using the G{{ slot() }} buttons above.</p>

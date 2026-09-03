@@ -2,6 +2,10 @@
   <h1>League</h1>
 </div>
 
+<button class="button-icon" (click)="league.toggleMovePlayersLock()">
+  <img alt="lock" [src]="league.lockIcon()" height="30" width="30">
+</button>
+
 <div class="games-row">
   @for (slot of league.slots; track slot) {
   <app-league-game-panel [slot]="slot" [teamKeys]="league.slotTeams(slot)" [ready]="league.slotReady(slot)"
@@ -18,7 +22,7 @@
 
 <app-players-drag-drop-table
   [clonedTeams]="league.teams()"
-  [isLocked]="false"
+  [isLocked]="league.isMovePlayersLocked()"
   [numberOfTeams]="league.teamCount"
   [leagueAssignMode]="true"
   [teamSlots]="league.assignments()"

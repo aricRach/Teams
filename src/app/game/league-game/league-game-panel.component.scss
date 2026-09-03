@@ -43,14 +43,25 @@
 }
 
 .scorers {
-  list-style: none;
-  padding: 0;
+  display: flex;
+  gap: 1rem;
   margin: 0.75rem 0 0;
   font-size: 0.9rem;
 
-  li {
-    padding: 0.15rem 0;
-    border-bottom: 1px dashed #e0e0e0;
+  .scorers-col {
+    flex: 1 1 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    &.away {
+      text-align: right;
+    }
+
+    li {
+      padding: 0.15rem 0;
+      border-bottom: 1px dashed #e0e0e0;
+    }
   }
 
   .minute {

@@ -4,6 +4,7 @@ import { StopwatchComponent } from '../../stopwatch/stopwatch.component';
 export interface PanelScorer {
   name: string;
   minute: number | null | undefined;
+  teamKey?: string;
 }
 
 @Component({
@@ -30,5 +31,9 @@ export class LeagueGamePanelComponent {
   label(teamKey: string | undefined): string {
     if (!teamKey) return '?';
     return teamKey.replace(/^team/i, '').toUpperCase() || teamKey;
+  }
+
+  scorersFor(teamKey: string | undefined): PanelScorer[] {
+    return this.scorers().filter((s) => s.teamKey === teamKey);
   }
 }
