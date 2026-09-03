@@ -52,6 +52,15 @@ export class StopwatchComponent {
     return this.time;
   }
 
+  /** Zero the timer without emitting any event (used after a league game ends). */
+  clear(): void {
+    clearInterval(this.interval);
+    this.running = false;
+    this.time = 0;
+    this.pausedTime = 0;
+    this.startTime = 0;
+  }
+
   endGame(): void {
     this.pause();
     this.timeEndEvent.emit();

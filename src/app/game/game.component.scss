@@ -3,14 +3,87 @@
   padding: 40px 0;
 }
 
-.audit-trail-button {
-  display: flex;
-  justify-content: end;
-  margin-right: 2rem;
-  margin-top: 2rem;
+.game-toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  margin-bottom: 1rem;
+
+  .toolbar-left {
+    display: flex;
+    flex-wrap: wrap;
+    justify-self: start;
+  }
+
+  .toolbar-center {
+    justify-self: center;
+    text-align: center;
+  }
+
+  .toolbar-right {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 640px) {
+  .game-toolbar {
+    grid-template-columns: 1fr auto;
+
+    .toolbar-center {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+  }
 }
 
 app-capture-media {
   display: flex;
   justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.mode-toggle-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  overflow: hidden;
+
+  button {
+    border: 0;
+    border-left: 1px solid #bbb;
+    background: #f4f4f4;
+    padding: 0.5rem 1.4rem;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:first-child { border-left: 0; }
+
+    &.active {
+      background: #00b894;
+      color: #fff;
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  &.locked { opacity: 0.7; }
+}
+
+.lock-hint {
+  font-size: 0.8rem;
+  color: #888;
+  text-align: center;
+  padding: 0 1rem;
 }

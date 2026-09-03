@@ -32,11 +32,28 @@ export class PlayersDragDropTableComponent {
   showStatisticsInput = input(false);
   showStatistics = linkedSignal(() => this.showStatisticsInput())
 
+  // League mode: show a G1 / G2 / – slot selector per team instead of the single "playing" checkbox.
+  leagueAssignMode = input(false);
+  teamSlots = input<Record<string, number>>({});
+  teamSlotChange = output<Record<string, number>>();
+  // League mode: teamKey -> the live matchId of the game that team is playing (null when its game isn't live).
+  matchIdByTeam = input<Record<string, string | null>>({});
+  // Teams whose game has started - their drop list is frozen even though the rest of the board isn't.
+  lockedTeamKeys = input<string[]>([]);
+
+  private liveMatchKey = computed(() =>
+    Object.values(this.matchIdByTeam()).filter(Boolean).sort().join(',')
+  );
+
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent);
   makeBalancedTeamsModalVisible = signal(false);
 
-  // Resets to an empty map whenever currentMatchId changes (new game starts or game ends)
-  liveSessionGoals = linkedSignal<Map<string, number>>(() => { this.currentMatchId(); return new Map(); });
+  // Resets to an empty map whenever the live match(es) change (new game starts or game ends)
+  liveSessionGoals = linkedSignal<Map<string, number>>(() => {
+    this.currentMatchId();
+    this.liveMatchKey();
+    return new Map();
+  });
 
   getGoalModalDataByPlayer = linkedSignal(() => {
     const playerId = this.setGoalModalData().player?.id ?? '';
@@ -83,6 +100,41 @@ export class PlayersDragDropTableComponent {
         this.playingTeamsChange.emit([...current, teamKey]);
       }
     }
+  }
+
+  slotTeamCount(slot: number, exceptTeamKey?: string): number {
+    return Object.entries(this.teamSlots())
+      .filter(([key, value]) => value === slot && key !== exceptTeamKey)
+      .length;
+  }
+
+  isSlotButtonDisabled(teamKey: string, slot: number): boolean {
+    if (this.isTeamLocked(teamKey)) return true;
+    return this.teamSlots()[teamKey] !== slot && this.slotTeamCount(slot, teamKey) >= 2;
+  }
+
+  setTeamSlot(teamKey: string, slot: number | null) {
+    if (this.isTeamLocked(teamKey)) return;
+    const current = { ...this.teamSlots() };
+    if (slot === null || current[teamKey] === slot) {
+      delete current[teamKey];
+    } else {
+      if (this.slotTeamCount(slot, teamKey) >= 2) return;
+      current[teamKey] = slot;
+    }
+    this.teamSlotChange.emit(current);
+  }
+
+  isTeamLocked(teamKey: string): boolean {
+    return !!this.isLocked() || this.lockedTeamKeys().includes(teamKey);
+  }
+
+  /** Whether double-clicking a player in this team should open the goal modal. */
+  isGoalTaggingEnabled(teamKey: string): boolean {
+    if (this.leagueAssignMode()) {
+      return !!this.matchIdByTeam()[teamKey];
+    }
+    return !!this.isLocked() && this.playingTeams().includes(teamKey);
   }
 
   private setTotalRatingToAllTeams() {

@@ -1,0 +1,34 @@
+<div class="in-row center gap">
+  <h1>League</h1>
+</div>
+
+<div class="games-row">
+  @for (slot of league.slots; track slot) {
+  <app-league-game-panel [slot]="slot" [teamKeys]="league.slotTeams(slot)" [ready]="league.slotReady(slot)"
+    [live]="league.slotLive(slot)" [score]="league.score(slot)" [scorers]="league.scorers(slot)"
+    (start)="onStart(slot)" (reset)="onReset(slot)" (end)="onEnd(slot)" />
+  }
+</div>
+
+@if (league.canFinishSession()) {
+<div class="center">
+  <button class="action-btn active-btn" (click)="finishSession()">Finish league</button>
+</div>
+}
+
+<app-players-drag-drop-table
+  [clonedTeams]="league.teams()"
+  [isLocked]="false"
+  [numberOfTeams]="league.teamCount"
+  [leagueAssignMode]="true"
+  [teamSlots]="league.assignments()"
+  [matchIdByTeam]="league.matchIdByTeam()"
+  [lockedTeamKeys]="league.lockedTeamKeys()"
+  [enableShowRatings]="league.showRating()"
+  [enableMakeBalancedTeams]="false"
+  [playerStatsMap]="league.playerStatsMap()"
+  (recordGoalEvent)="recordGoal($event)"
+  (teamSlotChange)="league.setAssignments($event)"
+  (dropPlayer)="league.updateTeams($event)" />
+
+<app-league-standings [rows]="league.standings()" />

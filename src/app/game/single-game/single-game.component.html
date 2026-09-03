@@ -1,0 +1,24 @@
+<div class="in-row center gap">
+  <h1>Teams</h1>
+  <button class="action-btn" (click)="single.revealTeams()">Save Team Selection</button>
+</div>
+
+<button class="button-icon" (click)="single.toggleMovePlayersLock()">
+  <img alt="lock" [src]="single.lockIcon()" height="30" width="30">
+</button>
+
+<app-players-drag-drop-table
+  [clonedTeams]="single.teams()"
+  [isLocked]="single.isMovePlayersLocked()"
+  [numberOfTeams]="single.numberOfTeams()"
+  [enableShowRatings]="single.showRating()"
+  [enableMakeBalancedTeams]="single.showMakeBalancedTeams()"
+  [playerStatsMap]="single.playerStatsMap()"
+  [currentMatchId]="single.liveMatchId()"
+  [playingTeams]="single.playingTeams()"
+  (recordGoalEvent)="recordGoal($event)"
+  (playingTeamsChange)="single.setPlayingTeams($event)"
+  (dropPlayer)="single.updateTeams($event)" />
+
+<app-stopwatch [disabled]="single.playingTeams().length !== 2" [disabledTooltip]="'Please select 2 teams'"
+  (timeStartEvent)="single.onTimerStart()" (timeResetEvent)="single.onTimerReset()" (timeEndEvent)="endGameFromTimer()" />

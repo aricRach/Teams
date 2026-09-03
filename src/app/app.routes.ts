@@ -118,6 +118,11 @@ export const routes: Routes = [
             data: { breadcrumb: 'Timeline' },
           },
           {
+            path: 'league',
+            loadComponent: () => import('./match-event-manager/league-table/league-table.component').then(m => m.LeagueTableComponent),
+            data: { breadcrumb: 'League' },
+          },
+          {
             path: 'manage-events',
             component: MatchEventsManagerComponent,
             canActivate: [groupAdminGuard],

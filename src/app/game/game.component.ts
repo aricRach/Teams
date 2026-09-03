@@ -1,23 +1,19 @@
-import {Component, computed, inject, signal, viewChild} from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Component, computed, inject, signal } from '@angular/core';
 import { PlayersService } from '../players/players.service';
-
-import { PlayersDragDropTableComponent } from '../players/players-drag-drop-table/players-drag-drop-table.component';
-import { StopwatchComponent } from '../stopwatch/stopwatch.component';
-import { ModalComponent } from '../../modals/modal/modal.component';
-import { Player } from '../players/models/player.model';
-import { AuditTrailComponent } from '../audit-trail/audit-trail.component';
-import { AdminControlService } from '../user/admin-control.service';
-import { AddNewPlayerComponent } from '../add-new-player/add-new-player.component';
-import { CaptureMediaComponent } from '../media/capture-media/capture-media.component';
 import { MatchEventsManagerService } from '../match-event-manager/services/match-events-manager.service';
-import {GameService} from './game.service';
-import {NavigationService} from '../shared/navigation/navigation.service';
-import {RouterLink} from '@angular/router';
+import { AdminControlService } from '../user/admin-control.service';
+import { GameService } from './game.service';
+import { SingleGameComponent } from './single-game/single-game.component';
+import { LeagueGameComponent } from './league-game/league-game.component';
+import { CaptureMediaComponent } from '../media/capture-media/capture-media.component';
+import { ModalComponent } from '../../modals/modal/modal.component';
+import { AuditTrailComponent } from '../audit-trail/audit-trail.component';
+
+type GameMode = 'single' | 'league';
 
 @Component({
   selector: 'app-game',
-  imports: [ReactiveFormsModule, PlayersDragDropTableComponent, CaptureMediaComponent, StopwatchComponent, ModalComponent, FormsModule, AuditTrailComponent, AddNewPlayerComponent, RouterLink],
+  imports: [SingleGameComponent, LeagueGameComponent, CaptureMediaComponent, ModalComponent, AuditTrailComponent],
   templateUrl: './game.component.html',
   standalone: true,
   providers: [GameService],
@@ -26,26 +22,33 @@ import {RouterLink} from '@angular/router';
 export class GameComponent {
   playersService = inject(PlayersService);
   adminControlService = inject(AdminControlService);
-  matchEventsService = inject(MatchEventsManagerService);
-  gameService = inject(GameService);
-  navigationService = inject(NavigationService);
+  private matchEventsService = inject(MatchEventsManagerService);
 
-  isMovePlayersLocked = signal(false);
-  playingTeams = signal<string[]>([]);
+  private storageKey = computed(() => `gameMode-${this.playersService.selectedGroup()?.id ?? 'default'}`);
 
-  private stopwatchRef = viewChild(StopwatchComponent);
+  // A live game outranks the stored preference (e.g. navigating back to a running league).
+  mode = signal<GameMode>(this.matchEventsService.liveMode() ?? this.readStoredMode());
+
+  /** A live game (single match or league slot) locks the mode toggle. */
+  toggleDisabled = computed(() => this.matchEventsService.liveMode() !== null);
 
   protected isAuditTrailModalVisible = signal(false);
 
-  lockIcon = computed(() =>
-    this.isMovePlayersLocked() ? 'assets/icons/unlock.svg' : 'assets/icons/lock.svg')
+  setMode(mode: GameMode): void {
+    if (this.toggleDisabled() || mode === this.mode()) return;
+    this.mode.set(mode);
+    try {
+      localStorage.setItem(this.storageKey(), mode);
+    } catch {
+      /* localStorage unavailable - fall back to in-memory only */
+    }
+  }
 
-  teams = computed(() => this.playersService.getTeams())
-  save() {
+  save(): void {
     localStorage.setItem(`teams-${this.playersService.selectedGroup().id}`, JSON.stringify(this.playersService.getTeams()));
   }
 
-  load() {
+  load(): void {
     const savedTeams = localStorage.getItem(`teams-${this.playersService.selectedGroup().id}`);
     if (savedTeams) {
       const teamsObj = JSON.parse(savedTeams);
@@ -53,51 +56,15 @@ export class GameComponent {
     }
   }
 
-  async endGame(teams: any) {
-    await this.gameService.endGame(teams);
-    this.isMovePlayersLocked.set(false);
-    this.stopwatchRef()?.reset();
-  }
-
-  saveGlobal() {
+  saveGlobal(): void {
     this.playersService.savePlayers();
   }
 
-  updateTeams(teams: any) {
-    this.playersService.setTeams(teams);
-  }
-
-  onTimerStart(): void {
-    if (this.playingTeams().length !== 2) {
-      return;
+  private readStoredMode(): GameMode {
+    try {
+      return localStorage.getItem(this.storageKey()) === 'league' ? 'league' : 'single';
+    } catch {
+      return 'single';
     }
-    this.isMovePlayersLocked.set(true);
-    this.navigationService.lockNavigation();
-    void this.matchEventsService.onTimerStartedForMatch();
-  }
-
-  onTimerReset(): void {
-    void this.matchEventsService.abandonLiveMatchOnReset();
-    this.isMovePlayersLocked.set(false);
-    this.navigationService.unlockNavigation();
-  }
-
-  async endGameFromTimer() {
-    if (this.playingTeams().length === 2) {
-      await this.endGame({
-        team1: this.playingTeams()[0],
-        team2: this.playingTeams()[1]
-      });
-      this.playingTeams.set([]);
-    }
-  }
-
-  recordGoalFromTimerHandler = (goalRecord: {player: Player, teamKey: string}) => {
-    const ms = this.stopwatchRef()?.getElapsedMs() ?? 0;
-    void this.matchEventsService.recordPlayerGoalFromTimer(goalRecord.player, goalRecord.teamKey, ms);
-  }
-
-  revealTeams() {
-    void this.gameService.revealTeams();
   }
 }

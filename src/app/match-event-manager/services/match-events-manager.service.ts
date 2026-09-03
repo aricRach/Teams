@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Auth } from '@angular/fire/auth';
 import { MatchEventsApiService } from './match-events-api.service';
 import { PlayersService } from '../../players/players.service';
@@ -23,6 +23,17 @@ export enum GameStatus {
   Decided = 'decided',
 }
 
+/** Options passed when a match is started for a given slot. */
+export interface StartMatchOptions {
+  mode?: 'single' | 'league';
+  sessionId?: string;
+  slot?: number;
+  teamKeys?: string[];
+}
+
+/** slot number a single match always lives on. */
+export const SINGLE_SLOT = 1;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -38,24 +49,80 @@ export class MatchEventsManagerService {
     return user?.email ?? user?.uid ?? '';
   }
 
-  readonly liveMatchId = signal<string | null>(null);
+  /** slot -> live matchId. Empty when nothing is live. */
+  private readonly liveMatches = signal<Record<number, string | null>>({});
 
-  async onTimerStartedForMatch(): Promise<void> {
+  /** Whether the currently live game(s) are a single match or a league session. */
+  readonly liveMode = signal<'single' | 'league' | null>(null);
+
+  /** Back-compat: the single-mode live match id (slot 1). */
+  readonly liveMatchId = computed(() => this.liveMatchIdFor(SINGLE_SLOT));
+
+  readonly hasAnyLiveMatch = computed(() =>
+    Object.values(this.liveMatches()).some(Boolean)
+  );
+
+  liveMatchIdFor(slot = SINGLE_SLOT): string | null {
+    return this.liveMatches()[slot] ?? null;
+  }
+
+  /** All slots that currently have a live match, ascending. */
+  liveSlots(): number[] {
+    return Object.entries(this.liveMatches())
+      .filter(([, id]) => !!id)
+      .map(([slot]) => Number(slot))
+      .sort((a, b) => a - b);
+  }
+
+  private setLiveMatch(slot: number, matchId: string | null): void {
+    this.liveMatches.update(current => {
+      const next = { ...current };
+      if (matchId) {
+        next[slot] = matchId;
+      } else {
+        delete next[slot];
+      }
+      return next;
+    });
+    if (!this.hasAnyLiveMatch()) {
+      this.liveMode.set(null);
+    }
+  }
+
+  async onTimerStartedForMatch(slotOrOptions: number | StartMatchOptions = SINGLE_SLOT): Promise<string | null> {
+    const options: StartMatchOptions = typeof slotOrOptions === 'number'
+      ? { slot: slotOrOptions }
+      : slotOrOptions;
+    const slot = options.slot ?? SINGLE_SLOT;
+    const mode = options.mode ?? 'single';
+
     const selectedGroup = this.playersService.selectedGroup();
-    if (!selectedGroup?.id || this.liveMatchId()) {
-      return;
+    if (!selectedGroup?.id || this.liveMatchIdFor(slot)) {
+      return null;
     }
 
     try {
-      const id = await this.matchEventsApiService.createMatch(selectedGroup.id, {
+      // Keep single-mode match docs byte-identical to before; only tag league matches.
+      const matchDoc: Omit<MatchRecord, 'id'> = {
         status: 'live',
         startedAt: new Date(),
         createdBy: this.getActorId()
-      });
-      this.liveMatchId.set(id);
+      };
+      if (mode === 'league') {
+        matchDoc.mode = 'league';
+        matchDoc.slot = slot;
+        if (options.sessionId) matchDoc.sessionId = options.sessionId;
+        if (options.teamKeys?.length) matchDoc.teamKeys = options.teamKeys;
+      }
+
+      const id = await this.matchEventsApiService.createMatch(selectedGroup.id, matchDoc);
+      this.setLiveMatch(slot, id);
+      this.liveMode.set(mode);
+      return id;
     } catch (e) {
       console.error('Failed to create live match:', e);
       this.popupsService.addErrorPopOut('Failed to start live match data sync.');
+      return null;
     }
   }
 
@@ -76,11 +143,11 @@ export class MatchEventsManagerService {
     await this.matchEventsApiService.deleteEvent(groupId, matchId, eventSnapshot.id);
   }
 
-  async abandonLiveMatchOnReset(): Promise<void> {
+  async abandonLiveMatchOnReset(slot = SINGLE_SLOT): Promise<void> {
     const selectedGroup = this.playersService.selectedGroup();
-    const matchId = this.liveMatchId();
+    const matchId = this.liveMatchIdFor(slot);
     // Clear immediately so a quick reset → start can create a new match without racing.
-    this.liveMatchId.set(null);
+    this.setLiveMatch(slot, null);
     if (!selectedGroup?.id || !matchId) return;
     try {
       const eventsObs = this.matchEventsApiService.getEvents(selectedGroup.id, matchId);
@@ -100,9 +167,9 @@ export class MatchEventsManagerService {
     }
   }
 
-  async recordPlayerGoalFromTimer(player: Player, teamKey: string, elapsedMs: number): Promise<void> {
+  async recordPlayerGoalFromTimer(player: Player, teamKey: string, elapsedMs: number, slot = SINGLE_SLOT): Promise<void> {
     const selectedGroup = this.playersService.selectedGroup();
-    const matchId = this.liveMatchId();
+    const matchId = this.liveMatchIdFor(slot);
     if (!selectedGroup?.id || !matchId) {
       this.popupsService.addErrorPopOut('Start the match timer first.');
       return;
@@ -129,7 +196,7 @@ export class MatchEventsManagerService {
     }
   }
 
-  async endGameAndPersist(gameDetails: GameDetails): Promise<void> {
+  async endGameAndPersist(gameDetails: GameDetails, slot = SINGLE_SLOT): Promise<void> {
     const selectedGroup = this.playersService.selectedGroup();
     if (!selectedGroup?.id || !gameDetails.gameStatus) {
       return Promise.reject();
@@ -141,7 +208,7 @@ export class MatchEventsManagerService {
       return Promise.reject();
     }
 
-    const existingLiveId = this.liveMatchId();
+    const existingLiveId = this.liveMatchIdFor(slot);
 
     const teams = this.playersService.getTeams();
     const winnerPlayerIds = (teams[gameDetails.winner]?.players || []).map((player: Player) => player.id);
@@ -162,7 +229,7 @@ export class MatchEventsManagerService {
         gameStatus: gameDetails.gameStatus,
         endedAt: new Date()
       });
-      this.liveMatchId.set(null);
+      this.setLiveMatch(slot, null);
     } else {
       matchId = await this.matchEventsApiService.createMatch(selectedGroup.id, {
         status: 'completed',

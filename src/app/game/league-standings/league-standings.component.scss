@@ -1,0 +1,43 @@
+.standings {
+  margin: 1rem auto;
+  max-width: 520px;
+
+  h3 {
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty {
+    text-align: center;
+    color: #888;
+  }
+
+  .table-scroll {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+
+    th, td {
+      padding: 0.4rem 0.5rem;
+      text-align: center;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    th.team, td.team {
+      text-align: left;
+      font-weight: bold;
+    }
+
+    td.pts {
+      font-weight: bold;
+    }
+
+    tbody tr:first-child {
+      background: rgba(0, 184, 148, 0.12);
+    }
+  }
+}

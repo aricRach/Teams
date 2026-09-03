@@ -24,6 +24,12 @@ export interface MatchRecord {
   createdAt?: any;
   updatedAt?: any;
   createdBy: string;
+  // League mode - all optional, absent means a classic single match.
+  mode?: 'single' | 'league';
+  sessionId?: string;
+  slot?: number;
+  round?: number;
+  teamKeys?: string[];
 }
 
 export interface MatchEventRecord {

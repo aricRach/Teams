@@ -1,59 +1,49 @@
-@if(adminControlService.isAdminModeEnabled()) {
-<div class="center">
-  <button class="action-btn active-btn" (click)="adminControlService.cleanAdminControlState()">Revert admin
-    mode</button>
-</div>
-}
-<div class="in-row center gap">
-  <h1>Teams</h1>
-  <button class="action-btn" (click)="revealTeams()">Save Team Selection</button>
-</div>
-
-<div class="space-between save-buttons gap">
-  @if(adminControlService.getAdminControl().showSaveButtons) {
-  <div>
+<div class="game-toolbar">
+  <div class="toolbar-left gap">
+    @if(adminControlService.getAdminControl().showSaveButtons) {
     <button (click)="load()">Load local data</button>
-    <button (click)="save()">Save local data </button>
+    <button (click)="save()">Save local data</button>
+    <button (click)="saveGlobal()">Save Global</button>
+    }
   </div>
-  <button (click)="saveGlobal()">Save Global</button>
-  }
+
+  <div class="toolbar-center">
+    @if(adminControlService.isAdminModeEnabled()) {
+    <button class="action-btn active-btn" (click)="adminControlService.cleanAdminControlState()">Revert admin mode</button>
+    }
+  </div>
+
+  <div class="toolbar-right">
+    <button class="button-icon audit-trail-button" (click)="isAuditTrailModalVisible.set(true)">
+      <img alt="audit trail" src="assets/icons/audit-trail.svg" height="30" width="30">
+    </button>
+  </div>
 </div>
-
-<div class="audit-trail-button">
-  <button class="button-icon" (click)="isAuditTrailModalVisible.set(true)">
-    <img alt="login" src="assets/icons/audit-trail.svg" height="30" width="30">
-  </button>
-</div>
-
-
-<button class="button-icon" (click)="isMovePlayersLocked.set(!this.isMovePlayersLocked())">
-  <img alt="lock" [src]=lockIcon() height="30" width="30">
-</button>
 
 @if(playersService.isGroupOwner()) {
 <app-capture-media></app-capture-media>
-
 }
-<app-players-drag-drop-table
-  [clonedTeams]="teams()"
-  [isLocked]="isMovePlayersLocked()"
-  [numberOfTeams]="playersService.numberOfTeams()"
-  [enableShowRatings]="adminControlService.getAdminControl().showRating"
-  [enableMakeBalancedTeams]="adminControlService.getAdminControl().showMakeBalanceTeams"
-  [playerStatsMap]="gameService.computedStats()"
-  [currentMatchId]="matchEventsService.liveMatchId()"
-  [playingTeams]="playingTeams()"
-  (recordGoalEvent)="recordGoalFromTimerHandler($event)"
-  (playingTeamsChange)="playingTeams.set($event)"
-  (dropPlayer)="updateTeams($event)" />
 
-<app-stopwatch [disabled]="playingTeams().length !== 2" [disabledTooltip]="'Please select 2 teams'"
-  (timeStartEvent)="onTimerStart()" (timeResetEvent)="onTimerReset()" (timeEndEvent)="endGameFromTimer()" />
+<div class="mode-toggle-row">
+  <div class="mode-toggle" [class.locked]="toggleDisabled()">
+    <button type="button" [class.active]="mode() === 'single'" [disabled]="toggleDisabled()"
+      (click)="setMode('single')">Single</button>
+    <button type="button" [class.active]="mode() === 'league'" [disabled]="toggleDisabled()"
+      (click)="setMode('league')">League</button>
+  </div>
+  @if (toggleDisabled()) {
+  <span class="lock-hint">End the running game to switch mode</span>
+  }
+</div>
+
+@if (mode() === 'single') {
+<app-single-game />
+} @else {
+<app-league-game />
+}
 
 @if(isAuditTrailModalVisible()) {
 <app-modal [showSubmitButton]="false" (close)="isAuditTrailModalVisible.set(false)">
   <app-audit-trail></app-audit-trail>
 </app-modal>
 }
-
-

@@ -36,11 +36,11 @@ export class GameService {
     this.router.navigate(['/reveal'], { queryParams: { groupId } });
   }
 
-  async endGame(teams: any) {
+  async endGame(teams: any, slot = 1) {
     let team1Score = 0;
     let team2Score = 0;
     const groupId = this.playersService.selectedGroup()?.id;
-    const matchId = this.matchEventsService.liveMatchId();
+    const matchId = this.matchEventsService.liveMatchIdFor(slot);
     if (groupId && matchId) {
       try {
         const eventsObservable = (this.matchEventsService as any).matchEventsApiService.getEvents(groupId, matchId);
@@ -82,10 +82,13 @@ export class GameService {
 
     const gameDetails: GameDetails = {gameStatus, winner, loser, wonTeamScore, loseTeamScore};
 
-    await this.matchEventsService.endGameAndPersist(gameDetails);
-    await this.playersService.setFantasyMetaIsActive(false);
+    await this.matchEventsService.endGameAndPersist(gameDetails, slot);
 
-    this.navigationService.unlockNavigation();
+    // Only tear down shared state once no game (single or league slot) is still live.
+    if (!this.matchEventsService.hasAnyLiveMatch()) {
+      await this.playersService.setFantasyMetaIsActive(false);
+      this.navigationService.unlockNavigation();
+    }
   }
 
   private buildSnapshot(): RevealSnapshot {
