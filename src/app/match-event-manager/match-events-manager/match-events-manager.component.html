@@ -49,7 +49,7 @@
         <label>Winner</label>
         <select [formField]='draftMatchForm.winner' (change)='updateLocalMatch({winner: $any($event.target).value})'>
           @for (team of localMatchTeams(); track team) {
-          <option [value]="team">{{ team }}</option>
+          <option [value]="team">{{ teamLabelOf(team) }}</option>
           }
         </select>
       </div>
@@ -57,7 +57,7 @@
         <label>Loser</label>
         <select [formField]='draftMatchForm.loser' (change)='updateLocalMatch({loser: $any($event.target).value})'>
           @for (team of localMatchTeams(); track team) {
-          <option [value]="team">{{ team }}</option>
+          <option [value]="team">{{ teamLabelOf(team) }}</option>
           }
         </select>
       </div>
@@ -79,7 +79,7 @@
     <select [formField]="eventForm.playerId">
       <option value="" disabled selected>Player</option>
       @for (player of rosterPlayers(); track player.id) {
-      <option [value]="player.id">{{ player.name }} ({{ player.team }})</option>
+      <option [value]="player.id">{{ player.name }} ({{ teamLabelOf(player.team) }})</option>
       }
     </select>
 
@@ -108,7 +108,7 @@
         <select [formField]="eventForm.playerId">
           <option value="" disabled selected>Player</option>
           @for (player of rosterPlayers(); track player.id) {
-          <option [value]="player.id">{{ player.name }} ({{ player.team }})</option>
+          <option [value]="player.id">{{ player.name }} ({{ teamLabelOf(player.team) }})</option>
           }
         </select>
       </div>
@@ -122,7 +122,7 @@
       <button [disabled]="eventForm().invalid()" (click)="saveEdit(event)">Save</button>
       <button (click)="cancelEdit()">Cancel</button>
       } @else {
-      <span class="scorer">{{ event.playerNameSnapshot || 'Unknown scorer' }} ({{ event.teamKey }})</span>
+      <span class="scorer">{{ event.playerNameSnapshot || 'Unknown scorer' }} ({{ teamLabelOf(event.teamKey) }})</span>
       <span class="minute timer">{{ formatEventTime(event) }}</span>
 
       @if (isEditingMatch() && localMatch()?.status !== 'abandoned') {

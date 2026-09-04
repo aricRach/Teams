@@ -13,6 +13,6 @@
     </select>
   </div>
 
-  <app-league-standings [rows]="rows()" [title]="selectedDate()" />
+  <app-league-standings [rows]="rows()" [title]="selectedDate()" [aliases]="playersService.teamAliases()" />
   }
 </div>

@@ -10,6 +10,7 @@ import { PopupsService } from 'ui';
 import { DatePipe } from '@angular/common';
 import { formatElapsedMsAsMmSs, parseMmSsToMinute, parseMmSsToMs } from '../utils/timer-display';
 import { MatchEventRecord, MatchRecord, MatchStatus } from '../models/match-event.model';
+import { formatTeamLabel } from '../../utils/team-label.util';
 
 @Component({
   selector: 'app-match-events-manager',
@@ -30,6 +31,10 @@ export class MatchEventsManagerComponent {
   user = toSignal(authState(this.auth));
 
   playingTeamKeys = computed(() => this.playersService.selectedTeamsKeys())
+
+  /** Display label for a team slot key (letter + nickname). The stored key is never changed. */
+  teamLabelOf = (teamKey: string | undefined | null): string =>
+    teamKey ? formatTeamLabel(teamKey, this.playersService.teamAliases()[teamKey]) : '';
 
   // ── Matches: live Firestore stream, re-runs when the group changes ──────────
   private matchesResource = rxResource({
@@ -57,8 +62,8 @@ export class MatchEventsManagerComponent {
       }
 
       if (match.status === 'completed') {
-        const winner = match.winner || 'Unknown';
-        const loser = match.loser || 'Unknown';
+        const winner = match.winner ? this.teamLabelOf(match.winner) : 'Unknown';
+        const loser = match.loser ? this.teamLabelOf(match.loser) : 'Unknown';
         const result = match.gameStatus === 'draw' ? 'Draw' : `${winner} Won`;
         label += ` - ${result} (${winner} ${match.wonTeamScore ?? 0} - ${match.loseTeamScore ?? 0} ${loser})`;
       } else if (match.status === 'live') {
@@ -66,7 +71,7 @@ export class MatchEventsManagerComponent {
       } else if (match.status === 'abandoned') {
         label += ` - Abandoned`;
         if (match.winner || match.loser) {
-          label += ` (${match.winner || ''} - ${match.loser || ''})`;
+          label += ` (${this.teamLabelOf(match.winner)} - ${this.teamLabelOf(match.loser)})`;
         }
       }
       return { id: matchId, label };

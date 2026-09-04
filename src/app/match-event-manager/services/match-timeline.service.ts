@@ -5,6 +5,7 @@ import {MatchEventsApiService} from './match-events-api.service';
 import {rxResource} from '@angular/core/rxjs-interop';
 import {forkJoin, map, of, take} from 'rxjs';
 import {formatDateToString} from '../../utils/date-utils';
+import {formatTeamLabel} from '../../utils/team-label.util';
 
 @Injectable()
 export class MatchTimelineService {
@@ -31,6 +32,7 @@ export class MatchTimelineService {
     );
     const eventsMap = this.eventsResource.value() || {};
     const nameMap = this.playerNameMap();
+    const aliases = this.playersService.teamAliases();
 
     const resolveNames = (ids?: string[]): string =>
       (ids || []).map((id) => nameMap.get(id) ?? id).join(', ');
@@ -42,8 +44,8 @@ export class MatchTimelineService {
         (e: MatchEventRecord) => e.type === 'player_goal' && !e.deletedAt
       );
 
-      const winnerName = match.winner || 'Team A';
-      const loserName = match.loser || 'Team B';
+      const winnerName = match.winner ? formatTeamLabel(match.winner, aliases[match.winner]) : 'Team A';
+      const loserName = match.loser ? formatTeamLabel(match.loser, aliases[match.loser]) : 'Team B';
       const isDraw = match.gameStatus === 'draw';
       const winnerScore = match.wonTeamScore || 0;
       const loserScore = match.loseTeamScore || 0;

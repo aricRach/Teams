@@ -15,7 +15,25 @@
     @for (teamKey of teamKeys(); track teamKey) {
     <div class="list-container">
       <div class="team-header">
-        <h2>{{ teamKey.slice(-1).toUpperCase() }}</h2>
+        @if (renamingTeamKey() === teamKey) {
+        <div class="team-rename">
+          <input type="text" class="team-rename-input" placeholder="Team name"
+            [formField]="teamAliasForm.alias"
+            (keyup.enter)="saveTeamRename(teamKey)" (keyup.escape)="cancelTeamRename()">
+          <button type="button" class="team-rename-btn" (click)="saveTeamRename(teamKey)">Save</button>
+          <button type="button" class="team-rename-btn" (click)="cancelTeamRename()">Cancel</button>
+        </div>
+        } @else {
+        <div class="team-name">
+          <h2>{{ teamKey | teamLabel: playersService.teamAliases() }}</h2>
+          @if (canRenameTeams()) {
+          <button type="button" class="button-icon team-rename-pencil" aria-label="Edit team name"
+            (click)="startTeamRename(teamKey)">
+            <img src="assets/icons/pencil.svg" alt="edit" height="18" width="18">
+          </button>
+          }
+        </div>
+        }
         @if (leagueAssignMode()) {
         <div class="slot-selector">
           <button type="button" [class.active]="teamSlots()[teamKey] === 1"

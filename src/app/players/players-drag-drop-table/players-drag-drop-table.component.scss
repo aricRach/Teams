@@ -19,6 +19,44 @@
   }
 }
 
+.team-name {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.team-rename-pencil {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.team-rename {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+
+  .team-rename-input {
+    padding: 0.25rem 0.4rem;
+    font-size: 1rem;
+    max-width: 160px;
+  }
+
+  .team-rename-btn {
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+  }
+}
+
 .slot-selector {
   display: inline-flex;
   border: 1px solid #bbb;

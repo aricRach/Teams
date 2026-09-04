@@ -8,6 +8,7 @@ import {NavigationService} from '../shared/navigation/navigation.service';
 import {ComputedStatisticsService} from '../statistics/services/computed-statistics.service';
 import {computeTeamScores} from '../utils/team-scores.utils';
 import {RevealApiService, RevealTeam, RevealSnapshot, PositionedPlayer, Position} from '../reveal/reveal-api.service';
+import {formatTeamLabel} from '../utils/team-label.util';
 import {PopupsService} from 'ui';
 
 @Injectable()
@@ -96,10 +97,11 @@ export class GameService {
     const statsMap = this.computedStatsService.statsMap();
     const scores   = computeTeamScores(rawTeams, statsMap);
 
+    const aliases = this.playersService.teamAliases();
     const teams: RevealTeam[] = Object.entries(rawTeams)
       .filter(([key, team]: [string, any]) => key !== 'allPlayers' && team.players.length > 0)
       .map(([key, team]: [string, any]) => ({
-        name:         key.replace(/([A-Z])/g, ' $1').toUpperCase().trim(),
+        name:         formatTeamLabel(key, aliases[key]),
         rating:       this.averageRating(team.players),
         attackScore:  scores[key]?.attackScore  ?? 0,
         defenseScore: scores[key]?.defenseScore ?? 0,

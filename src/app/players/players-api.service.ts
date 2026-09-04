@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {
   collection,
   collectionData,
+  deleteField,
   doc,
   Firestore,
   getDoc,
@@ -71,6 +72,15 @@ export class PlayersApiService {
     console.log("✅ All players and stats added/updated successfully!");
 
     return true;
+  }
+
+  /**
+   * Sets (or clears, when alias is empty) the display nickname for one team slot
+   * on the group document. The slot key itself is untouched - it stays the team's id.
+   */
+  async updateTeamAlias(groupId: string, teamKey: string, alias: string) {
+    const groupDocRef = doc(this.firestore, `groups/${groupId}`);
+    return updateDoc(groupDocRef, { [`teamAliases.${teamKey}`]: alias || deleteField() });
   }
 
   getUserCreatedGroups(): Observable<any[]> {

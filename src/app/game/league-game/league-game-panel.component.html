@@ -2,15 +2,15 @@
   <div class="panel-header">
     <span class="game-name">Game {{ slot() }}</span>
     @if (teamKeys().length === 2) {
-    <span class="matchup">{{ label(teamKeys()[0]) }} vs {{ label(teamKeys()[1]) }}</span>
+    <span class="matchup">{{ teamKeys()[0] | teamLabel: aliases() }} vs {{ teamKeys()[1] | teamLabel: aliases() }}</span>
     }
   </div>
 
   @if (teamKeys().length === 2) {
   <div class="score">
-    <span>{{ label(teamKeys()[0]) }}</span>
+    <span>{{ teamKeys()[0] | teamLabel: aliases() }}</span>
     <strong>{{ score()[teamKeys()[0]] ?? 0 }} &ndash; {{ score()[teamKeys()[1]] ?? 0 }}</strong>
-    <span>{{ label(teamKeys()[1]) }}</span>
+    <span>{{ teamKeys()[1] | teamLabel: aliases() }}</span>
   </div>
 
   <app-stopwatch [disabled]="!ready()" [disabledTooltip]="'Assign 2 teams to this game'"

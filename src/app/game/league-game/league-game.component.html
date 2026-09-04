@@ -10,6 +10,7 @@
   @for (slot of league.slots; track slot) {
   <app-league-game-panel [slot]="slot" [teamKeys]="league.slotTeams(slot)" [ready]="league.slotReady(slot)"
     [live]="league.slotLive(slot)" [score]="league.score(slot)" [scorers]="league.scorers(slot)"
+    [aliases]="league.teamAliases()"
     (start)="onStart(slot)" (reset)="onReset(slot)" (end)="onEnd(slot)" />
   }
 </div>
@@ -25,6 +26,7 @@
   [isLocked]="league.isMovePlayersLocked()"
   [numberOfTeams]="league.teamCount"
   [leagueAssignMode]="true"
+  [enableTeamRename]="true"
   [teamSlots]="league.assignments()"
   [matchIdByTeam]="league.matchIdByTeam()"
   [lockedTeamKeys]="league.lockedTeamKeys()"
@@ -35,4 +37,4 @@
   (teamSlotChange)="league.setAssignments($event)"
   (dropPlayer)="league.updateTeams($event)" />
 
-<app-league-standings [rows]="league.standings()" />
+<app-league-standings [rows]="league.standings()" [aliases]="league.teamAliases()" />

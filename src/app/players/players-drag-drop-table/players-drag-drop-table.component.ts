@@ -1,6 +1,7 @@
 import {Component, computed, HostListener, inject, input, linkedSignal, output, signal,} from '@angular/core';
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
+import {form, FormField, maxLength} from '@angular/forms/signals';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
 import {GoalModalEvent, Player, Statistics, TeamsOptions} from '../models/player.model';
 import {currentDate} from '../../utils/date-utils';
@@ -8,10 +9,13 @@ import {PlayerViewComponent} from '../player-view/player-view.component';
 import {ModalComponent} from '../../../modals/modal/modal.component';
 import {PlayersDragDropTableService} from './players-drag-drop-table.service';
 import {TeamScoreBarsComponent} from '../../shared/team-score-bars/team-score-bars.component';
+import {PlayersService} from '../players.service';
+import {TeamLabelPipe} from '../../pipes/team-label.pipe';
+import {TEAM_ALIAS_MAX_LENGTH} from '../../utils/team-label.util';
 
 @Component({
   selector: 'app-players-drag-drop-table',
-  imports: [DragDropModule, CommonModule, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent],
+  imports: [DragDropModule, CommonModule, FormField, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent, TeamLabelPipe],
   standalone: true,
   providers: [PlayersDragDropTableService],
   templateUrl: './players-drag-drop-table.component.html',
@@ -20,12 +24,15 @@ import {TeamScoreBarsComponent} from '../../shared/team-score-bars/team-score-ba
 export class PlayersDragDropTableComponent {
 
   playersDragDropTableService = inject(PlayersDragDropTableService);
+  playersService = inject(PlayersService);
   isLocked = input.required();
   dateStatistics = input<string>();
   editStatistics = input(false);
   clonedTeams = input<any>();
   enableShowRatings = input(false);
   enableMakeBalancedTeams = input(true);
+  // When true, admins get a pencil on each team header to set a display nickname.
+  enableTeamRename = input(false);
   numberOfTeams = input<number>(Infinity);
   playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
   currentMatchId = input<string | null>(null);
@@ -47,6 +54,14 @@ export class PlayersDragDropTableComponent {
 
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent);
   makeBalancedTeamsModalVisible = signal(false);
+
+  // ── Team nickname editing ──────────────────────────────────────────────────
+  readonly canRenameTeams = computed(() => this.enableTeamRename() && this.playersService.isAdmin());
+  renamingTeamKey = signal<string | null>(null);
+  teamAliasModel = signal({ alias: '' });
+  teamAliasForm = form(this.teamAliasModel, (fields) => {
+    maxLength(fields.alias, TEAM_ALIAS_MAX_LENGTH);
+  });
 
   // Resets to an empty map whenever the live match(es) change (new game starts or game ends)
   liveSessionGoals = linkedSignal<Map<string, number>>(() => {
@@ -245,5 +260,19 @@ export class PlayersDragDropTableComponent {
 
   toggleShowStatistics() {
     this.showStatistics.set(!this.showStatistics());
+  }
+
+  startTeamRename(teamKey: string) {
+    this.teamAliasModel.set({ alias: this.playersService.teamAliases()[teamKey] ?? '' });
+    this.renamingTeamKey.set(teamKey);
+  }
+
+  cancelTeamRename() {
+    this.renamingTeamKey.set(null);
+  }
+
+  async saveTeamRename(teamKey: string) {
+    await this.playersService.setTeamAlias(teamKey, this.teamAliasModel().alias);
+    this.renamingTeamKey.set(null);
   }
 }

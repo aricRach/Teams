@@ -7,6 +7,7 @@ import {PopupsService} from 'ui';
 import {skeleton} from './consts/teams-skeleton';
 import {MembersService} from '../admin/services/members.service';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
+import {TEAM_ALIAS_MAX_LENGTH} from '../utils/team-label.util';
 
 @Injectable({
   providedIn: 'root'
@@ -20,6 +21,9 @@ export class PlayersService {
   // @ts-ignore
   selectedGroup = signal<null | any>(null);
   numberOfTeams = signal<number>(2);
+  // Per-slot display nicknames for the selected group, e.g. { teamA: 'Rockets' }.
+  // Keyed by the team slot key - the key is the identity and never changes.
+  teamAliases = signal<Record<string, string>>({});
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
   isGroupOwner = signal(false);
@@ -235,10 +239,36 @@ export class PlayersService {
     })
   }
 
-  selectGroup(selectedGroup: {admins: string[]; id: string, createdBy?: string}, email: string) {
+  selectGroup(selectedGroup: {admins: string[]; id: string, createdBy?: string, teamAliases?: Record<string, string>}, email: string) {
     this.selectedGroup.set(selectedGroup);
     this.isAdmin.set(selectedGroup.admins.includes(email));
     this.isGroupOwner.set(selectedGroup.createdBy === email)
+    this.teamAliases.set(selectedGroup.teamAliases ?? {});
+  }
+
+  async setTeamAlias(teamKey: string, alias: string): Promise<void> {
+    const groupId = this.selectedGroup()?.id;
+    if (!groupId) return;
+    const trimmedAlias = alias.trim().slice(0, TEAM_ALIAS_MAX_LENGTH);
+    this.spinnerService.setIsLoading(true);
+    try {
+      await this.playersApiService.updateTeamAlias(groupId, teamKey, trimmedAlias);
+      this.teamAliases.update((aliases) => {
+        const next = {...aliases};
+        if (trimmedAlias) {
+          next[teamKey] = trimmedAlias;
+        } else {
+          delete next[teamKey];
+        }
+        return next;
+      });
+      this.selectedGroup.update((group: any) => ({...group, teamAliases: {...this.teamAliases()}}));
+      this.popoutService.addSuccessPopOut('Team name updated.');
+    } catch {
+      this.popoutService.addErrorPopOut('Could not update team name, please try again later.');
+    } finally {
+      this.spinnerService.setIsLoading(false);
+    }
   }
 
   setNumberOfTeams(numberOfTeams: number) {

@@ -5,6 +5,7 @@ import { LeagueStandingsComponent } from '../../game/league-standings/league-sta
 import { computeStandings } from '../../game/league-standings/standings.util';
 import { compareDates, formatDateToString } from '../../utils/date-utils';
 import { MatchRecord } from '../models/match-event.model';
+import { PlayersService } from '../../players/players.service';
 
 @Component({
   selector: 'app-league-table',
@@ -15,6 +16,7 @@ import { MatchRecord } from '../models/match-event.model';
 })
 export class LeagueTableComponent {
   private allMatchData = inject(AllMatchDataService);
+  readonly playersService = inject(PlayersService);
 
   private leagueMatches = computed<MatchRecord[]>(() =>
     this.allMatchData.matchesWithEvents()
