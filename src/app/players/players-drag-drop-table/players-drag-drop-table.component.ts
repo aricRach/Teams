@@ -9,7 +9,6 @@ import {PlayerViewComponent} from '../player-view/player-view.component';
 import {ModalComponent} from '../../../modals/modal/modal.component';
 import {PlayersDragDropTableService} from './players-drag-drop-table.service';
 import {TeamScoreBarsComponent} from '../../shared/team-score-bars/team-score-bars.component';
-import {PlayersService} from '../players.service';
 import {TeamLabelPipe} from '../../pipes/team-label.pipe';
 import {TEAM_ALIAS_MAX_LENGTH} from '../../utils/team-label.util';
 
@@ -24,15 +23,18 @@ import {TEAM_ALIAS_MAX_LENGTH} from '../../utils/team-label.util';
 export class PlayersDragDropTableComponent {
 
   playersDragDropTableService = inject(PlayersDragDropTableService);
-  playersService = inject(PlayersService);
   isLocked = input.required();
   dateStatistics = input<string>();
   editStatistics = input(false);
   clonedTeams = input<any>();
   enableShowRatings = input(false);
   enableMakeBalancedTeams = input(true);
-  // When true, admins get a pencil on each team header to set a display nickname.
-  enableTeamRename = input(false);
+  // Per-slot display nicknames, e.g. { teamA: 'Rockets' }. Purely for display - the parent owns the data.
+  aliases = input<Record<string, string>>({});
+  // When true, a pencil is shown on each team header to edit its nickname. The parent decides
+  // (e.g. gates it on admin) and handles the actual write via the `renameTeam` output.
+  canRenameTeams = input(false);
+  renameTeam = output<{teamKey: string, alias: string}>();
   numberOfTeams = input<number>(Infinity);
   playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
   currentMatchId = input<string | null>(null);
@@ -56,7 +58,6 @@ export class PlayersDragDropTableComponent {
   makeBalancedTeamsModalVisible = signal(false);
 
   // ── Team nickname editing ──────────────────────────────────────────────────
-  readonly canRenameTeams = computed(() => this.enableTeamRename() && this.playersService.isAdmin());
   renamingTeamKey = signal<string | null>(null);
   teamAliasModel = signal({ alias: '' });
   teamAliasForm = form(this.teamAliasModel, (fields) => {
@@ -263,7 +264,7 @@ export class PlayersDragDropTableComponent {
   }
 
   startTeamRename(teamKey: string) {
-    this.teamAliasModel.set({ alias: this.playersService.teamAliases()[teamKey] ?? '' });
+    this.teamAliasModel.set({ alias: this.aliases()[teamKey] ?? '' });
     this.renamingTeamKey.set(teamKey);
   }
 
@@ -271,8 +272,8 @@ export class PlayersDragDropTableComponent {
     this.renamingTeamKey.set(null);
   }
 
-  async saveTeamRename(teamKey: string) {
-    await this.playersService.setTeamAlias(teamKey, this.teamAliasModel().alias);
+  saveTeamRename(teamKey: string) {
+    this.renameTeam.emit({ teamKey, alias: this.teamAliasModel().alias });
     this.renamingTeamKey.set(null);
   }
 }

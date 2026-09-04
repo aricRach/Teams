@@ -26,7 +26,8 @@
   [isLocked]="league.isMovePlayersLocked()"
   [numberOfTeams]="league.teamCount"
   [leagueAssignMode]="true"
-  [enableTeamRename]="true"
+  [aliases]="league.teamAliases()"
+  [canRenameTeams]="league.isAdmin()"
   [teamSlots]="league.assignments()"
   [matchIdByTeam]="league.matchIdByTeam()"
   [lockedTeamKeys]="league.lockedTeamKeys()"
@@ -35,6 +36,7 @@
   [playerStatsMap]="league.playerStatsMap()"
   (recordGoalEvent)="recordGoal($event)"
   (teamSlotChange)="league.setAssignments($event)"
-  (dropPlayer)="league.updateTeams($event)" />
+  (dropPlayer)="league.updateTeams($event)"
+  (renameTeam)="league.renameTeam($event.teamKey, $event.alias)" />
 
 <app-league-standings [rows]="league.standings()" [aliases]="league.teamAliases()" />

@@ -13,13 +13,15 @@
   [numberOfTeams]="single.numberOfTeams()"
   [enableShowRatings]="single.showRating()"
   [enableMakeBalancedTeams]="single.showMakeBalancedTeams()"
-  [enableTeamRename]="true"
+  [aliases]="single.teamAliases()"
+  [canRenameTeams]="single.isAdmin()"
   [playerStatsMap]="single.playerStatsMap()"
   [currentMatchId]="single.liveMatchId()"
   [playingTeams]="single.playingTeams()"
   (recordGoalEvent)="recordGoal($event)"
   (playingTeamsChange)="single.setPlayingTeams($event)"
-  (dropPlayer)="single.updateTeams($event)" />
+  (dropPlayer)="single.updateTeams($event)"
+  (renameTeam)="single.renameTeam($event.teamKey, $event.alias)" />
 
 <app-stopwatch [disabled]="single.playingTeams().length !== 2" [disabledTooltip]="'Please select 2 teams'"
   (timeStartEvent)="single.onTimerStart()" (timeResetEvent)="single.onTimerReset()" (timeEndEvent)="endGameFromTimer()" />

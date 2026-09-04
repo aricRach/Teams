@@ -34,6 +34,8 @@ export class SingleGameService {
   readonly liveMatchId = this.matchEvents.liveMatchId;
   readonly showRating = computed(() => this.adminControl.getAdminControl().showRating);
   readonly showMakeBalancedTeams = computed(() => this.adminControl.getAdminControl().showMakeBalanceTeams);
+  readonly isAdmin = computed(() => this.playersService.isAdmin());
+  readonly teamAliases = computed(() => this.playersService.teamAliases());
 
   toggleMovePlayersLock(): void {
     this.isMovePlayersLocked.set(!this.isMovePlayersLocked());
@@ -45,6 +47,10 @@ export class SingleGameService {
 
   updateTeams(teams: any): void {
     this.playersService.setTeams(teams);
+  }
+
+  renameTeam(teamKey: string, alias: string): void {
+    void this.playersService.setTeamAlias(teamKey, alias);
   }
 
   revealTeams(): void {

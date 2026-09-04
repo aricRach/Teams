@@ -98,7 +98,8 @@ export class LeagueGameService implements OnDestroy {
   readonly teams = computed(() => this.playersService.getTeams());
   readonly playerStatsMap = this.gameService.computedStats;
   readonly showRating = computed(() => this.adminControl.getAdminControl().showRating);
-  readonly teamAliases = this.playersService.teamAliases;
+  readonly teamAliases = computed(() => this.playersService.teamAliases());
+  readonly isAdmin = computed(() => this.playersService.isAdmin());
 
   private readonly groupId = computed(() => this.playersService.selectedGroup()?.id ?? null);
 
@@ -137,6 +138,10 @@ export class LeagueGameService implements OnDestroy {
 
   updateTeams(teams: any): void {
     this.playersService.setTeams(teams);
+  }
+
+  renameTeam(teamKey: string, alias: string): void {
+    void this.playersService.setTeamAlias(teamKey, alias);
   }
 
   recordGoal(goal: { player: Player; teamKey: string }, elapsedMs: number): void {
