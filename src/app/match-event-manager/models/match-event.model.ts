@@ -30,6 +30,9 @@ export interface MatchRecord {
   slot?: number;
   round?: number;
   teamKeys?: string[];
+  /** Copy of the group's teamAliases map at the moment this match was created,
+   *  so historical views render the name a team had when it was played. */
+  teamAliasSnapshot?: Record<string, string>;
 }
 
 export interface MatchEventRecord {

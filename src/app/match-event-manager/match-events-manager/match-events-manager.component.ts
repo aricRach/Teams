@@ -32,9 +32,15 @@ export class MatchEventsManagerComponent {
 
   playingTeamKeys = computed(() => this.playersService.selectedTeamsKeys())
 
-  /** Display label for a team slot key (letter + nickname). The stored key is never changed. */
+  /** Display label for a team slot key (letter + nickname), using the live alias.
+   *  For the current-team selectors while editing a draft - not a historical record. */
   teamLabelOf = (teamKey: string | undefined | null): string =>
     teamKey ? formatTeamLabel(teamKey, this.playersService.teamAliases()[teamKey]) : '';
+
+  /** Display label for a team slot key as it was when the given match was recorded.
+   *  No live-alias fallback: a match predating snapshots just renders its plain letter. */
+  private matchTeamLabelOf = (teamKey: string | undefined | null, match: MatchRecord): string =>
+    teamKey ? formatTeamLabel(teamKey, match.teamAliasSnapshot?.[teamKey]) : '';
 
   // ── Matches: live Firestore stream, re-runs when the group changes ──────────
   private matchesResource = rxResource({
@@ -62,8 +68,8 @@ export class MatchEventsManagerComponent {
       }
 
       if (match.status === 'completed') {
-        const winner = match.winner ? this.teamLabelOf(match.winner) : 'Unknown';
-        const loser = match.loser ? this.teamLabelOf(match.loser) : 'Unknown';
+        const winner = match.winner ? this.matchTeamLabelOf(match.winner, match) : 'Unknown';
+        const loser = match.loser ? this.matchTeamLabelOf(match.loser, match) : 'Unknown';
         const result = match.gameStatus === 'draw' ? 'Draw' : `${winner} Won`;
         label += ` - ${result} (${winner} ${match.wonTeamScore ?? 0} - ${match.loseTeamScore ?? 0} ${loser})`;
       } else if (match.status === 'live') {
@@ -71,7 +77,7 @@ export class MatchEventsManagerComponent {
       } else if (match.status === 'abandoned') {
         label += ` - Abandoned`;
         if (match.winner || match.loser) {
-          label += ` (${this.teamLabelOf(match.winner)} - ${this.teamLabelOf(match.loser)})`;
+          label += ` (${this.matchTeamLabelOf(match.winner, match)} - ${this.matchTeamLabelOf(match.loser, match)})`;
         }
       }
       return { id: matchId, label };

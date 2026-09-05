@@ -58,6 +58,6 @@ export class AllMatchDataService {
       return formatDateToString(new Date(match.createdAt.seconds * 1000)) === dateKey;
     });
     if (existing) return existing.match.id!;
-    return this.matchEventsApi.createCorrectionMatch(groupId, dateKey, createdBy);
+    return this.matchEventsApi.createCorrectionMatch(groupId, dateKey, createdBy, this.playersService.teamAliases());
   }
 }

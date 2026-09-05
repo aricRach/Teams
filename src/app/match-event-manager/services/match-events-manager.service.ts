@@ -106,7 +106,8 @@ export class MatchEventsManagerService {
       const matchDoc: Omit<MatchRecord, 'id'> = {
         status: 'live',
         startedAt: new Date(),
-        createdBy: this.getActorId()
+        createdBy: this.getActorId(),
+        teamAliasSnapshot: { ...this.playersService.teamAliases() }
       };
       if (mode === 'league') {
         matchDoc.mode = 'league';
@@ -241,7 +242,8 @@ export class MatchEventsManagerService {
         loserPlayerIds,
         gameStatus: gameDetails.gameStatus,
         endedAt: new Date(),
-        createdBy
+        createdBy,
+        teamAliasSnapshot: { ...this.playersService.teamAliases() }
       });
     }
 

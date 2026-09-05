@@ -5,7 +5,6 @@ import { LeagueStandingsComponent } from '../../game/league-standings/league-sta
 import { computeStandings } from '../../game/league-standings/standings.util';
 import { compareDates, formatDateToString } from '../../utils/date-utils';
 import { MatchRecord } from '../models/match-event.model';
-import { PlayersService } from '../../players/players.service';
 
 @Component({
   selector: 'app-league-table',
@@ -16,7 +15,6 @@ import { PlayersService } from '../../players/players.service';
 })
 export class LeagueTableComponent {
   private allMatchData = inject(AllMatchDataService);
-  readonly playersService = inject(PlayersService);
 
   private leagueMatches = computed<MatchRecord[]>(() =>
     this.allMatchData.matchesWithEvents()
@@ -34,13 +32,32 @@ export class LeagueTableComponent {
 
   readonly selectedDate = signal<string>('');
 
-  readonly rows = computed(() => {
+  private dayMatches = computed<MatchRecord[]>(() => {
     const date = this.selectedDate();
     if (!date) return [];
-    const dayMatches = this.leagueMatches().filter(
+    return this.leagueMatches().filter(
       m => formatDateToString(new Date(m.createdAt.seconds * 1000)) === date
     );
-    return computeStandings(dayMatches);
+  });
+
+  readonly rows = computed(() => computeStandings(this.dayMatches()));
+
+  /** Aliases as they were when the selected date's matches were played, not today's aliases.
+   *  A team with no snapshot (match predates this field) renders as its plain letter, not
+   *  today's live alias — showing a rename that hadn't happened yet would be worse than no nickname.
+   *  Matches are applied oldest-first, so a same-day rename between two matches settles on the
+   *  name from the later match — the one that was true by the end of that day. */
+  readonly dateAliases = computed<Record<string, string>>(() => {
+    const matches = [...this.dayMatches()].sort(
+      (a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
+    );
+    const result: Record<string, string> = {};
+    for (const m of matches) {
+      if (!m.teamAliasSnapshot) continue;
+      if (m.winner && m.teamAliasSnapshot[m.winner]) result[m.winner] = m.teamAliasSnapshot[m.winner];
+      if (m.loser && m.teamAliasSnapshot[m.loser]) result[m.loser] = m.teamAliasSnapshot[m.loser];
+    }
+    return result;
   });
 
   constructor() {
