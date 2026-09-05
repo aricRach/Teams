@@ -12,6 +12,7 @@
           <th>W</th>
           <th>D</th>
           <th>L</th>
+          <th>GD</th>
           <th>Pts</th>
         </tr>
       </thead>
@@ -23,6 +24,7 @@
           <td>{{ row.won }}</td>
           <td>{{ row.drawn }}</td>
           <td>{{ row.lost }}</td>
+          <td>{{ row.goalDiff > 0 ? '+' : '' }}{{ row.goalDiff }}</td>
           <td class="pts">{{ row.points }}</td>
         </tr>
         }
