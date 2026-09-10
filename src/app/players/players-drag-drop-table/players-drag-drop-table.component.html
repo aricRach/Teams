@@ -108,7 +108,7 @@
 
   <h2>Players</h2>
   <div cdkDropList id="allPlayers" [cdkDropListDisabled]="isLocked()"
-    [cdkDropListData]="clonedTeams()?.allPlayers?.players" [cdkDropListConnectedTo]="teamKeys()"
+    [cdkDropListData]="clonedTeams()?.allPlayers?.players" [cdkDropListConnectedTo]="unlockedTeamKeys()"
     class="box available-player" (cdkDropListDropped)="drop($event)">
     @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
     <div class="player">

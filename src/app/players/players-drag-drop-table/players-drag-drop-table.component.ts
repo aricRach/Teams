@@ -97,8 +97,15 @@ export class PlayersDragDropTableComponent {
     Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.numberOfTeams()) as TeamsOptions[]
   );
 
+  // A locked team (globally locked, or its game is live) must not be a drop target for
+  // anyone else - only its own (disabled) list should reference it, so it neither
+  // accepts a drop nor can be dragged out of.
+  readonly unlockedTeamKeys = computed(() =>
+    this.teamKeys().filter(key => !this.isTeamLocked(key))
+  );
+
   readonly dropListRefs = computed(() =>
-    [...this.teamKeys(), 'allPlayers']
+    [...this.unlockedTeamKeys(), 'allPlayers']
   );
 
   dropPlayer = output();
