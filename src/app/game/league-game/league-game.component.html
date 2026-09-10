@@ -6,37 +6,28 @@
   <img alt="lock" [src]="league.lockIcon()" height="30" width="30">
 </button>
 
-<div class="games-row">
-  @for (slot of league.slots; track slot) {
-  <app-league-game-panel [slot]="slot" [teamKeys]="league.slotTeams(slot)" [ready]="league.slotReady(slot)"
-    [live]="league.slotLive(slot)" [score]="league.score(slot)" [scorers]="league.scorers(slot)"
-    [aliases]="league.teamAliases()"
-    (start)="onStart(slot)" (reset)="onReset(slot)" (end)="onEnd(slot)" />
-  }
-</div>
+<app-game-slots-board
+  [slotViewModels]="league.slotViewModels()"
+  [aliases]="league.teamAliases()"
+  [teams]="league.teams()"
+  [teamCount]="league.teamCount"
+  [isMovePlayersLocked]="league.isMovePlayersLocked()"
+  [assignments]="league.assignments()"
+  [matchIdByTeam]="league.matchIdByTeam()"
+  [lockedTeamKeys]="league.lockedTeamKeys()"
+  [showRating]="league.showRating()"
+  [isAdmin]="league.isAdmin()"
+  [playerStatsMap]="league.playerStatsMap()"
+  (start)="onStart($event)" (reset)="onReset($event)" (end)="onEnd($event)"
+  (recordGoal)="recordGoal($event)"
+  (teamSlotChange)="league.setAssignments($event)"
+  (dropPlayer)="league.updateTeams($event)"
+  (renameTeam)="league.renameTeam($event.teamKey, $event.alias)" />
 
 @if (league.canFinishSession()) {
 <div class="center">
   <button class="action-btn active-btn" (click)="finishSession()">Finish league</button>
 </div>
 }
-
-<app-players-drag-drop-table
-  [clonedTeams]="league.teams()"
-  [isLocked]="league.isMovePlayersLocked()"
-  [numberOfTeams]="league.teamCount"
-  [leagueAssignMode]="true"
-  [aliases]="league.teamAliases()"
-  [canRenameTeams]="league.isAdmin()"
-  [teamSlots]="league.assignments()"
-  [matchIdByTeam]="league.matchIdByTeam()"
-  [lockedTeamKeys]="league.lockedTeamKeys()"
-  [enableShowRatings]="league.showRating()"
-  [enableMakeBalancedTeams]="false"
-  [playerStatsMap]="league.playerStatsMap()"
-  (recordGoalEvent)="recordGoal($event)"
-  (teamSlotChange)="league.setAssignments($event)"
-  (dropPlayer)="league.updateTeams($event)"
-  (renameTeam)="league.renameTeam($event.teamKey, $event.alias)" />
 
 <app-league-standings [rows]="league.standings()" [aliases]="league.teamAliases()" />

@@ -7,21 +7,20 @@
   <img alt="lock" [src]="single.lockIcon()" height="30" width="30">
 </button>
 
-<app-players-drag-drop-table
-  [clonedTeams]="single.teams()"
-  [isLocked]="single.isMovePlayersLocked()"
-  [numberOfTeams]="single.numberOfTeams()"
-  [enableShowRatings]="single.showRating()"
-  [enableMakeBalancedTeams]="single.showMakeBalancedTeams()"
+<app-game-slots-board
+  [slotViewModels]="single.slotViewModels()"
   [aliases]="single.teamAliases()"
-  [canRenameTeams]="single.isAdmin()"
+  [teams]="single.teams()"
+  [teamCount]="single.teamCount"
+  [isMovePlayersLocked]="single.isMovePlayersLocked()"
+  [assignments]="single.assignments()"
+  [matchIdByTeam]="single.matchIdByTeam()"
+  [lockedTeamKeys]="single.lockedTeamKeys()"
+  [showRating]="single.showRating()"
+  [isAdmin]="single.isAdmin()"
   [playerStatsMap]="single.playerStatsMap()"
-  [currentMatchId]="single.liveMatchId()"
-  [playingTeams]="single.playingTeams()"
-  (recordGoalEvent)="recordGoal($event)"
-  (playingTeamsChange)="single.setPlayingTeams($event)"
+  (start)="onStart($event)" (reset)="onReset($event)" (end)="onEnd($event)"
+  (recordGoal)="recordGoal($event)"
+  (teamSlotChange)="single.setAssignments($event)"
   (dropPlayer)="single.updateTeams($event)"
   (renameTeam)="single.renameTeam($event.teamKey, $event.alias)" />
-
-<app-stopwatch [disabled]="single.playingTeams().length !== 2" [disabledTooltip]="'Please select 2 teams'"
-  (timeStartEvent)="single.onTimerStart()" (timeResetEvent)="single.onTimerReset()" (timeEndEvent)="endGameFromTimer()" />

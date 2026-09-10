@@ -41,11 +41,11 @@ export class PlayersDragDropTableComponent {
   showStatisticsInput = input(false);
   showStatistics = linkedSignal(() => this.showStatisticsInput())
 
-  // League mode: show a G1 / G2 / – slot selector per team instead of the single "playing" checkbox.
-  leagueAssignMode = input(false);
+  // Parallel-slots modes (single, league): a G1 / G2 / – slot selector per team.
+  slotAssignMode = input(false);
   teamSlots = input<Record<string, number>>({});
   teamSlotChange = output<Record<string, number>>();
-  // League mode: teamKey -> the live matchId of the game that team is playing (null when its game isn't live).
+  // teamKey -> the live matchId of the game that team is playing (null when its game isn't live).
   matchIdByTeam = input<Record<string, string | null>>({});
   // Teams whose game has started - their drop list is frozen even though the rest of the board isn't.
   lockedTeamKeys = input<string[]>([]);
@@ -104,20 +104,6 @@ export class PlayersDragDropTableComponent {
   dropPlayer = output();
   updateTeamStatistics = output<{players: Player[], team: TeamsOptions, name: string, number: number}>();
 
-  playingTeams = input<string[]>([]);
-  playingTeamsChange = output<string[]>();
-
-  togglePlayingTeam(teamKey: string) {
-    const current = this.playingTeams();
-    if (current.includes(teamKey)) {
-      this.playingTeamsChange.emit(current.filter(t => t !== teamKey));
-    } else {
-      if (current.length < 2) {
-        this.playingTeamsChange.emit([...current, teamKey]);
-      }
-    }
-  }
-
   slotTeamCount(slot: number, exceptTeamKey?: string): number {
     return Object.entries(this.teamSlots())
       .filter(([key, value]) => value === slot && key !== exceptTeamKey)
@@ -147,10 +133,7 @@ export class PlayersDragDropTableComponent {
 
   /** Whether double-clicking a player in this team should open the goal modal. */
   isGoalTaggingEnabled(teamKey: string): boolean {
-    if (this.leagueAssignMode()) {
-      return !!this.matchIdByTeam()[teamKey];
-    }
-    return !!this.isLocked() && this.playingTeams().includes(teamKey);
+    return !!this.matchIdByTeam()[teamKey];
   }
 
   private setTotalRatingToAllTeams() {

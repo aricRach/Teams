@@ -1,0 +1,26 @@
+<div class="games-row">
+  @for (vm of slotViewModels(); track vm.slot) {
+  <app-game-slot-panel [slot]="vm.slot" [teamKeys]="vm.teamKeys" [ready]="vm.ready"
+    [live]="vm.live" [score]="vm.score" [scorers]="vm.scorers"
+    [aliases]="aliases()"
+    (start)="start.emit(vm.slot)" (reset)="reset.emit(vm.slot)" (end)="end.emit(vm.slot)" />
+  }
+</div>
+
+<app-players-drag-drop-table
+  [clonedTeams]="teams()"
+  [isLocked]="isMovePlayersLocked()"
+  [numberOfTeams]="teamCount()"
+  [slotAssignMode]="true"
+  [aliases]="aliases()"
+  [canRenameTeams]="isAdmin()"
+  [teamSlots]="assignments()"
+  [matchIdByTeam]="matchIdByTeam()"
+  [lockedTeamKeys]="lockedTeamKeys()"
+  [enableShowRatings]="showRating()"
+  [enableMakeBalancedTeams]="false"
+  [playerStatsMap]="playerStatsMap()"
+  (recordGoalEvent)="recordGoal.emit($event)"
+  (teamSlotChange)="teamSlotChange.emit($event)"
+  (dropPlayer)="dropPlayer.emit($event)"
+  (renameTeam)="renameTeam.emit($event)" />

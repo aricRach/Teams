@@ -1,30 +1,39 @@
 import { Component, inject, viewChild } from '@angular/core';
-import { PlayersDragDropTableComponent } from '../../players/players-drag-drop-table/players-drag-drop-table.component';
-import { StopwatchComponent } from '../../stopwatch/stopwatch.component';
-import { Player } from '../../players/models/player.model';
 import { SingleGameService } from './single-game.service';
+import { GameSlotsBoardComponent } from '../shared/game-slots-board.component';
+import { Player } from '../../players/models/player.model';
 
 @Component({
   selector: 'app-single-game',
-  imports: [PlayersDragDropTableComponent, StopwatchComponent],
-  templateUrl: './single-game.component.html',
   standalone: true,
+  imports: [GameSlotsBoardComponent],
   providers: [SingleGameService],
+  templateUrl: './single-game.component.html',
   styleUrl: './single-game.component.scss'
 })
 export class SingleGameComponent {
   single = inject(SingleGameService);
 
-  private stopwatch = viewChild(StopwatchComponent);
+  board = viewChild.required(GameSlotsBoardComponent);
 
-  async endGameFromTimer(): Promise<void> {
-    if (await this.single.endGame()) {
-      this.stopwatch()?.reset();
-    }
+  async onStart(slot: number): Promise<void> {
+    const ok = await this.single.startGame(slot);
+    if (!ok) this.board().stopwatchForSlot(slot)?.clear();
+  }
+
+  onReset(slot: number): void {
+    void this.single.resetGame(slot);
+  }
+
+  async onEnd(slot: number): Promise<void> {
+    await this.single.endGame(slot);
+    this.board().stopwatchForSlot(slot)?.clear();
   }
 
   recordGoal(goal: { player: Player; teamKey: string }): void {
-    const ms = this.stopwatch()?.getElapsedMs() ?? 0;
+    const slot = this.single.assignments()[goal.teamKey];
+    if (!slot) return;
+    const ms = this.board().stopwatchForSlot(slot)?.getElapsedMs() ?? 0;
     this.single.recordGoal(goal, ms);
   }
 }

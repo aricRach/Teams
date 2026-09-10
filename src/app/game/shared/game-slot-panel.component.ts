@@ -8,14 +8,15 @@ export interface PanelScorer {
   teamKey?: string;
 }
 
+/** Presentational: one slot's live score + scorers + stopwatch. Shared by single and league modes. */
 @Component({
-  selector: 'app-league-game-panel',
+  selector: 'app-game-slot-panel',
   standalone: true,
   imports: [StopwatchComponent, TeamLabelPipe],
-  templateUrl: './league-game-panel.component.html',
-  styleUrl: './league-game-panel.component.scss'
+  templateUrl: './game-slot-panel.component.html',
+  styleUrl: './game-slot-panel.component.scss'
 })
-export class LeagueGamePanelComponent {
+export class GameSlotPanelComponent {
   slot = input.required<number>();
   teamKeys = input<string[]>([]);
   ready = input(false);

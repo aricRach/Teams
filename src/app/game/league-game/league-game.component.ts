@@ -1,14 +1,13 @@
-import { Component, inject, viewChildren } from '@angular/core';
-import { PlayersDragDropTableComponent } from '../../players/players-drag-drop-table/players-drag-drop-table.component';
+import { Component, inject, viewChild } from '@angular/core';
 import { LeagueGameService } from './league-game.service';
-import { LeagueGamePanelComponent } from './league-game-panel.component';
+import { GameSlotsBoardComponent } from '../shared/game-slots-board.component';
 import { LeagueStandingsComponent } from '../league-standings/league-standings.component';
 import { Player } from '../../players/models/player.model';
 
 @Component({
   selector: 'app-league-game',
   standalone: true,
-  imports: [PlayersDragDropTableComponent, LeagueGamePanelComponent, LeagueStandingsComponent],
+  imports: [GameSlotsBoardComponent, LeagueStandingsComponent],
   providers: [LeagueGameService],
   templateUrl: './league-game.component.html',
   styleUrl: './league-game.component.scss'
@@ -16,15 +15,11 @@ import { Player } from '../../players/models/player.model';
 export class LeagueGameComponent {
   league = inject(LeagueGameService);
 
-  panels = viewChildren(LeagueGamePanelComponent);
-
-  private panelForSlot(slot: number) {
-    return this.panels().find(p => p.slot() === slot);
-  }
+  board = viewChild.required(GameSlotsBoardComponent);
 
   async onStart(slot: number): Promise<void> {
     const ok = await this.league.startGame(slot);
-    if (!ok) this.panelForSlot(slot)?.stopwatch()?.clear();
+    if (!ok) this.board().stopwatchForSlot(slot)?.clear();
   }
 
   onReset(slot: number): void {
@@ -33,13 +28,13 @@ export class LeagueGameComponent {
 
   async onEnd(slot: number): Promise<void> {
     await this.league.endGame(slot);
-    this.panelForSlot(slot)?.stopwatch()?.clear();
+    this.board().stopwatchForSlot(slot)?.clear();
   }
 
   recordGoal(goal: { player: Player; teamKey: string }): void {
     const slot = this.league.assignments()[goal.teamKey];
     if (!slot) return;
-    const ms = this.panelForSlot(slot)?.stopwatch()?.getElapsedMs() ?? 0;
+    const ms = this.board().stopwatchForSlot(slot)?.getElapsedMs() ?? 0;
     this.league.recordGoal(goal, ms);
   }
 
