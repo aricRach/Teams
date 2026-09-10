@@ -5,6 +5,7 @@ import { MatchEventsManagerService } from '../../match-event-manager/services/ma
 import { NavigationService } from '../../shared/navigation/navigation.service';
 import { GameService } from '../game.service';
 import { Player } from '../../players/models/player.model';
+import { collapseExtraTeams } from '../../utils/collapse-extra-teams.util';
 
 /**
  * All state and side effects for the classic single-match view. The component
@@ -28,8 +29,11 @@ export class SingleGameService {
   );
 
   // --- Board view: everything the template used to pull from other services ---
-  readonly teams = computed(() => this.playersService.getTeams());
   readonly numberOfTeams = this.playersService.numberOfTeams;
+  // Board view only: players in team slots beyond the chosen count sit in the pool.
+  readonly teams = computed(() =>
+    collapseExtraTeams(this.playersService.getTeams(), this.numberOfTeams())
+  );
   readonly playerStatsMap = this.gameService.computedStats;
   readonly liveMatchId = this.matchEvents.liveMatchId;
   readonly showRating = computed(() => this.adminControl.getAdminControl().showRating);

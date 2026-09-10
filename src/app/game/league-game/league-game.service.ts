@@ -13,6 +13,7 @@ import { Player } from '../../players/models/player.model';
 import { MatchEventRecord } from '../../match-event-manager/models/match-event.model';
 import { PanelScorer } from './league-game-panel.component';
 import { computeStandings, StandingsRow } from '../league-standings/standings.util';
+import { collapseExtraTeams } from '../../utils/collapse-extra-teams.util';
 
 /** The whole board switches to four teams while a league session is on screen. */
 const LEAGUE_TEAM_COUNT = 4;
@@ -94,8 +95,12 @@ export class LeagueGameService implements OnDestroy {
 
   // --- Board view: everything the template used to pull from other services ---
 
-  /** Live view of the board's teams, the stats overlay and the ratings toggle. */
-  readonly teams = computed(() => this.playersService.getTeams());
+  /** Live view of the board's teams, the stats overlay and the ratings toggle.
+   *  Same board-view collapse as single mode - a no-op today since league shows
+   *  every skeleton slot, but keeps the two game modes symmetric. */
+  readonly teams = computed(() =>
+    collapseExtraTeams(this.playersService.getTeams(), this.teamCount)
+  );
   readonly playerStatsMap = this.gameService.computedStats;
   readonly showRating = computed(() => this.adminControl.getAdminControl().showRating);
   readonly teamAliases = computed(() => this.playersService.teamAliases());

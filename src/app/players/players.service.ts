@@ -101,7 +101,9 @@ export class PlayersService {
          take(1),
         tap((allPlayers) => {
           if (activePlayers) {
-            const teams = Object.fromEntries(Object.entries(structuredClone(skeleton)).slice(0, this.numberOfTeams() + 1));
+            // Always hydrate every team slot from the DB. How many teams the game
+            // screen *shows* is a separate, game-flow-only concern (numberOfTeams).
+            const teams: {[key: string]: { players: Player[] }} = structuredClone(skeleton);
             for (const player of allPlayers) {
               if(teams.hasOwnProperty(player['team'])) {
                 // @ts-ignore
