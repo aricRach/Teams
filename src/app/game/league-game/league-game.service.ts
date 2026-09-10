@@ -186,7 +186,10 @@ export class LeagueGameService implements OnDestroy {
   }
 
   async startGame(slot: number): Promise<boolean> {
-    if (!this.slotReady(slot) || this.slotLive(slot)) return false;
+    // Resuming after a local Pause re-fires the same start event; the match is
+    // already live server-side, so treat it as a successful resume, not a failed start.
+    if (this.slotLive(slot)) return true;
+    if (!this.slotReady(slot)) return false;
 
     const otherSlot = this.slots.find(s => s !== slot);
     if (otherSlot && this.slotTeams(otherSlot).length && this.sharedPlayerId(slot, otherSlot)) {
