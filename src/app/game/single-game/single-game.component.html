@@ -8,10 +8,14 @@
 </button>
 
 <app-game-slots-board
-  [slotViewModels]="single.slotViewModels()"
+  [slotViewModels]="single.visibleSlotViewModels()"
+  [availableSlots]="single.activeSlots()"
+  [matchCount]="single.matchCount()"
+  [canToggleMatchCount]="single.canToggleMatchCount()"
+  (matchCountChange)="single.setMatchCount($event)"
   [aliases]="single.teamAliases()"
   [teams]="single.teams()"
-  [teamCount]="single.teamCount"
+  [teamCount]="single.teamCount()"
   [isMovePlayersLocked]="single.isMovePlayersLocked()"
   [assignments]="single.assignments()"
   [matchIdByTeam]="single.matchIdByTeam()"

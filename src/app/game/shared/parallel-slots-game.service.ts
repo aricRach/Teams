@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, OnDestroy, ResourceRef, signal, WritableSignal } from '@angular/core';
+import { computed, effect, inject, Injectable, OnDestroy, ResourceRef, Signal, signal, WritableSignal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { PopupsService } from 'ui';
@@ -41,16 +41,23 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   protected gameService = inject(GameService);
   protected popups = inject(PopupsService);
 
-  private readonly previousTeamCount: number;
+  /** The board's team count before this service took over - restored on destroy. */
+  protected readonly previousTeamCount: number;
   /** One live-events resource per slot, built once `slots` is known. */
   private readonly slotEventsBySlot: Map<number, ResourceRef<MatchEventRecord[] | undefined>>;
 
-  protected constructor(
-    readonly slots: readonly number[],
-    readonly teamCount: number,
-  ) {
+  /** How many teams the board shows. A signal (not a fixed value) so a mode can
+   *  vary it at runtime (e.g. Quick mode: 2 teams for one match, 4 for two). */
+  abstract readonly teamCount: Signal<number>;
+
+  /** How many of `slots` are selectable/shown right now - 1 (just the first
+   *  slot, classic single-match UI) or 2 (both slots, G1/G2 selector). The
+   *  slot(s) beyond that stay wired up underneath but hidden. */
+  readonly matchCount: WritableSignal<1 | 2>;
+
+  protected constructor(readonly slots: readonly number[], defaultMatchCount: 1 | 2 = 2) {
     this.previousTeamCount = this.playersService.numberOfTeams();
-    this.playersService.setNumberOfTeams(this.teamCount);
+    this.matchCount = signal(defaultMatchCount);
     this.activeSlot.set(this.slots[0]);
     this.slotEventsBySlot = new Map(this.slots.map(slot => [
       slot,
@@ -62,6 +69,12 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
             : of([] as MatchEventRecord[])
       })
     ]));
+    // Deferred to an effect (not called eagerly here) because `teamCount` is
+    // implemented by the subclass and may read the subclass's own signals,
+    // which aren't initialized until after this base constructor returns.
+    effect(() => {
+      this.playersService.setNumberOfTeams(this.teamCount());
+    });
   }
 
   ngOnDestroy(): void {
@@ -101,7 +114,7 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
 
   /** Live view of the board's teams, the stats overlay and the ratings toggle. */
   readonly teams = computed(() =>
-    collapseExtraTeams(this.playersService.getTeams(), this.teamCount)
+    collapseExtraTeams(this.playersService.getTeams(), this.teamCount())
   );
   readonly playerStatsMap = this.gameService.computedStats;
   readonly showRating = computed(() => this.adminControl.getAdminControl().showRating);
@@ -121,6 +134,32 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
       scorers: this.scorers(slot)
     }))
   );
+
+  /** Only these slots are selectable/rendered right now. */
+  readonly activeSlots = computed<readonly number[]>(() =>
+    this.matchCount() === 2 ? this.slots : [this.slots[0]]
+  );
+
+  /** `slotViewModels` filtered down to the currently active slot(s) - what the board actually renders. */
+  readonly visibleSlotViewModels = computed(() =>
+    this.slotViewModels().filter(vm => this.activeSlots().includes(vm.slot))
+  );
+
+  readonly canToggleMatchCount = computed(() => !this.anySlotLive());
+
+  setMatchCount(count: 1 | 2): void {
+    if (count === this.matchCount() || !this.canToggleMatchCount()) return;
+    if (count === 1) {
+      // Narrowing back to one slot - drop picks on the slot(s) being hidden so
+      // they don't silently resurface (still assigned) if Multiple is picked again later.
+      const next = { ...this.assignments() };
+      for (const [teamKey, slot] of Object.entries(next)) {
+        if (slot !== this.slots[0]) delete next[teamKey];
+      }
+      this.assignments.set(next);
+    }
+    this.matchCount.set(count);
+  }
 
   private eventsForSlot(slot: number): MatchEventRecord[] {
     return this.slotEventsBySlot.get(slot)?.value() ?? [];

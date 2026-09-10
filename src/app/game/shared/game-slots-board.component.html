@@ -1,3 +1,15 @@
+<div class="mode-toggle-row">
+  <div class="mode-toggle" [class.locked]="!canToggleMatchCount()">
+    <button type="button" [class.active]="matchCount() === 1" [disabled]="!canToggleMatchCount()"
+      (click)="matchCountChange.emit(1)">Single</button>
+    <button type="button" [class.active]="matchCount() === 2" [disabled]="!canToggleMatchCount()"
+      (click)="matchCountChange.emit(2)">Multiple</button>
+  </div>
+  @if (!canToggleMatchCount()) {
+  <span class="lock-hint">End the running game to switch</span>
+  }
+</div>
+
 <div class="games-row">
   @for (vm of slotViewModels(); track vm.slot) {
   <app-game-slot-panel [slot]="vm.slot" [teamKeys]="vm.teamKeys" [ready]="vm.ready"
@@ -11,7 +23,7 @@
   [clonedTeams]="teams()"
   [isLocked]="isMovePlayersLocked()"
   [numberOfTeams]="teamCount()"
-  [slotAssignMode]="true"
+  [availableSlots]="availableSlots()"
   [aliases]="aliases()"
   [canRenameTeams]="isAdmin()"
   [teamSlots]="assignments()"

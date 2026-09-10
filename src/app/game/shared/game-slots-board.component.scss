@@ -2,6 +2,43 @@
   display: block;
 }
 
+.mode-toggle-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  overflow: hidden;
+
+  button {
+    border: 0;
+    border-left: 1px solid #bbb;
+    background: #f4f4f4;
+    padding: 0.5rem 1.4rem;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:first-child { border-left: 0; }
+
+    &:disabled { cursor: not-allowed; }
+  }
+
+  &.locked { opacity: 0.7; }
+}
+
+.lock-hint {
+  font-size: 0.8rem;
+  color: #888;
+  text-align: center;
+  padding: 0 1rem;
+}
+
 .games-row {
   display: flex;
   flex-wrap: wrap;

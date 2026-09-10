@@ -60,6 +60,17 @@
   }
 }
 
+.playing-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  input {
+    cursor: pointer;
+    transform: scale(1.3);
+  }
+}
+
 .slot-selector {
   display: inline-flex;
   border: 1px solid #bbb;

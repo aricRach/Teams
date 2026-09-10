@@ -17,6 +17,10 @@ import { Player, Statistics } from '../../players/models/player.model';
 })
 export class GameSlotsBoardComponent {
   slotViewModels = input.required<SlotViewModel[]>();
+  availableSlots = input<readonly number[]>([]);
+  /** 1 = one match (slot 1 only), 2 = two parallel matches. Drives the Single/Multiple toggle. */
+  matchCount = input<1 | 2>(2);
+  canToggleMatchCount = input(true);
   aliases = input<Record<string, string>>({});
   teams = input<any>();
   teamCount = input<number>(Infinity);
@@ -28,6 +32,7 @@ export class GameSlotsBoardComponent {
   isAdmin = input(false);
   playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
 
+  matchCountChange = output<1 | 2>();
   start = output<number>();
   reset = output<number>();
   end = output<number>();

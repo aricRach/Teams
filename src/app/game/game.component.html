@@ -27,7 +27,7 @@
 <div class="mode-toggle-row">
   <div class="mode-toggle" [class.locked]="toggleDisabled()">
     <button type="button" [class.active]="mode() === 'single'" [disabled]="toggleDisabled()"
-      (click)="setMode('single')">Single</button>
+      (click)="setMode('single')">Quick</button>
     <button type="button" [class.active]="mode() === 'league'" [disabled]="toggleDisabled()"
       (click)="setMode('league')">League</button>
   </div>

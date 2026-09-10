@@ -34,12 +34,19 @@
           }
         </div>
         }
-        @if (slotAssignMode()) {
+        @if (availableSlots().length === 1) {
+        <label class="playing-checkbox">
+          <input type="checkbox"
+            [checked]="teamSlots()[teamKey] === availableSlots()[0]"
+            [disabled]="isSlotButtonDisabled(teamKey, availableSlots()[0])"
+            (change)="setTeamSlot(teamKey, teamSlots()[teamKey] === availableSlots()[0] ? null : availableSlots()[0])">
+        </label>
+        } @else if (availableSlots().length > 1) {
         <div class="slot-selector">
-          <button type="button" [class.active]="teamSlots()[teamKey] === 1"
-            [disabled]="isSlotButtonDisabled(teamKey, 1)" (click)="setTeamSlot(teamKey, 1)">G1</button>
-          <button type="button" [class.active]="teamSlots()[teamKey] === 2"
-            [disabled]="isSlotButtonDisabled(teamKey, 2)" (click)="setTeamSlot(teamKey, 2)">G2</button>
+          @for (slot of availableSlots(); track slot) {
+          <button type="button" [class.active]="teamSlots()[teamKey] === slot"
+            [disabled]="isSlotButtonDisabled(teamKey, slot)" (click)="setTeamSlot(teamKey, slot)">G{{ slot }}</button>
+          }
           <button type="button" [class.active]="!teamSlots()[teamKey]"
             [disabled]="isTeamLocked(teamKey)" (click)="setTeamSlot(teamKey, null)">–</button>
         </div>

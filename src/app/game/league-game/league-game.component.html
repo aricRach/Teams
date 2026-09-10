@@ -7,10 +7,14 @@
 </button>
 
 <app-game-slots-board
-  [slotViewModels]="league.slotViewModels()"
+  [slotViewModels]="league.visibleSlotViewModels()"
+  [availableSlots]="league.activeSlots()"
+  [matchCount]="league.matchCount()"
+  [canToggleMatchCount]="league.canToggleMatchCount()"
+  (matchCountChange)="league.setMatchCount($event)"
   [aliases]="league.teamAliases()"
   [teams]="league.teams()"
-  [teamCount]="league.teamCount"
+  [teamCount]="league.teamCount()"
   [isMovePlayersLocked]="league.isMovePlayersLocked()"
   [assignments]="league.assignments()"
   [matchIdByTeam]="league.matchIdByTeam()"

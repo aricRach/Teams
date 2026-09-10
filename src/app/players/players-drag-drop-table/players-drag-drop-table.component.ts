@@ -41,8 +41,9 @@ export class PlayersDragDropTableComponent {
   showStatisticsInput = input(false);
   showStatistics = linkedSignal(() => this.showStatisticsInput())
 
-  // Parallel-slots modes (single, league): a G1 / G2 / – slot selector per team.
-  slotAssignMode = input(false);
+  // Parallel-slots modes (single, league): which slots a team can be assigned to.
+  // One slot -> a plain "playing" checkbox; more than one -> a G1 / G2 / – selector.
+  availableSlots = input<readonly number[]>([]);
   teamSlots = input<Record<string, number>>({});
   teamSlotChange = output<Record<string, number>>();
   // teamKey -> the live matchId of the game that team is playing (null when its game isn't live).

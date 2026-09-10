@@ -16,8 +16,10 @@ const LEAGUE_TEAM_COUNT = 4;
 @Injectable()
 export class LeagueGameService extends ParallelSlotsGameService {
   constructor() {
-    super(LEAGUE_SLOTS, LEAGUE_TEAM_COUNT);
+    super(LEAGUE_SLOTS, 1);
   }
+
+  readonly teamCount = computed(() => LEAGUE_TEAM_COUNT);
 
   readonly sessionId = signal<string | null>(null);
 
