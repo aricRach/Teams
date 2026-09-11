@@ -24,6 +24,10 @@ export class GameSlotPanelComponent {
   score = input<Record<string, number>>({});
   scorers = input<PanelScorer[]>([]);
   aliases = input<Record<string, string>>({});
+  showTimer = input(true);
+  label = input('Game');
+  /** teamKey -> player names on that side. Rendered above the scorers when present. */
+  squad = input<Record<string, string[]>>({});
 
   start = output<void>();
   reset = output<void>();
@@ -33,5 +37,9 @@ export class GameSlotPanelComponent {
 
   scorersFor(teamKey: string | undefined): PanelScorer[] {
     return this.scorers().filter((s) => s.teamKey === teamKey);
+  }
+
+  squadFor(teamKey: string | undefined): string[] {
+    return (teamKey && this.squad()[teamKey]) || [];
   }
 }

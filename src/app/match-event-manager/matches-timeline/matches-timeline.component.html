@@ -10,23 +10,21 @@
     </select>
   </div>
 
-  <small><b>Click the match to see the goal scores</b></small>
-
-  <div class="flip-cards">
-    @if (matchTimelineService.flipCardsData().length === 0) {
+  <div class="match-panels">
+    @if (matchTimelineService.matchPanelsData().length === 0) {
       <p class="no-matches">No matches found for selected date.</p>
     } @else {
-      @for (card of matchTimelineService.flipCardsData(); track card) {
-        <div class="card">
-          <lib-flip-card
-            [backContent]="card.data"
-            [frontContent]="card.frontContent"
-            [backStyle]="backStyle"
-            [frontStyle]="frontStyle"
-            [width]="'min(350px, calc(100vw - 48px))'"
-            [height]="'min(350px, calc(100vw - 48px))'"
-          ></lib-flip-card>
-        </div>
+      @for (panel of matchTimelineService.matchPanelsData(); track panel.slot) {
+        <app-game-slot-panel
+          label="Match"
+          [slot]="panel.slot"
+          [teamKeys]="panel.teamKeys"
+          [score]="panel.score"
+          [scorers]="panel.scorers"
+          [squad]="panel.squad"
+          [aliases]="panel.aliases"
+          [showTimer]="false"
+        ></app-game-slot-panel>
       }
     }
   </div>

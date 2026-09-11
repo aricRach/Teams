@@ -5,7 +5,16 @@ import {MatchEventsApiService} from './match-events-api.service';
 import {rxResource} from '@angular/core/rxjs-interop';
 import {forkJoin, map, of, take} from 'rxjs';
 import {formatDateToString} from '../../utils/date-utils';
-import {formatTeamLabel} from '../../utils/team-label.util';
+import {PanelScorer} from '../../game/shared/game-slot-panel.component';
+
+export interface MatchPanelData {
+  slot: number;
+  teamKeys: string[];
+  score: Record<string, number>;
+  scorers: PanelScorer[];
+  squad: Record<string, string[]>;
+  aliases: Record<string, string>;
+}
 
 @Injectable()
 export class MatchTimelineService {
@@ -25,72 +34,44 @@ export class MatchTimelineService {
     return map;
   });
 
-  // ── 5. Structure FlipCards Data ─────────────────────────────────────────────
-  flipCardsData = computed(() => {
+  // ── 5. Structure Match Panels Data ──────────────────────────────────────────
+  matchPanelsData = computed<MatchPanelData[]>(() => {
     const matches = [...this.matchesForSelectedDate()].sort(
       (a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
     );
     const eventsMap = this.eventsResource.value() || {};
     const nameMap = this.playerNameMap();
 
-    const resolveNames = (ids?: string[]): string =>
-      (ids || []).map((id) => nameMap.get(id) ?? id).join(', ');
+    const resolveNames = (ids?: string[]): string[] =>
+      (ids || []).map((id) => nameMap.get(id) ?? id);
 
-    return matches.map((match: MatchRecord, index: number) => {
+    return matches.map((match: MatchRecord, index: number): MatchPanelData => {
       const events =
         (eventsMap as Record<string, MatchEventRecord[]>)[match.id!] || [];
-      const goals = events.filter(
-        (e: MatchEventRecord) => e.type === 'player_goal' && !e.deletedAt
-      );
 
-      const winnerName = match.winner
-        ? formatTeamLabel(match.winner, match.teamAliasSnapshot?.[match.winner])
-        : 'Team A';
-      const loserName = match.loser
-        ? formatTeamLabel(match.loser, match.teamAliasSnapshot?.[match.loser])
-        : 'Team B';
-      const isDraw = match.gameStatus === 'draw';
-      const winnerScore = match.wonTeamScore || 0;
-      const loserScore = match.loseTeamScore || 0;
+      const teamKeys = [match.winner, match.loser].filter((k): k is string => !!k);
 
-      const winnerPlayers = resolveNames(match.winnerPlayerIds);
-      const loserPlayers = resolveNames(match.loserPlayerIds);
+      const scorers: PanelScorer[] = events
+        .filter((e) => e.type === 'player_goal' && !e.deletedAt)
+        .map((e) => ({ name: e.playerNameSnapshot ?? 'Goal', minute: e.minute, teamKey: e.teamKey }))
+        .sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
 
-      // Front card: result row + one row per team with their player names
-      const result = isDraw
-        ? `Match ${index + 1} · Draw (${winnerScore} - ${loserScore})`
-        : `Match ${index + 1} · ${winnerName} won (${winnerScore} - ${loserScore})`;
+      const score: Record<string, number> = {};
+      if (match.winner) score[match.winner] = match.wonTeamScore || 0;
+      if (match.loser) score[match.loser] = match.loseTeamScore || 0;
 
-      const frontContent: Record<string, string> = {
-        '': result,
-        [winnerName]: winnerPlayers || '—',
-        [loserName]: loserPlayers || '—',
+      const squad: Record<string, string[]> = {};
+      if (match.winner) squad[match.winner] = resolveNames(match.winnerPlayerIds);
+      if (match.loser) squad[match.loser] = resolveNames(match.loserPlayerIds);
+
+      return {
+        slot: index + 1,
+        teamKeys,
+        score,
+        scorers,
+        squad,
+        aliases: match.teamAliasSnapshot || {},
       };
-
-      goals.sort(
-        (a, b) => (a.payload?.['timerMs'] || 0) - (b.payload?.['timerMs'] || 0)
-      );
-
-      const formatMs = (ms: number) => {
-        if (!ms) return '00:00';
-        const totalSeconds = Math.floor(ms / 1000);
-        const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-        const s = String(totalSeconds % 60).padStart(2, '0');
-        return `${m}:${s}`;
-      };
-
-      const data: Record<string, string> = {};
-      if(goals.length > 0) {
-        goals.forEach((g, i) => {
-          const key = `${i + 1}# ${g.playerNameSnapshot}`;
-          data[key] = formatMs(g.payload?.['timerMs'] || 0);
-        });
-      } else {
-        data['No Goals'] = 'No Goals'
-      }
-
-
-      return { frontContent, data };
     });
   });
 
