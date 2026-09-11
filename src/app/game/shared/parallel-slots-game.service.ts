@@ -266,6 +266,12 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     const [team1, team2] = this.slotTeams(slot);
     if (!team1 || !team2) return;
 
+    if (!this.slotLive(slot)) {
+      this.freeSlot(slot);
+      this.retargetActiveSlot(slot);
+      return;
+    }
+
     await this.gameService.endGame({ team1, team2 }, slot);
     this.freeSlot(slot);
     this.retargetActiveSlot(slot);

@@ -210,60 +210,52 @@ export class MatchEventsManagerService {
     }
 
     const existingLiveId = this.liveMatchIdFor(slot);
+    if (!existingLiveId) {
+      console.warn(`endGameAndPersist called for slot ${slot} with no live match - ignoring.`);
+      return;
+    }
 
     const teams = this.playersService.getTeams();
     const winnerPlayerIds = (teams[gameDetails.winner]?.players || []).map((player: Player) => player.id);
     const loserPlayerIds = (teams[gameDetails.loser]?.players || []).map((player: Player) => player.id);
 
-    let matchId: string;
-
-    if (existingLiveId) {
-      matchId = existingLiveId;
-      await this.matchEventsApiService.updateMatch(selectedGroup.id, matchId, {
-        status: 'completed',
-        winner: gameDetails.winner,
-        loser: gameDetails.loser,
-        wonTeamScore: gameDetails.wonTeamScore,
-        loseTeamScore: gameDetails.loseTeamScore,
-        winnerPlayerIds,
-        loserPlayerIds,
-        gameStatus: gameDetails.gameStatus,
-        endedAt: new Date()
-      });
-      this.setLiveMatch(slot, null);
-    } else {
-      matchId = await this.matchEventsApiService.createMatch(selectedGroup.id, {
-        status: 'completed',
-        winner: gameDetails.winner,
-        loser: gameDetails.loser,
-        wonTeamScore: gameDetails.wonTeamScore,
-        loseTeamScore: gameDetails.loseTeamScore,
-        winnerPlayerIds,
-        loserPlayerIds,
-        gameStatus: gameDetails.gameStatus,
-        endedAt: new Date(),
-        createdBy,
-        teamAliasSnapshot: { ...this.playersService.teamAliases() }
-      });
-    }
-
-    await this.addMatchEvent(selectedGroup.id, matchId, {
-      type: 'team_result',
-      source: 'manual',
-      createdBy,
-      payload: {
-        winner: gameDetails.winner,
-        loser: gameDetails.loser,
-        wonTeamScore: gameDetails.wonTeamScore,
-        loseTeamScore: gameDetails.loseTeamScore,
-        gameStatus: gameDetails.gameStatus
-      }
+    const matchId = existingLiveId;
+    await this.matchEventsApiService.updateMatch(selectedGroup.id, matchId, {
+      status: 'completed',
+      winner: gameDetails.winner,
+      loser: gameDetails.loser,
+      wonTeamScore: gameDetails.wonTeamScore,
+      loseTeamScore: gameDetails.loseTeamScore,
+      winnerPlayerIds,
+      loserPlayerIds,
+      gameStatus: gameDetails.gameStatus,
+      endedAt: new Date()
     });
+    // The match itself is saved as of here - clear the live flag so the slot is
+    // free to start again even if the follow-up event/audit-trail writes below fail.
+    this.setLiveMatch(slot, null);
 
-    if (gameDetails.gameStatus === 'decided') {
-      this.auditTrailService.addAuditTrail(`winner: ${gameDetails.winner} - loser: ${gameDetails.loser}`);
-    } else {
-      this.auditTrailService.addAuditTrail(`draw: ${gameDetails.winner} - ${gameDetails.loser}`);
+    try {
+      await this.addMatchEvent(selectedGroup.id, matchId, {
+        type: 'team_result',
+        source: 'manual',
+        createdBy,
+        payload: {
+          winner: gameDetails.winner,
+          loser: gameDetails.loser,
+          wonTeamScore: gameDetails.wonTeamScore,
+          loseTeamScore: gameDetails.loseTeamScore,
+          gameStatus: gameDetails.gameStatus
+        }
+      });
+
+      if (gameDetails.gameStatus === 'decided') {
+        this.auditTrailService.addAuditTrail(`winner: ${gameDetails.winner} - loser: ${gameDetails.loser}`);
+      } else {
+        this.auditTrailService.addAuditTrail(`draw: ${gameDetails.winner} - ${gameDetails.loser}`);
+      }
+    } catch (e) {
+      console.error(`Failed to record team_result/audit trail for match ${matchId}:`, e);
     }
   }
 
