@@ -6,7 +6,6 @@ import { computeStandings, StandingsRow } from '../league-standings/standings.ut
 export type { StandingsRow } from '../league-standings/standings.util';
 
 export const LEAGUE_SLOTS = [1, 2] as const;
-const LEAGUE_TEAM_COUNT = 4;
 
 /**
  * League state is in-memory only. A live league match doc is still tagged with
@@ -19,7 +18,8 @@ export class LeagueGameService extends ParallelSlotsGameService {
     super(LEAGUE_SLOTS, 1);
   }
 
-  readonly teamCount = computed(() => LEAGUE_TEAM_COUNT);
+  // Always the number of teams chosen on the group-selection screen.
+  readonly teamCount = computed(() => this.selectedTeamCount);
 
   readonly sessionId = signal<string | null>(null);
 

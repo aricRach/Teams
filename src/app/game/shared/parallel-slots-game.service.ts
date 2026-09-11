@@ -41,13 +41,14 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   protected gameService = inject(GameService);
   protected popups = inject(PopupsService);
 
-  /** The board's team count before this service took over - restored on destroy. */
-  protected readonly previousTeamCount: number;
+  /** The number of teams chosen on the group-selection screen, snapshotted when
+   *  this service is created - also restored to the board on destroy. */
+  protected readonly selectedTeamCount: number;
   /** One live-events resource per slot, built once `slots` is known. */
   private readonly slotEventsBySlot: Map<number, ResourceRef<MatchEventRecord[] | undefined>>;
 
   /** How many teams the board shows. A signal (not a fixed value) so a mode can
-   *  vary it at runtime (e.g. Quick mode: 2 teams for one match, 4 for two). */
+   *  vary it at runtime. */
   abstract readonly teamCount: Signal<number>;
 
   /** How many of `slots` are selectable/shown right now - 1 (just the first
@@ -56,7 +57,7 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   readonly matchCount: WritableSignal<1 | 2>;
 
   protected constructor(readonly slots: readonly number[], defaultMatchCount: 1 | 2 = 2) {
-    this.previousTeamCount = this.playersService.numberOfTeams();
+    this.selectedTeamCount = this.playersService.numberOfTeams();
     this.matchCount = signal(defaultMatchCount);
     this.activeSlot.set(this.slots[0]);
     this.slotEventsBySlot = new Map(this.slots.map(slot => [
@@ -78,7 +79,7 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.playersService.setNumberOfTeams(this.previousTeamCount);
+    this.playersService.setNumberOfTeams(this.selectedTeamCount);
   }
 
   /** Manual board move-lock, toggled via the lock button. Live-match teams are locked separately via `lockedTeamKeys`. */
