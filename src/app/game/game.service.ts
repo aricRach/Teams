@@ -87,7 +87,11 @@ export class GameService {
 
     // Only tear down shared state once no game (single or league slot) is still live.
     if (!this.matchEventsService.hasAnyLiveMatch()) {
-      await this.playersService.setFantasyMetaIsActive(false);
+      try {
+        await this.playersService.setFantasyMetaIsActive(false);
+      } catch (e) {
+        console.error('Failed to clear fantasy meta isActive flag:', e);
+      }
       this.navigationService.unlockNavigation();
     }
   }

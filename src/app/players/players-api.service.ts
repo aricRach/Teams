@@ -181,7 +181,7 @@ export class PlayersApiService {
 
   async setFantasyMetaIsActive(groupId: string, isActive: boolean) {
     const metaRef = doc(this.firestore, `groups/${groupId}/fantasyDrafts/meta`);
-    await updateDoc(metaRef, { isActive });
+    await setDoc(metaRef, { isActive }, { merge: true });
   }
 
 
