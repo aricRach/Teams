@@ -1,6 +1,9 @@
 <div class="panel" [class.live]="live()">
   <div class="panel-header">
     <span class="game-name">{{ label() }} {{ slot() }}</span>
+    @if (mode()) {
+    <span class="mode-badge" [class.league]="mode() === 'league'">{{ mode() === 'league' ? 'League' : 'Single' }}</span>
+    }
     @if (teamKeys().length === 2) {
     <span class="matchup">{{ teamKeys()[0] | teamLabel: aliases() }} vs {{ teamKeys()[1] | teamLabel: aliases() }}</span>
     }
@@ -37,12 +40,12 @@
   <div class="scorers">
     <ul class="scorers-col home">
       @for (s of scorersFor(teamKeys()[0]); track $index) {
-      <li>{{ s.name }}<span class="minute">{{ s.minute != null ? " " + s.minute + "'" : '' }}</span></li>
+      <li>{{ s.name }}@if (s.isOwnGoal) {<span class="og-tag"> (OG)</span>}<span class="minute">{{ s.minute != null ? " " + s.minute + "'" : '' }}</span></li>
       }
     </ul>
     <ul class="scorers-col away">
       @for (s of scorersFor(teamKeys()[1]); track $index) {
-      <li><span class="minute">{{ s.minute != null ? s.minute + "' " : '' }}</span>{{ s.name }}</li>
+      <li><span class="minute">{{ s.minute != null ? s.minute + "' " : '' }}</span>{{ s.name }}@if (s.isOwnGoal) {<span class="og-tag"> (OG)</span>}</li>
       }
     </ul>
   </div>

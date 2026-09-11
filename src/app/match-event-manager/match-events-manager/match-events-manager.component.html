@@ -11,6 +11,7 @@
       }
     </select>
     @if (selectedMatchId()) {
+    <span class="mode-badge" [class.league]="currentMatchMode() === 'league'">{{ currentMatchMode() === 'league' ? 'League' : 'Single' }}</span>
     <span class="match-full-label">{{ selectedMatchLabel() }}</span>
     }
     @if (!isEditingMatch() && selectedMatchId()) {
@@ -41,6 +42,14 @@
         </select>
       </div>
       }
+
+      <div>
+        <label>Mode</label>
+        <select [formField]='draftMatchForm.mode' (change)='updateLocalMatch({mode: $any($event.target).value})'>
+          <option value="single">Single</option>
+          <option value="league">League</option>
+        </select>
+      </div>
     </div>
 
     @if (draftMatchModel().status === 'completed' && draftMatchModel().gameStatus === 'decided') {
@@ -93,6 +102,30 @@
 
     <button type="button" [disabled]="eventForm().invalid()" (click)="addForgottenGoalEvent()">Add</button>
   </div>
+
+  <div class="add-row add-forgotten">
+    <label class="add-label">Add own goal</label>
+    <select [formField]="ownGoalForm.playerId">
+      <option value="" disabled selected>Conceding player</option>
+      @for (player of rosterPlayers(); track player.id) {
+      <option [value]="player.id">{{ player.name }} ({{ teamLabelOf(player.team) }})</option>
+      }
+    </select>
+
+    @if (ownGoalBeneficiaryTeam()) {
+    <span class="team-hint">Benefits {{ teamLabelOf(ownGoalBeneficiaryTeam()) }}</span>
+    }
+
+    <div class="time-input-container">
+      <input type="text" placeholder="MM:SS" class="time-input"
+        [class.invalid]="ownGoalForm.time().invalid() && ownGoalForm.time().dirty()" [formField]="ownGoalForm.time" />
+      @if (ownGoalForm.time().invalid() && ownGoalForm.time().dirty()) {
+      <span class="error-msg">Format MM:SS (e.g. 12:45)</span>
+      }
+    </div>
+
+    <button type="button" [disabled]="ownGoalForm().invalid()" (click)="addForgottenOwnGoalEvent()">Add OG</button>
+  </div>
   }
 
   @if (selectedMatchId()) {
@@ -122,7 +155,13 @@
       <button [disabled]="eventForm().invalid()" (click)="saveEdit(event)">Save</button>
       <button (click)="cancelEdit()">Cancel</button>
       } @else {
-      <span class="scorer">{{ event.playerNameSnapshot || 'Unknown scorer' }} ({{ teamLabelOf(event.teamKey) }})</span>
+      <span class="scorer">{{ event.playerNameSnapshot || 'Unknown scorer' }}
+        @if (event.type === 'own_goal') {
+        <span class="og-tag">(OG &rarr; {{ teamLabelOf(event.teamKey) }})</span>
+        } @else {
+        ({{ teamLabelOf(event.teamKey) }})
+        }
+      </span>
       <span class="minute timer">{{ formatEventTime(event) }}</span>
 
       @if (isEditingMatch() && localMatch()?.status !== 'abandoned') {

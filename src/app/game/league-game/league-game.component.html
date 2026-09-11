@@ -24,6 +24,7 @@
   [playerStatsMap]="league.playerStatsMap()"
   (start)="onStart($event)" (reset)="onReset($event)" (end)="onEnd($event)"
   (recordGoal)="recordGoal($event)"
+  (recordOwnGoal)="recordOwnGoal($event)"
   (teamSlotChange)="league.setAssignments($event)"
   (dropPlayer)="league.updateTeams($event)"
   (renameTeam)="league.renameTeam($event.teamKey, $event.alias)" />

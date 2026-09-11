@@ -6,6 +6,7 @@ export interface PanelScorer {
   name: string;
   minute: number | null | undefined;
   teamKey?: string;
+  isOwnGoal?: boolean;
 }
 
 /** Presentational: one slot's live score + scorers + stopwatch. Shared by single and league modes. */
@@ -26,6 +27,8 @@ export class GameSlotPanelComponent {
   aliases = input<Record<string, string>>({});
   showTimer = input(true);
   label = input('Game');
+  /** When set, renders a "League"/"Single" badge next to the header. Omit to hide the badge entirely. */
+  mode = input<'single' | 'league' | null>(null);
   /** teamKey -> player names on that side. Rendered above the scorers when present. */
   squad = input<Record<string, string[]>>({});
 

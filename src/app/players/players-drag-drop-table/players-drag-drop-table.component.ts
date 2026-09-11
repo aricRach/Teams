@@ -92,7 +92,12 @@ export class PlayersDragDropTableComponent {
   totalRatings = linkedSignal(() => this.setTotalRatingToAllTeams());
 
   recordGoalEvent = output<{player: Player, teamKey: string}>();
+  // teamKey = the conceding player's own team; the parent credits the goal to the opponent.
+  recordOwnGoalEvent = output<{player: Player, teamKey: string}>();
   removePlayer = output<{team: string, index: number}>();
+
+  // Two-tap guard for the "Own Goal" action in the mini modal (mirrors the +/set flow).
+  ownGoalArmed = signal(false);
 
   readonly teamKeys = computed(() =>
     Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.numberOfTeams()) as TeamsOptions[]
@@ -158,6 +163,7 @@ export class PlayersDragDropTableComponent {
 
   closeSetGoalModal() {
     this.isSetGoalModalVisible.set(false);
+    this.ownGoalArmed.set(false);
   }
 
   calculateRating(players: Player[]) {
@@ -195,6 +201,7 @@ export class PlayersDragDropTableComponent {
       player: data.player,
       team: data.team
     });
+    this.ownGoalArmed.set(false);
     this.isSetGoalModalVisible.set(true);
   }
 
@@ -216,6 +223,15 @@ export class PlayersDragDropTableComponent {
       const updated = new Map(this.liveSessionGoals());
       updated.set(player.id, (updated.get(player.id) || 0) + 1);
       this.liveSessionGoals.set(updated);
+    }
+    this.closeSetGoalModal();
+  }
+
+  setOwnGoal() {
+    const { player, team: teamKey } = this.setGoalModalData();
+    // No liveSessionGoals bump - an own goal must not credit the conceding player.
+    if (player) {
+      this.recordOwnGoalEvent.emit({player, teamKey});
     }
     this.closeSetGoalModal();
   }

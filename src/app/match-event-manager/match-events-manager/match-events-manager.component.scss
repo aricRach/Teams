@@ -44,6 +44,23 @@
     word-break: break-word;
   }
 
+  .mode-badge {
+    font-size: 0.7em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.1em 0.5em;
+    border-radius: 999px;
+    background: #e0e0e0;
+    color: #555;
+    white-space: nowrap;
+
+    &.league {
+      background: #dff3ff;
+      color: #0d6aa8;
+    }
+  }
+
   .edit-btn {
     flex: 1 1 auto;
     white-space: nowrap;
@@ -220,4 +237,9 @@ input.invalid {
 
 .time-input {
   width: 60px;
+}
+
+.og-tag {
+  color: #c0392b;
+  font-style: italic;
 }

@@ -10,6 +10,7 @@ import { PopupsService } from 'ui';
 import { DatePipe } from '@angular/common';
 import { formatElapsedMsAsMmSs, parseMmSsToMinute, parseMmSsToMs } from '../utils/timer-display';
 import { MatchEventRecord, MatchRecord, MatchStatus } from '../models/match-event.model';
+import { isScoringEvent } from '../utils/scoring.util';
 import { formatTeamLabel } from '../../utils/team-label.util';
 
 @Component({
@@ -80,9 +81,15 @@ export class MatchEventsManagerComponent {
           label += ` (${this.matchTeamLabelOf(match.winner, match)} - ${this.matchTeamLabelOf(match.loser, match)})`;
         }
       }
+      label = `${match.mode === 'league' ? '[League]' : '[Single]'} ${label}`;
       return { id: matchId, label };
     });
   });
+
+  /** 'league' when the currently selected/edited match was played in league mode, else 'single'. */
+  currentMatchMode = computed<'single' | 'league'>(() =>
+    this.currentMatch()?.mode === 'league' ? 'league' : 'single'
+  );
 
   // Auto-selects the first match; user can override via the dropdown
   selectedMatchId = linkedSignal(() => this.matches()[0]?.id ?? '');
@@ -112,7 +119,7 @@ export class MatchEventsManagerComponent {
   });
 
   goalEvents = computed(() =>
-    this.events().filter((event: MatchEventRecord) => event.type === 'player_goal' && !event.deletedAt)
+    this.events().filter((event: MatchEventRecord) => isScoringEvent(event))
   );
 
   // --- Draft Mode State ---
@@ -124,13 +131,15 @@ export class MatchEventsManagerComponent {
     gameStatus: 'draw' | 'decided';
     winner: string;
     loser: string;
+    mode: 'single' | 'league';
   }>(() => {
     const m = this.localMatch();
     return {
       status: m?.status || 'completed',
       gameStatus: m?.gameStatus || 'decided',
       winner: m?.winner || '',
-      loser: m?.loser || ''
+      loser: m?.loser || '',
+      mode: m?.mode === 'league' ? 'league' : 'single'
     };
   });
 
@@ -249,6 +258,26 @@ export class MatchEventsManagerComponent {
     pattern(fields.time, /^\d{1,3}:[0-5]\d$/);
   });
 
+  // --- Add forgotten own goal ---
+  ownGoalModel = linkedSignal<{ playerId: string; time: string }>(() => {
+    this.selectedMatchId();
+    return { playerId: '', time: '00:00' };
+  });
+
+  ownGoalForm = form(this.ownGoalModel, (fields) => {
+    required(fields.playerId);
+    pattern(fields.time, /^\d{1,3}:[0-5]\d$/);
+  });
+
+  /** An own goal always benefits the opponent - derive it from the conceding player's team, no need to ask.
+   *  Uses getMatchTeams (the match's actual winner/loser), not localMatchTeams, which also mixes in
+   *  whatever teams are currently selected on the live game screen (e.g. an 'allPlayers' placeholder). */
+  ownGoalBeneficiaryTeam = computed(() => {
+    const player = this.rosterPlayers().find((p) => p.id === this.ownGoalModel().playerId);
+    if (!player?.team) return '';
+    return this.getMatchTeams(this.currentMatch()).find((team) => team !== player.team) ?? '';
+  });
+
 
   rosterPlayers = computed(() => {
     const allPlayers = this.playersService.flattenPlayers(true, true);
@@ -343,6 +372,47 @@ export class MatchEventsManagerComponent {
     // this.popupsService.addSuccessPopOut('Goal event added');
   }
 
+  addForgottenOwnGoalEvent() {
+    const groupId = this.playersService.selectedGroup()?.id;
+    const matchId = this.selectedMatchId();
+
+    if (!groupId || !matchId || this.ownGoalForm().invalid()) {
+      this.popupsService.addErrorPopOut('Pick the conceding player and a valid MM:SS time.');
+      return;
+    }
+
+    const { playerId, time } = this.ownGoalModel();
+    const player = this.rosterPlayers().find((p) => p.id === playerId);
+    if (!player) return;
+
+    const beneficiaryTeamKey = this.ownGoalBeneficiaryTeam();
+    if (!beneficiaryTeamKey) {
+      this.popupsService.addErrorPopOut('Could not determine the opposing team for this match.');
+      return;
+    }
+
+    const currentUser = this.auth.currentUser;
+    const createdBy = currentUser?.email ?? currentUser?.uid ?? '';
+    if (!createdBy) {
+      this.popupsService.addErrorPopOut('Sign in to add events.');
+      return;
+    }
+
+    const newEvent: MatchEventRecord = {
+      type: 'own_goal',
+      source: 'manual',
+      createdBy,
+      playerId: player.id,
+      playerNameSnapshot: player.name,
+      teamKey: beneficiaryTeamKey,
+      minute: parseMmSsToMinute(time),
+      payload: { timerMs: parseMmSsToMs(time) }
+    };
+
+    this.localEvents.update((list: MatchEventRecord[]) => [...list, newEvent]);
+    this.ownGoalModel.set({ playerId: '', time: '00:00' });
+  }
+
   startEdit(event: MatchEventRecord) {
     this.editingEvent.set(event);
   }
@@ -368,10 +438,11 @@ export class MatchEventsManagerComponent {
     const player = this.rosterPlayers().find((p) => p.id === playerIdStr);
     if (!player) return;
 
+    // An own_goal's teamKey is the beneficiary team, not the (conceding) player's team - keep it.
     const patch: Partial<MatchEventRecord> = {
       playerId: player.id,
       playerNameSnapshot: player.name,
-      teamKey: player.team,
+      teamKey: event.type === 'own_goal' ? event.teamKey : player.team,
       minute: parseMmSsToMinute(timeStr),
       payload: { timerMs: parseMmSsToMs(timeStr) }
     };

@@ -64,7 +64,7 @@ export class EditPlayerStatisticsService {
     const groupId = this.playersService.selectedGroup()?.id;
     if (!groupId) return;
 
-    const currentStats: Statistics = lastDay.statistics || {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0};
+    const currentStats: Statistics = lastDay.statistics || {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0, ownGoals: 0};
     const delta: Partial<Statistics> = {};
     for (const key of ['goals', 'wins', 'loses', 'draws', 'games', 'goalsConceded'] as (keyof Statistics)[]) {
       const d = (formValues[key] || 0) - (currentStats[key] || 0);

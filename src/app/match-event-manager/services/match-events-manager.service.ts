@@ -7,6 +7,7 @@ import { formatDateToString } from '../../utils/date-utils';
 import { PopupsService } from 'ui';
 import { elapsedMsToGameMinute } from '../utils/timer-display';
 import { MatchEventRecord, MatchRecord } from '../models/match-event.model';
+import { isScoringEvent } from '../utils/scoring.util';
 import { Player } from '../../players/models/player.model';
 import { firstValueFrom } from 'rxjs';
 
@@ -155,7 +156,7 @@ export class MatchEventsManagerService {
       const events = await firstValueFrom(eventsObs);
 
       const goalEventIdsToDelete = events
-        .filter(event => !event.deletedAt && event.type === 'player_goal' && event.id)
+        .filter(event => isScoringEvent(event) && event.id)
         .map(event => event.id!);
       await this.matchEventsApiService.deleteEvents(selectedGroup.id, matchId, goalEventIdsToDelete);
 
@@ -194,6 +195,46 @@ export class MatchEventsManagerService {
       });
     } catch {
       this.popupsService.addErrorPopOut('Could not save goal event.');
+    }
+  }
+
+  /**
+   * Records an own goal: `concedingPlayer` (on the other team) put it into their own net,
+   * so the event is credited to `beneficiaryTeamKey` - the team whose score goes up.
+   * No player is credited with a personal goal.
+   */
+  async recordOwnGoalFromTimer(concedingPlayer: Player, beneficiaryTeamKey: string, elapsedMs: number, slot = SINGLE_SLOT): Promise<void> {
+    const selectedGroup = this.playersService.selectedGroup();
+    const matchId = this.liveMatchIdFor(slot);
+    if (!selectedGroup?.id || !matchId) {
+      this.popupsService.addErrorPopOut('Start the match timer first.');
+      return;
+    }
+
+    if (!concedingPlayer?.id || !beneficiaryTeamKey) {
+      this.popupsService.addErrorPopOut('Could not save own goal event.');
+      return;
+    }
+
+    const createdBy = this.getActorId();
+    const minute = elapsedMsToGameMinute(elapsedMs);
+
+    try {
+      await this.addMatchEvent(selectedGroup.id, matchId, {
+        type: 'own_goal',
+        source: 'manual',
+        createdBy,
+        playerId: concedingPlayer.id,
+        playerNameSnapshot: concedingPlayer.name,
+        teamKey: beneficiaryTeamKey,
+        minute,
+        payload: {
+          timerMs: elapsedMs
+        }
+      });
+    } catch (e) {
+      console.error('Failed to save own goal event:', e);
+      this.popupsService.addErrorPopOut('Could not save own goal event.');
     }
   }
 
@@ -276,6 +317,7 @@ export class MatchEventsManagerService {
       winnerPlayerIds: newMatch.winnerPlayerIds,
       loserPlayerIds: newMatch.loserPlayerIds,
       gameStatus: newMatch.gameStatus,
+      mode: newMatch.mode,
       endedAt: newMatch.endedAt || (newMatch.status === 'completed' ? new Date() : undefined)
     };
 

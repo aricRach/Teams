@@ -138,6 +138,13 @@
     <button [disabled]="isGoalIncreased()" (click)="setGoalModalClicked(true)">+</button>
     <button [disabled]="!isGoalIncreased()" (click)="setGoals()">set</button>
   </div>
+  <div class="own-goal-container">
+    @if (!ownGoalArmed()) {
+    <button type="button" class="own-goal-btn" (click)="ownGoalArmed.set(true)">Own Goal</button>
+    } @else {
+    <button type="button" class="own-goal-btn danger" (click)="setOwnGoal()">Confirm OG</button>
+    }
+  </div>
 </div>
 }
 

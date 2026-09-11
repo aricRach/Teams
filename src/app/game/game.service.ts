@@ -7,6 +7,7 @@ import {GameDetails, GameStatus, MatchEventsManagerService} from '../match-event
 import {NavigationService} from '../shared/navigation/navigation.service';
 import {ComputedStatisticsService} from '../statistics/services/computed-statistics.service';
 import {computeTeamScores} from '../utils/team-scores.utils';
+import {isScoringEvent} from '../match-event-manager/utils/scoring.util';
 import {RevealApiService, RevealTeam, RevealSnapshot, PositionedPlayer, Position} from '../reveal/reveal-api.service';
 import {formatTeamLabel} from '../utils/team-label.util';
 import {PopupsService} from 'ui';
@@ -47,7 +48,7 @@ export class GameService {
         const eventsObservable = (this.matchEventsService as any).matchEventsApiService.getEvents(groupId, matchId);
         const events = (await firstValueFrom(eventsObservable)) as any[];
         events.forEach((ev: any) => {
-          if (ev.type === 'player_goal' && !ev.deletedAt) {
+          if (isScoringEvent(ev)) {
             if (ev.teamKey === teams.team1) team1Score++;
             if (ev.teamKey === teams.team2) team2Score++;
           }

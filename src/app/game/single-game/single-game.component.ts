@@ -36,4 +36,11 @@ export class SingleGameComponent {
     const ms = this.board().stopwatchForSlot(slot)?.getElapsedMs() ?? 0;
     this.single.recordGoal(goal, ms);
   }
+
+  recordOwnGoal(goal: { player: Player; teamKey: string }): void {
+    const slot = this.single.assignments()[goal.teamKey];
+    if (!slot) return;
+    const ms = this.board().stopwatchForSlot(slot)?.getElapsedMs() ?? 0;
+    this.single.recordOwnGoal(goal, ms);
+  }
 }

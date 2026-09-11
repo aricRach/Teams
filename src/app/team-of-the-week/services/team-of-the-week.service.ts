@@ -13,6 +13,8 @@ export interface PlayerWeekStates {
   totalGoals: number,
   totalGames: number,
   totalWins: number,
+  totalGoalsConceded: number,
+  totalOwnGoals: number,
   team: string
 }
 
@@ -56,7 +58,7 @@ export class TeamOfTheWeekService {
     const allPlayers = this.playersService.flattenPlayers();
     const statsMap = this.computedStatsService.statsMap();
     const setOfTeams = new Set<string>();
-    const players = allPlayers
+    const players: PlayerWeekStates[] = allPlayers
       .filter(player => {
         const s = statsMap.get(player.id)?.get(date);
         return s && s.games > 0;
@@ -64,7 +66,7 @@ export class TeamOfTheWeekService {
       .map(player => {
         const s = statsMap.get(player.id)!.get(date)!;
         setOfTeams.add(player.team);
-        return {name: player.name, team: player.team, totalGoals: s.goals, totalGames: s.games, totalWins: s.wins, totalGoalsConceded: s.goalsConceded};
+        return {name: player.name, team: player.team, totalGoals: s.goals, totalGames: s.games, totalWins: s.wins, totalGoalsConceded: s.goalsConceded, totalOwnGoals: s.ownGoals};
       });
     return {players, teamSize: Math.ceil(players.length / setOfTeams.size)};
   }

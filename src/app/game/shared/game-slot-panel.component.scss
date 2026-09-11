@@ -27,6 +27,22 @@
   .matchup {
     color: #555;
   }
+
+  .mode-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: #e0e0e0;
+    color: #555;
+
+    &.league {
+      background: #dff3ff;
+      color: #0d6aa8;
+    }
+  }
 }
 
 .score {
@@ -89,6 +105,11 @@
 
   .minute {
     color: #888;
+  }
+
+  .og-tag {
+    color: #c0392b;
+    font-style: italic;
   }
 }
 

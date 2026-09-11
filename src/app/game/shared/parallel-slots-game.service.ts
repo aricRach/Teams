@@ -13,6 +13,7 @@ import { Player } from '../../players/models/player.model';
 import { MatchEventRecord } from '../../match-event-manager/models/match-event.model';
 import { PanelScorer } from './game-slot-panel.component';
 import { collapseExtraTeams } from '../../utils/collapse-extra-teams.util';
+import { computeGoalTally, isScoringEvent } from '../../match-event-manager/utils/scoring.util';
 
 export interface SlotViewModel {
   slot: number;
@@ -167,19 +168,18 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   }
 
   score(slot: number): Record<string, number> {
-    const out: Record<string, number> = {};
-    for (const e of this.eventsForSlot(slot)) {
-      if (e.type === 'player_goal' && !e.deletedAt && e.teamKey) {
-        out[e.teamKey] = (out[e.teamKey] ?? 0) + 1;
-      }
-    }
-    return out;
+    return computeGoalTally(this.eventsForSlot(slot));
   }
 
   scorers(slot: number): PanelScorer[] {
     return this.eventsForSlot(slot)
-      .filter((e) => e.type === 'player_goal' && !e.deletedAt)
-      .map((e) => ({ name: e.playerNameSnapshot ?? 'Goal', minute: e.minute, teamKey: e.teamKey }))
+      .filter((e) => isScoringEvent(e))
+      .map((e) => ({
+        name: e.playerNameSnapshot ?? 'Goal',
+        minute: e.minute,
+        teamKey: e.teamKey,
+        isOwnGoal: e.type === 'own_goal'
+      }))
       .sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
   }
 
@@ -195,6 +195,15 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     const slot = this.assignments()[goal.teamKey];
     if (!slot) return;
     void this.matchEvents.recordPlayerGoalFromTimer(goal.player, goal.teamKey, elapsedMs, slot);
+  }
+
+  /** `concede.teamKey` is the conceding player's own team; the goal is credited to the other team in the slot. */
+  recordOwnGoal(concede: { player: Player; teamKey: string }, elapsedMs: number): void {
+    const slot = this.assignments()[concede.teamKey];
+    if (!slot) return;
+    const beneficiary = this.slotTeams(slot).find((k) => k !== concede.teamKey);
+    if (!beneficiary) return;
+    void this.matchEvents.recordOwnGoalFromTimer(concede.player, beneficiary, elapsedMs, slot);
   }
 
   slotTeams(slot: number): string[] {

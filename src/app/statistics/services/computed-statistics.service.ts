@@ -18,9 +18,15 @@ export class ComputedStatisticsService {
       if (!dateKey) continue;
 
       const activeGoals = events.filter(event => event.type === 'player_goal' && !event.deletedAt);
+      const activeOwnGoals = events.filter(event => event.type === 'own_goal' && !event.deletedAt);
 
       for (const goal of activeGoals) {
         if (goal.playerId) this.getOrInitStats(result, goal.playerId, dateKey).goals++;
+      }
+
+      // own_goal.playerId is the conceding player who scored into their own net.
+      for (const ownGoal of activeOwnGoals) {
+        if (ownGoal.playerId) this.getOrInitStats(result, ownGoal.playerId, dateKey).ownGoals++;
       }
 
       if (match.status === 'completed') {
@@ -77,7 +83,7 @@ export class ComputedStatisticsService {
     if (!result.has(playerId)) result.set(playerId, new Map());
     const playerMap = result.get(playerId)!;
     if (!playerMap.has(dateKey)) {
-      playerMap.set(dateKey, {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0});
+      playerMap.set(dateKey, {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0, ownGoals: 0});
     }
     return playerMap.get(dateKey)!;
   }

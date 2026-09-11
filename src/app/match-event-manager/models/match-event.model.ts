@@ -5,6 +5,7 @@ export type MatchEventType =
   | 'match_ended'
   | 'team_result'
   | 'player_goal'
+  | 'own_goal'
   | 'player_assist'
   | 'stat_correction'
   | 'custom';

@@ -14,7 +14,10 @@ export interface MatchPanelData {
   scorers: PanelScorer[];
   squad: Record<string, string[]>;
   aliases: Record<string, string>;
+  mode: 'single' | 'league';
 }
+import {formatTeamLabel} from '../../utils/team-label.util';
+import {isScoringEvent} from '../utils/scoring.util';
 
 @Injectable()
 export class MatchTimelineService {
@@ -48,12 +51,28 @@ export class MatchTimelineService {
     return matches.map((match: MatchRecord, index: number): MatchPanelData => {
       const events =
         (eventsMap as Record<string, MatchEventRecord[]>)[match.id!] || [];
+      const goals = events.filter((e: MatchEventRecord) => isScoringEvent(e));
+
+      const winnerName = match.winner
+        ? formatTeamLabel(match.winner, match.teamAliasSnapshot?.[match.winner])
+        : 'Team A';
+      const loserName = match.loser
+        ? formatTeamLabel(match.loser, match.teamAliasSnapshot?.[match.loser])
+        : 'Team B';
+      const isDraw = match.gameStatus === 'draw';
+      const winnerScore = match.wonTeamScore || 0;
+      const loserScore = match.loseTeamScore || 0;
 
       const teamKeys = [match.winner, match.loser].filter((k): k is string => !!k);
 
       const scorers: PanelScorer[] = events
-        .filter((e) => e.type === 'player_goal' && !e.deletedAt)
-        .map((e) => ({ name: e.playerNameSnapshot ?? 'Goal', minute: e.minute, teamKey: e.teamKey }))
+        .filter((e) => isScoringEvent(e))
+        .map((e) => ({
+          name: e.playerNameSnapshot ?? 'Goal',
+          minute: e.minute,
+          teamKey: e.teamKey,
+          isOwnGoal: e.type === 'own_goal',
+        }))
         .sort((a, b) => (a.minute ?? 0) - (b.minute ?? 0));
 
       const score: Record<string, number> = {};
@@ -71,6 +90,7 @@ export class MatchTimelineService {
         scorers,
         squad,
         aliases: match.teamAliasSnapshot || {},
+        mode: match.mode === 'league' ? 'league' : 'single',
       };
     });
   });

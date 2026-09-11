@@ -38,6 +38,13 @@ export class LeagueGameComponent {
     this.league.recordGoal(goal, ms);
   }
 
+  recordOwnGoal(goal: { player: Player; teamKey: string }): void {
+    const slot = this.league.assignments()[goal.teamKey];
+    if (!slot) return;
+    const ms = this.board().stopwatchForSlot(slot)?.getElapsedMs() ?? 0;
+    this.league.recordOwnGoal(goal, ms);
+  }
+
   finishSession(): void {
     this.league.finishSession();
   }

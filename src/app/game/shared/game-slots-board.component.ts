@@ -37,6 +37,7 @@ export class GameSlotsBoardComponent {
   reset = output<number>();
   end = output<number>();
   recordGoal = output<{ player: Player; teamKey: string }>();
+  recordOwnGoal = output<{ player: Player; teamKey: string }>();
   teamSlotChange = output<Record<string, number>>();
   dropPlayer = output<any>();
   renameTeam = output<{ teamKey: string; alias: string }>();

@@ -221,7 +221,7 @@
 
 .set-goal-modal {
   position: absolute;
-  width: 100px;
+  width: 150px;
   background: white;
   border: 1px solid #ccc;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -230,8 +230,51 @@
 
   .goal-set-container {
     display: flex;
-    gap: 5px;
+    gap: 6px;
     margin-top: 0.5rem;
+
+    button {
+      flex: 1;
+      padding: 12px 0;
+      font-size: 1.2rem;
+      font-weight: 700;
+      line-height: 1;
+      border: 1px solid #1e874b;
+      border-radius: 6px;
+      background: #2ecc71;
+      color: #fff;
+      cursor: pointer;
+
+      &:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+    }
+  }
+
+  // Secondary, deliberately small so it can't be hit by mistake instead of a normal goal.
+  .own-goal-container {
+    margin-top: 0.6rem;
+    padding-top: 0.4rem;
+    border-top: 1px dashed #ddd;
+    text-align: center;
+
+    .own-goal-btn {
+      padding: 2px 6px;
+      font-size: 0.7rem;
+      line-height: 1.2;
+      background: none;
+      border: none;
+      color: #999;
+      text-decoration: underline;
+      cursor: pointer;
+
+      &.danger {
+        color: #c0392b;
+        font-weight: 700;
+        text-decoration: none;
+      }
+    }
   }
 }
 
