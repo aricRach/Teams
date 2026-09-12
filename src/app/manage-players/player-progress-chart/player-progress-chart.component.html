@@ -1,3 +1,21 @@
+@if(playerProgressChartService.managePlayersService.selectedPlayer() ) {
+  <div class="center gap-10">
+    <label>
+      compare with player
+      <input [(ngModel)]="playerProgressChartService.isCompareMode" (change)="playerProgressChartService.compareModeToggle()" type="checkbox">
+    </label>
+
+    @if(playerProgressChartService.isCompareMode) {
+      <app-auto-complete
+        [inputValue]="playerProgressChartService.compareWithPlayer()?.name || ''"
+        [options]="playerProgressChartService.compareWithPlayerAutoCompleteOptions()"
+        (optionSelected)="playerProgressChartService.onChangeComparePlayer($event)"
+        (optionCleaned)="playerProgressChartService.removeComparePlayer()">
+      </app-auto-complete>
+    }
+  </div>
+}
+
 @if(playerProgressChartService.managePlayersService.selectedPlayer()) {
   <div class="stat-toggle">
     <button
@@ -31,19 +49,5 @@
   </div>
 }
 
-@if(playerProgressChartService.managePlayersService.selectedPlayer() ) {
-  <label>
-    compare with player
-    <input [(ngModel)]="playerProgressChartService.isCompareMode" (change)="playerProgressChartService.compareModeToggle()" type="checkbox">
-  </label>
-
-  @if(playerProgressChartService.isCompareMode) {
-    <select id="select-player" [(ngModel)]="playerProgressChartService.selectedPlayerOption" (change)="playerProgressChartService.onChangePlayer()">
-      @for(player of playerProgressChartService.compareWithPlayerOptions(); track player.name) {
-        <option>{{player.name}}</option>
-      }
-    </select>
-  }
-}
 
 
