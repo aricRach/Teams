@@ -1,3 +1,4 @@
+@if (teamCount() === 4) {
 <div class="mode-toggle-row">
   <div class="mode-toggle" [class.locked]="!canToggleMatchCount()">
     <button type="button" [class.active]="matchCount() === 1" [disabled]="!canToggleMatchCount()"
@@ -9,6 +10,7 @@
   <span class="lock-hint">End the running game to switch</span>
   }
 </div>
+}
 
 <div class="games-row">
   @for (vm of slotViewModels(); track vm.slot) {

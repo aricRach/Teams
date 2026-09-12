@@ -147,7 +147,7 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     this.slotViewModels().filter(vm => this.activeSlots().includes(vm.slot))
   );
 
-  readonly canToggleMatchCount = computed(() => !this.anySlotLive());
+  readonly canToggleMatchCount = computed(() => !this.anySlotLive() && this.teamCount() === 4);
 
   setMatchCount(count: 1 | 2): void {
     if (count === this.matchCount() || !this.canToggleMatchCount()) return;
