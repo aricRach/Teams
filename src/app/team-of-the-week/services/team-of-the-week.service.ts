@@ -1,6 +1,6 @@
 import {computed, inject, Injectable, linkedSignal, resource} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
-import {TeamOfTheWeekApiService} from './team-of-the-week-api.service';
+import {TeamOfTheWeekApiService, TOTW_MAX_DAILY_GENERATES, TOTW_MAX_TOTAL_GENERATES} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
 import {ModalsService, PopupsService} from 'ui';
 import {SpinnerService} from '../../spinner.service';
@@ -49,8 +49,9 @@ export class TeamOfTheWeekService {
     const totalTries: number = data['totalTries'] ?? 0;
     const lastGeneratedDay: string | null = data['lastGeneratedDay'] ?? null;
     const today = new Date().toISOString().slice(0, 10);
-    if (totalTries >= 5) return 'Max 5 generates reached for this date';
-    if (lastGeneratedDay === today) return 'Already regenerated today';
+    const dailyTries: number = lastGeneratedDay === today ? (data['dailyTries'] ?? 0) : 0;
+    if (totalTries >= TOTW_MAX_TOTAL_GENERATES) return `Max ${TOTW_MAX_TOTAL_GENERATES} generates reached for this date`;
+    if (dailyTries >= TOTW_MAX_DAILY_GENERATES) return `Max ${TOTW_MAX_DAILY_GENERATES} generates reached for today`;
     return null;
   });
 
