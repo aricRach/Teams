@@ -19,7 +19,12 @@
       <tbody>
         @for (row of rows(); track row.teamKey) {
         <tr>
-          <td class="team">{{ row.teamKey | teamLabel: aliases() }}</td>
+          <td class="team">
+            <span class="letter">{{ teamLetter(row.teamKey) }}</span>
+            @if (teamAlias(row.teamKey); as alias) {
+            <span class="alias">{{ alias }}</span>
+            }
+          </td>
           <td>{{ row.played }}</td>
           <td>{{ row.won }}</td>
           <td>{{ row.drawn }}</td>

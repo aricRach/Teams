@@ -18,6 +18,7 @@
 
   table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     font-size: 0.9rem;
 
@@ -25,11 +26,32 @@
       padding: 0.4rem 0.5rem;
       text-align: center;
       border-bottom: 1px solid #e0e0e0;
+      overflow: hidden;
     }
 
     th.team, td.team {
+      width: 40%;
       text-align: left;
       font-weight: bold;
+    }
+
+    th:not(.team), td:not(.team) {
+      width: 10%;
+    }
+
+    td.team {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    td.team .alias {
+      font-weight: normal;
+      font-size: 0.75rem;
+      color: #888;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     td.pts {
