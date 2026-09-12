@@ -24,10 +24,6 @@
     letter-spacing: 0.04em;
   }
 
-  .matchup {
-    color: #555;
-  }
-
   .mode-badge {
     font-size: 0.7rem;
     font-weight: 600;
@@ -134,10 +130,4 @@
   color: #888;
   text-align: center;
   margin: 0.5rem 0;
-}
-
-@media (max-width: 640px) {
-  .panel-header .matchup {
-    display: none;
-  }
 }

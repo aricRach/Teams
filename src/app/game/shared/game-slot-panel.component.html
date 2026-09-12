@@ -4,9 +4,6 @@
     @if (mode()) {
     <span class="mode-badge" [class.league]="mode() === 'league'">{{ mode() === 'league' ? 'League' : 'Single' }}</span>
     }
-    @if (teamKeys().length === 2) {
-    <span class="matchup">{{ teamKeys()[0] | teamLabel: aliases() }} vs {{ teamKeys()[1] | teamLabel: aliases() }}</span>
-    }
   </div>
 
   @if (teamKeys().length === 2) {
