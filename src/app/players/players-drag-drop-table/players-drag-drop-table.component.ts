@@ -50,6 +50,8 @@ export class PlayersDragDropTableComponent {
   matchIdByTeam = input<Record<string, string | null>>({});
   // Teams whose game has started - their drop list is frozen even though the rest of the board isn't.
   lockedTeamKeys = input<string[]>([]);
+  // Require a long press before a touch drag starts so scrolling the page doesn't get mistaken for dragging a player.
+  readonly dragStartDelay = { touch: 2000, mouse: 0 };
 
   private liveMatchKey = computed(() =>
     Object.values(this.matchIdByTeam()).filter(Boolean).sort().join(',')
