@@ -6,8 +6,8 @@
 .team-color-swatch {
   // Sized as a real touch target (44px is the usual minimum recommendation), not
   // just a small visual dot - this button is easy to miss/mis-tap on mobile otherwise.
-  width: 32px;
-  height: 32px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 2px solid #bbb;
   cursor: pointer;
@@ -24,7 +24,7 @@
   // trick) could too easily be mistaken for an actual "White" pick; a palette
   // glyph reads unambiguously as "no color set, tap to pick one" and can never
   // collide with a real selection since colors never render as an emoji.
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .team-color-dropdown {

@@ -7,6 +7,7 @@
 
 .team-header {
   width: 100%;
+  min-width: 0;
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -20,14 +21,29 @@
 }
 
 .team-name {
+  // Never wraps: a team name that wrapped to a second line would push that team's
+  // player list down further than teams whose name fit on one line, staggering the
+  // columns into a staircase. Truncating instead keeps every header the same height.
   display: flex;
   align-items: center;
+  flex: 1 1 auto; // claim the row's free space instead of sitting shrink-wrapped
+  min-width: 0;
   gap: 0.35rem;
+
+  h2 {
+    min-width: 0;
+    flex: 1 1 auto;
+    font-size: 1.1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .team-rename-pencil {
   display: inline-flex;
   align-items: center;
+  flex-shrink: 0;
   padding: 2px;
   border: 0;
   background: transparent;
@@ -37,6 +53,10 @@
   &:hover {
     opacity: 1;
   }
+}
+
+app-team-color-picker {
+  flex-shrink: 0;
 }
 
 .team-rename {
@@ -195,6 +215,10 @@
   .slot-selector button {
     min-width: 0;
     padding: 0.35rem 0.5rem;
+  }
+
+  .team-name h2 {
+    font-size: 0.95rem;
   }
 }
 
