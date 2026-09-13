@@ -121,6 +121,7 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   readonly playerStatsMap = this.gameService.computedStats;
   readonly showRating = computed(() => this.adminControl.getAdminControl().showRating);
   readonly teamAliases = computed(() => this.playersService.teamAliases());
+  readonly teamColors = computed(() => this.playersService.teamColors());
   readonly isAdmin = computed(() => this.playersService.isAdmin());
 
   protected readonly groupId = computed(() => this.playersService.selectedGroup()?.id ?? null);
@@ -189,6 +190,10 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
 
   renameTeam(teamKey: string, alias: string): void {
     void this.playersService.setTeamAlias(teamKey, alias);
+  }
+
+  changeTeamColor(teamKey: string, color: string): void {
+    void this.playersService.setTeamColor(teamKey, color);
   }
 
   recordGoal(goal: { player: Player; teamKey: string }, elapsedMs: number): void {

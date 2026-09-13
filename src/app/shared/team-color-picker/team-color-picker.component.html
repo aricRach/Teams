@@ -1,0 +1,25 @@
+<div class="team-color-picker">
+  <button type="button" class="team-color-swatch" aria-label="Pick team color"
+    [style.background]="color() || 'transparent'"
+    (click)="toggleOpen()">
+    @if (!color()) {
+    <span class="team-color-swatch-icon">🎨</span>
+    }
+  </button>
+  @if (open()) {
+  <div class="team-color-dropdown">
+    @for (option of colorPalette; track option.value) {
+    <button type="button" class="team-color-option"
+      [class.selected]="color() === option.value"
+      [class.taken]="isTaken(option.value)"
+      [disabled]="isTaken(option.value)"
+      [style.background]="option.value"
+      [attr.title]="option.name"
+      (click)="select(option.value)"></button>
+    }
+    @if (color()) {
+    <button type="button" class="team-color-clear" (click)="clear()">Clear</button>
+    }
+  </div>
+  }
+</div>

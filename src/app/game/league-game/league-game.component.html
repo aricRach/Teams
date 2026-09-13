@@ -13,6 +13,7 @@
   [canToggleMatchCount]="league.canToggleMatchCount()"
   (matchCountChange)="league.setMatchCount($event)"
   [aliases]="league.teamAliases()"
+  [colors]="league.teamColors()"
   [teams]="league.teams()"
   [teamCount]="league.teamCount()"
   [isMovePlayersLocked]="league.isMovePlayersLocked()"
@@ -27,7 +28,8 @@
   (recordOwnGoal)="recordOwnGoal($event)"
   (teamSlotChange)="league.setAssignments($event)"
   (dropPlayer)="league.updateTeams($event)"
-  (renameTeam)="league.renameTeam($event.teamKey, $event.alias)" />
+  (renameTeam)="league.renameTeam($event.teamKey, $event.alias)"
+  (changeTeamColor)="league.changeTeamColor($event.teamKey, $event.color)" />
 
 @if (league.canFinishSession()) {
 <div class="center">
@@ -35,4 +37,4 @@
 </div>
 }
 
-<app-league-standings [rows]="league.standings()" [aliases]="league.teamAliases()" />
+<app-league-standings [rows]="league.standings()" [aliases]="league.teamAliases()" [colors]="league.teamColors()" />

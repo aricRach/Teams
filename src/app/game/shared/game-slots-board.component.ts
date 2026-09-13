@@ -22,6 +22,7 @@ export class GameSlotsBoardComponent {
   matchCount = input<1 | 2>(2);
   canToggleMatchCount = input(true);
   aliases = input<Record<string, string>>({});
+  colors = input<Record<string, string>>({});
   teams = input<any>();
   teamCount = input<number>(Infinity);
   isMovePlayersLocked = input(false);
@@ -41,6 +42,7 @@ export class GameSlotsBoardComponent {
   teamSlotChange = output<Record<string, number>>();
   dropPlayer = output<any>();
   renameTeam = output<{ teamKey: string; alias: string }>();
+  changeTeamColor = output<{ teamKey: string; color: string }>();
 
   /** The panels render inside this component's own template, so the smart
    *  container reaches a slot's stopwatch through here (view queries don't

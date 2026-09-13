@@ -1,6 +1,7 @@
 import { Component, input, output, viewChild } from '@angular/core';
 import { StopwatchComponent } from '../../stopwatch/stopwatch.component';
 import { TeamLabelPipe } from '../../pipes/team-label.pipe';
+import { TeamColorDirective } from '../../directives/team-color.directive';
 
 export interface PanelScorer {
   name: string;
@@ -13,7 +14,7 @@ export interface PanelScorer {
 @Component({
   selector: 'app-game-slot-panel',
   standalone: true,
-  imports: [StopwatchComponent, TeamLabelPipe],
+  imports: [StopwatchComponent, TeamLabelPipe, TeamColorDirective],
   templateUrl: './game-slot-panel.component.html',
   styleUrl: './game-slot-panel.component.scss'
 })
@@ -25,6 +26,7 @@ export class GameSlotPanelComponent {
   score = input<Record<string, number>>({});
   scorers = input<PanelScorer[]>([]);
   aliases = input<Record<string, string>>({});
+  colors = input<Record<string, string>>({});
   showTimer = input(true);
   label = input('Game');
   /** When set, renders a "League"/"Single" badge next to the header. Omit to hide the badge entirely. */

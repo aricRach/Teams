@@ -46,7 +46,11 @@ export class LeagueTableComponent {
    *  A team with no snapshot (match predates this field) renders as its plain letter, not
    *  today's live alias — showing a rename that hadn't happened yet would be worse than no nickname.
    *  Matches are applied oldest-first, so a same-day rename between two matches settles on the
-   *  name from the later match — the one that was true by the end of that day. */
+   *  name from the later match — the one that was true by the end of that day.
+   *  A snapshot that HAS the field but no entry for a team means the alias was explicitly
+   *  cleared before that match - that must overwrite (not just skip past) any alias carried
+   *  over from an earlier match that same day, or clearing a name and playing again would
+   *  still show the old one. */
   readonly dateAliases = computed<Record<string, string>>(() => {
     const matches = [...this.dayMatches()].sort(
       (a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
@@ -54,8 +58,35 @@ export class LeagueTableComponent {
     const result: Record<string, string> = {};
     for (const m of matches) {
       if (!m.teamAliasSnapshot) continue;
-      if (m.winner && m.teamAliasSnapshot[m.winner]) result[m.winner] = m.teamAliasSnapshot[m.winner];
-      if (m.loser && m.teamAliasSnapshot[m.loser]) result[m.loser] = m.teamAliasSnapshot[m.loser];
+      for (const teamKey of [m.winner, m.loser]) {
+        if (!teamKey) continue;
+        const alias = m.teamAliasSnapshot[teamKey];
+        if (alias) result[teamKey] = alias; else delete result[teamKey];
+      }
+    }
+    return result;
+  });
+
+  /** Colors as they were when the selected date's matches were played, not today's
+   *  colors - mirrors `dateAliases` above so re-coloring a team later doesn't
+   *  repaint every past league table. A team with no snapshot (match predates this
+   *  field) renders with no color, same as aliases do.
+   *  Unlike aliases, a snapshot that HAS the field but no entry for a team means
+   *  the color was explicitly cleared before that match - that must overwrite (not
+   *  just skip past) any color carried over from an earlier match that same day,
+   *  or clearing a color and playing again would still show the old one. */
+  readonly dateColors = computed<Record<string, string>>(() => {
+    const matches = [...this.dayMatches()].sort(
+      (a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
+    );
+    const result: Record<string, string> = {};
+    for (const m of matches) {
+      if (!m.teamColorSnapshot) continue;
+      for (const teamKey of [m.winner, m.loser]) {
+        if (!teamKey) continue;
+        const color = m.teamColorSnapshot[teamKey];
+        if (color) result[teamKey] = color; else delete result[teamKey];
+      }
     }
     return result;
   });

@@ -32,6 +32,10 @@
             <img src="assets/icons/pencil.svg" alt="edit" height="18" width="18">
           </button>
           }
+          <app-team-color-picker
+            [color]="colors()[teamKey]"
+            [takenColors]="takenColorsExcluding(teamKey)"
+            (colorChange)="changeTeamColor.emit({teamKey, color: $event})" />
         </div>
         }
         @if (availableSlots().length === 1) {

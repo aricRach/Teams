@@ -45,6 +45,20 @@
       min-width: 0;
     }
 
+    td.team .letter.has-team-color::before {
+      content: '';
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--team-color);
+      // Without this, "White" is invisible against the table's own white/near-white
+      // background - same reasoning as the swatch/dot borders elsewhere.
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      margin-right: 0.4em;
+      vertical-align: middle;
+    }
+
     td.team .alias {
       font-weight: normal;
       font-size: 0.75rem;

@@ -11,10 +11,11 @@ import {PlayersDragDropTableService} from './players-drag-drop-table.service';
 import {TeamScoreBarsComponent} from '../../shared/team-score-bars/team-score-bars.component';
 import {TeamLabelPipe} from '../../pipes/team-label.pipe';
 import {TEAM_ALIAS_MAX_LENGTH} from '../../utils/team-label.util';
+import {TeamColorPickerComponent} from '../../shared/team-color-picker/team-color-picker.component';
 
 @Component({
   selector: 'app-players-drag-drop-table',
-  imports: [DragDropModule, CommonModule, FormField, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent, TeamLabelPipe],
+  imports: [DragDropModule, CommonModule, FormField, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent, TeamLabelPipe, TeamColorPickerComponent],
   standalone: true,
   providers: [PlayersDragDropTableService],
   templateUrl: './players-drag-drop-table.component.html',
@@ -35,6 +36,12 @@ export class PlayersDragDropTableComponent {
   // (e.g. gates it on admin) and handles the actual write via the `renameTeam` output.
   canRenameTeams = input(false);
   renameTeam = output<{teamKey: string, alias: string}>();
+  // Per-slot display color, e.g. { teamA: '#e6194b' }. Purely for display - the parent owns the data.
+  colors = input<Record<string, string>>({});
+  // A color swatch is always shown on each team header to pick its color - this component
+  // only ever renders behind an admin-only route, so there's no separate gate like
+  // `canRenameTeams` here. The parent handles the actual write via this output.
+  changeTeamColor = output<{teamKey: string, color: string}>();
   numberOfTeams = input<number>(Infinity);
   playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
   currentMatchId = input<string | null>(null);
@@ -284,5 +291,11 @@ export class PlayersDragDropTableComponent {
   saveTeamRename(teamKey: string) {
     this.renameTeam.emit({ teamKey, alias: this.teamAliasModel().alias });
     this.renamingTeamKey.set(null);
+  }
+
+  takenColorsExcluding(teamKey: string): string[] {
+    return Object.entries(this.colors())
+      .filter(([key]) => key !== teamKey)
+      .map(([, value]) => value);
   }
 }

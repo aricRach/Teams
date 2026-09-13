@@ -2,6 +2,7 @@ import { computed, Injectable, signal } from '@angular/core';
 import { StartMatchOptions } from '../../match-event-manager/services/match-events-manager.service';
 import { ParallelSlotsGameService } from '../shared/parallel-slots-game.service';
 import { computeStandings, StandingsRow } from '../league-standings/standings.util';
+import { formatDateToString } from '../../utils/date-utils';
 
 export type { StandingsRow } from '../league-standings/standings.util';
 
@@ -26,11 +27,11 @@ export class LeagueGameService extends ParallelSlotsGameService {
   readonly canFinishSession = computed(() => !!this.sessionId() && !this.anySlotLive());
 
   readonly standings = computed<StandingsRow[]>(() => {
-    const sid = this.sessionId();
-    if (!sid) return [];
+    const today = formatDateToString(new Date());
     const matches = this.allMatchData.matchesWithEvents()
       .map(x => x.match)
-      .filter(m => m.mode === 'league' && m.sessionId === sid && m.status === 'completed');
+      .filter(m => m.mode === 'league' && m.status === 'completed' && m.createdAt?.seconds &&
+        formatDateToString(new Date(m.createdAt.seconds * 1000)) === today);
     return computeStandings(matches);
   });
 

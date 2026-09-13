@@ -14,6 +14,7 @@
   [canToggleMatchCount]="single.canToggleMatchCount()"
   (matchCountChange)="single.setMatchCount($event)"
   [aliases]="single.teamAliases()"
+  [colors]="single.teamColors()"
   [teams]="single.teams()"
   [teamCount]="single.teamCount()"
   [isMovePlayersLocked]="single.isMovePlayersLocked()"
@@ -28,4 +29,5 @@
   (recordOwnGoal)="recordOwnGoal($event)"
   (teamSlotChange)="single.setAssignments($event)"
   (dropPlayer)="single.updateTeams($event)"
-  (renameTeam)="single.renameTeam($event.teamKey, $event.alias)" />
+  (renameTeam)="single.renameTeam($event.teamKey, $event.alias)"
+  (changeTeamColor)="single.changeTeamColor($event.teamKey, $event.color)" />

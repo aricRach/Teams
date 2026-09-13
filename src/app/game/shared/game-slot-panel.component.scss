@@ -68,6 +68,18 @@
     &.away {
       text-align: left;
     }
+
+    &.has-team-color::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--team-color);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      margin: 0 0.35em;
+      vertical-align: middle;
+    }
   }
 }
 

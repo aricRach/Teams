@@ -83,6 +83,15 @@ export class PlayersApiService {
     return updateDoc(groupDocRef, { [`teamAliases.${teamKey}`]: alias || deleteField() });
   }
 
+  /**
+   * Sets (or clears, when color is empty) the display color for one team slot
+   * on the group document. The slot key itself is untouched - it stays the team's id.
+   */
+  async updateTeamColor(groupId: string, teamKey: string, color: string) {
+    const groupDocRef = doc(this.firestore, `groups/${groupId}`);
+    return updateDoc(groupDocRef, { [`teamColors.${teamKey}`]: color || deleteField() });
+  }
+
   getUserCreatedGroups(): Observable<any[]> {
     const user = this.auth.currentUser;
     if (!user) {

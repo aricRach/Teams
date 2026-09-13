@@ -20,7 +20,7 @@
         @for (row of rows(); track row.teamKey) {
         <tr>
           <td class="team">
-            <span class="letter">{{ teamLetter(row.teamKey) }}</span>
+            <span class="letter" [appTeamColor]="colors()[row.teamKey]">{{ teamLetter(row.teamKey) }}</span>
             @if (teamAlias(row.teamKey); as alias) {
             <span class="alias">{{ alias }}</span>
             }

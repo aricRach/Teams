@@ -1,0 +1,81 @@
+.team-color-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.team-color-swatch {
+  // Sized as a real touch target (44px is the usual minimum recommendation), not
+  // just a small visual dot - this button is easy to miss/mis-tap on mobile otherwise.
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #bbb;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.team-color-swatch-icon {
+  // Shown only when no color is chosen yet - a plain "+" (or a solid/dashed border
+  // trick) could too easily be mistaken for an actual "White" pick; a palette
+  // glyph reads unambiguously as "no color set, tap to pick one" and can never
+  // collide with a real selection since colors never render as an emoji.
+  font-size: 14px;
+}
+
+.team-color-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.team-color-option {
+  // Same touch-target sizing reasoning as `.team-color-swatch` above.
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  // A permanent faint border (not transparent) so "White" doesn't disappear
+  // against the dropdown's own white background.
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  padding: 0;
+
+  &.selected {
+    border-color: #333;
+    border-width: 3px;
+  }
+
+  &.taken {
+    opacity: 0.25;
+    cursor: not-allowed;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.team-color-clear {
+  grid-column: 1 / -1;
+  margin-top: 4px;
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+  color: #888;
+  font-size: 0.75rem;
+  text-decoration: underline;
+  cursor: pointer;
+}

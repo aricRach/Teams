@@ -8,9 +8,9 @@
 
   @if (teamKeys().length === 2) {
   <div class="score">
-    <span class="team-name home">{{ teamKeys()[0] | teamLabel: aliases() }}</span>
+    <span class="team-name home" [appTeamColor]="colors()[teamKeys()[0]]">{{ teamKeys()[0] | teamLabel: aliases() }}</span>
     <strong>{{ score()[teamKeys()[0]] ?? 0 }} &ndash; {{ score()[teamKeys()[1]] ?? 0 }}</strong>
-    <span class="team-name away">{{ teamKeys()[1] | teamLabel: aliases() }}</span>
+    <span class="team-name away" [appTeamColor]="colors()[teamKeys()[1]]">{{ teamKeys()[1] | teamLabel: aliases() }}</span>
   </div>
 
   @if (showTimer()) {
