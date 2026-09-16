@@ -58,25 +58,10 @@ export class LeagueTableService {
     return result;
   });
 
-  /** Colors as they were when the selected date's matches were played - mirrors `dateAliases`
-   *  above, including the live-for-today exception, for the same reasons. */
+  /** colors for the most recent day with games, so an older day's table renders without color.*/
   readonly dateColors = computed<Record<string, string>>(() => {
-    if (compareDateWithToday(this.selectedDate()) === 0) {
-      return this.playersService.teamColors();
-    }
-    const matches = [...this.dayMatches()].sort(
-      (a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
-    );
-    const result: Record<string, string> = {};
-    for (const m of matches) {
-      if (!m.teamColorSnapshot) continue;
-      for (const teamKey of [m.winner, m.loser]) {
-        if (!teamKey) continue;
-        const color = m.teamColorSnapshot[teamKey];
-        if (color) result[teamKey] = color; else delete result[teamKey];
-      }
-    }
-    return result;
+    const [latestDate] = this.availableDates();
+    return this.selectedDate() === latestDate ? this.playersService.teamColors() : {};
   });
 
   constructor() {

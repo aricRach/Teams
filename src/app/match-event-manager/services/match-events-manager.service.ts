@@ -108,8 +108,7 @@ export class MatchEventsManagerService {
         status: 'live',
         startedAt: new Date(),
         createdBy: this.getActorId(),
-        teamAliasSnapshot: { ...this.playersService.teamAliases() },
-        teamColorSnapshot: { ...this.playersService.teamColors() }
+        teamAliasSnapshot: { ...this.playersService.teamAliases() }
       };
       if (mode === 'league') {
         matchDoc.mode = 'league';
