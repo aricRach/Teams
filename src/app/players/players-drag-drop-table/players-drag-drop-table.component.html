@@ -110,7 +110,7 @@
           appDoubleClick
           [doubleClickDisabled]="!isGoalTaggingEnabled(teamKey)"
           (doubleClicked)="openSetGoalModal($event, {player: item, team: teamKey})" class="box"
-          cdkDrag [cdkDragStartDelay]="dragStartDelay"></app-player-view>
+          cdkDrag></app-player-view>
         }
       </div>
     </div>
@@ -124,9 +124,9 @@
     @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
     <div class="player">
       @if (!enableShowRatings()) {
-      <div class="box" cdkDrag [cdkDragStartDelay]="dragStartDelay">{{ item.name }}</div>
+      <div class="box" cdkDrag>{{ item.name }}</div>
       } @else {
-      <div class="box" cdkDrag [cdkDragStartDelay]="dragStartDelay">{{ item.name }} - {{ item.rating }}</div>
+      <div class="box" cdkDrag>{{ item.name }} - {{ item.rating }}</div>
       }
       <!--        <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>-->
     </div>

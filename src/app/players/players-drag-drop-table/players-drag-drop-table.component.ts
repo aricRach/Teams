@@ -1,5 +1,5 @@
 import {Component, computed, HostListener, inject, input, linkedSignal, output, signal,} from '@angular/core';
-import {CDK_DRAG_CONFIG, CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
+import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {form, FormField, maxLength} from '@angular/forms/signals';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
@@ -17,9 +17,7 @@ import {TeamColorPickerComponent} from '../../shared/team-color-picker/team-colo
   selector: 'app-players-drag-drop-table',
   imports: [DragDropModule, CommonModule, FormField, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent, TeamLabelPipe, TeamColorPickerComponent],
   standalone: true,
-  providers: [
-    PlayersDragDropTableService,
-    {provide: CDK_DRAG_CONFIG, useValue: {dragStartThreshold: 25, pointerDirectionChangeThreshold: 5}},],
+  providers: [PlayersDragDropTableService],
   templateUrl: './players-drag-drop-table.component.html',
   styleUrl: './players-drag-drop-table.component.scss'
 })
@@ -59,8 +57,6 @@ export class PlayersDragDropTableComponent {
   matchIdByTeam = input<Record<string, string | null>>({});
   // Teams whose game has started - their drop list is frozen even though the rest of the board isn't.
   lockedTeamKeys = input<string[]>([]);
-  // Require a long press before a touch drag starts so scrolling the page doesn't get mistaken for dragging a player.
-  readonly dragStartDelay = { touch: 2000, mouse: 0 };
 
   private liveMatchKey = computed(() =>
     Object.values(this.matchIdByTeam()).filter(Boolean).sort().join(',')
