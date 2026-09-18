@@ -39,7 +39,7 @@
       width: 10%;
     }
 
-    td.team {
+    td.team .team-cell {
       display: flex;
       flex-direction: column;
       min-width: 0;
@@ -63,9 +63,9 @@
       font-weight: normal;
       font-size: 0.75rem;
       color: #888;
-      white-space: nowrap;
-      overflow: hidden;
+      white-space: normal;
       text-overflow: ellipsis;
+      overflow: hidden;
     }
 
     td.pts {
