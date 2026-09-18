@@ -167,6 +167,10 @@ app-team-color-picker {
   cursor: move;
   background: white;
   font-size: 14px;
+  // Without this, the browser's own touch handling (scroll/pan, long-press context menu)
+  // races with CDK's touch listener and wins, so the long-press-to-drag delay never
+  // completes on mobile - you feel the OS's long-press vibration but the drag never starts.
+  touch-action: none;
 }
 
 .cdk-drag-preview {
