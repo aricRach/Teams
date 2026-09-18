@@ -7,7 +7,7 @@
     }
   </button>
   @if (open()) {
-  <div class="team-color-dropdown">
+  <div class="team-color-dropdown" [style.left.px]="dropdownOffsetPx()">
     @for (option of colorPalette; track option.value) {
     <button type="button" class="team-color-option"
       [class.selected]="color() === option.value"

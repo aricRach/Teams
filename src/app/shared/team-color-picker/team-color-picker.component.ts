@@ -1,5 +1,6 @@
 import { Component, ElementRef, HostListener, inject, input, output, signal } from '@angular/core';
 import { TEAM_COLOR_PALETTE } from '../../utils/team-label.util';
+import { centerUnderAnchor } from '../../utils/viewport-position.util';
 
 /**
  * A swatch button that opens a small palette dropdown to pick (or clear) a
@@ -24,9 +25,16 @@ export class TeamColorPickerComponent {
 
   readonly colorPalette = TEAM_COLOR_PALETTE;
   open = signal(false);
+  private static readonly DROPDOWN_WIDTH = 180;
+  dropdownOffsetPx = signal(0);
 
   toggleOpen(): void {
-    this.open.update(o => !o);
+    const opening = !this.open();
+    if (opening) {
+      const rect = (this.el.nativeElement as HTMLElement).getBoundingClientRect();
+      this.dropdownOffsetPx.set(centerUnderAnchor(rect, TeamColorPickerComponent.DROPDOWN_WIDTH));
+    }
+    this.open.set(opening);
   }
 
   isTaken(hex: string): boolean {
