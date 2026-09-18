@@ -1,9 +1,14 @@
 <div class="player-view-container">
-{{playerView()}}
-  @if(playerForm() === PlayerFormStatus.UP) {
-    <span class="up">^</span>
-  }
-  @if(playerForm() === PlayerFormStatus.DOWN) {
-    <span class="down">^</span>
+  <span class="name-row">
+    <span class="player-name" cdkDragHandle>{{ player().name }}</span>
+    @if(playerForm() === PlayerFormStatus.UP) {
+      <span class="up">^</span>
+    }
+    @if(playerForm() === PlayerFormStatus.DOWN) {
+      <span class="down">^</span>
+    }
+  </span>
+  @if (statsText()) {
+    <span class="player-stats">{{ statsText() }}</span>
   }
 </div>

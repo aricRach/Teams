@@ -162,11 +162,20 @@ app-team-color-picker {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   box-sizing: border-box;
-  cursor: move;
   background: white;
   font-size: 14px;
+
+  // Only the name starts a drag - touching the rest of the box does not.
+  .player-name {
+    cursor: grab;
+  }
+
+  .player-stats {
+    font-size: 0.85em;
+    color: #666;
+  }
 }
 
 .cdk-drag-preview {

@@ -1,4 +1,5 @@
 import {Component, computed, input} from '@angular/core';
+import {CdkDragHandle} from '@angular/cdk/drag-drop';
 import {compareDates} from '../../utils/date-utils';
 import {Player, Statistics} from '../models/player.model';
 
@@ -9,7 +10,7 @@ enum PlayerFormStatus {
 }
 @Component({
   selector: 'app-player-view',
-  imports: [],
+  imports: [CdkDragHandle],
   templateUrl: './player-view.component.html',
   standalone: true,
   styleUrl: './player-view.component.scss'
@@ -22,14 +23,16 @@ export class PlayerViewComponent {
   dateStats = input<Statistics | undefined>();
   allPlayerStats = input<Map<string, Statistics>>(new Map());
 
-  playerView = computed(() => {
+  // Suffix shown alongside the name (rating/stats) - kept separate from the name so only
+  // the name itself acts as the drag handle.
+  statsText = computed(() => {
     const stats = this.dateStats();
     if(!stats || !this.showStatistics()) {
-      return !this.showRating() ? this.player().name : this.player().name + ' - rating - ' + this.player().rating;
+      return this.showRating() ? 'rating - ' + this.player().rating : '';
     }
     return !this.showRating() ?
-      `${this.player().name} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} - conceded: ${this.getDisplayValue(stats.goalsConceded)} -games: ${this.getDisplayValue(stats.games)}`
-      : `${this.player().name} - rating ${this.player().rating} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} -games: ${this.getDisplayValue(stats.games)}`
+      `goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} - conceded: ${this.getDisplayValue(stats.goalsConceded)} -games: ${this.getDisplayValue(stats.games)}`
+      : `rating ${this.player().rating} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} -games: ${this.getDisplayValue(stats.games)}`
   })
 
   playerForm = computed(() => {
