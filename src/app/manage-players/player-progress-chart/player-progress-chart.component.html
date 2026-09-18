@@ -33,7 +33,27 @@
     >
       Wins
     </button>
+
+    <button
+      class="link-btn"
+      [class.active]="playerProgressChartService.statToShow() === 'performance'"
+      (click)="playerProgressChartService.toggleStat('performance')"
+    >
+      Performance
+    </button>
   </div>
+
+  @if(playerProgressChartService.performanceSummary(); as summary) {
+    <div class="performance-summary">
+      @if(summary.length > 1) {
+        <span>{{ summary[0].name }}: {{ summary[0].average }}</span>
+        <span class="vs">vs</span>
+        <span>{{ summary[1].name }}: {{ summary[1].average }}</span>
+      } @else {
+        <span>Avg performance: {{ summary[0].average }}</span>
+      }
+    </div>
+  }
 
   <canvas
     class="chart-canvas"
