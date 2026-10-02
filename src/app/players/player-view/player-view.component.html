@@ -1,6 +1,9 @@
 <div class="player-view-container">
   <span class="name-row">
     <span class="player-name" cdkDragHandle>{{ player().name }}</span>
+    @if(player().isGuest) {
+      <span class="guest-badge">guest</span>
+    }
     @if(playerForm() === PlayerFormStatus.UP) {
       <span class="up">^</span>
     }

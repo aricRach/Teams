@@ -125,6 +125,9 @@
     <div class="player">
       <div class="box" cdkDrag>
         <span class="player-name" cdkDragHandle>{{ item.name }}</span>
+        @if (item.isGuest) {
+        <span class="guest-badge">guest</span>
+        }
         @if (enableShowRatings()) {
         <span class="player-stats">- {{ item.rating }}</span>
         }

@@ -56,7 +56,7 @@ export class TeamOfTheWeekService {
   });
 
   calculateWeekStates(date: string) {
-    const allPlayers = this.playersService.flattenPlayers();
+    const allPlayers = this.playersService.flattenPlayers(true, false);
     const statsMap = this.computedStatsService.statsMap();
     const setOfTeams = new Set<string>();
     const players: PlayerWeekStates[] = allPlayers

@@ -38,6 +38,9 @@ export class PlayersStatisticsTableService {
     },
   ])
 
+  showGuests = signal(true);
+  private players = computed(() => this.playersService.flattenPlayers(true, this.showGuests()));
+
   dataRows = computed(() => {
     const date = this.statisticsService.getSelectedDate();
     const statsMap = this.computedStatsService.statsMap();
@@ -45,7 +48,7 @@ export class PlayersStatisticsTableService {
       return this.setOverallStatisticsData(statsMap);
     } else {
       let maxGoals = -1;
-      const dataByDate = this.playersService.flattenPlayers().map((player: Player) => {
+      const dataByDate = this.players().map((player: Player) => {
         const stats = statsMap.get(player.id)?.get(date);
         if (stats && stats.games > 0) {
           const goals = stats.goals || 0;
@@ -69,7 +72,7 @@ export class PlayersStatisticsTableService {
 
   setOverallStatisticsData(statsMap: Map<string, Map<string, import('../../players/models/player.model').Statistics>>) {
     let maxGoals = -1;
-    const rows = this.playersService.flattenPlayers().map((player: Player) => {
+    const rows = this.players().map((player: Player) => {
       const playerMap = statsMap.get(player.id);
       if (!playerMap) return null;
       let goals = 0, wins = 0, games = 0;
