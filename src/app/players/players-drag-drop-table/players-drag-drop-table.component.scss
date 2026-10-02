@@ -166,16 +166,6 @@ app-team-color-picker {
   box-sizing: border-box;
   background: white;
   font-size: 14px;
-
-  // Only the name starts a drag - touching the rest of the box does not.
-  .player-name {
-    cursor: grab;
-  }
-
-  .player-stats {
-    font-size: 0.85em;
-    color: #666;
-  }
 }
 
 .cdk-drag-preview {

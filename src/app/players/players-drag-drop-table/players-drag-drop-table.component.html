@@ -123,15 +123,12 @@
     class="box available-player" (cdkDropListDropped)="drop($event)">
     @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
     <div class="player">
-      <div class="box" cdkDrag>
-        <span class="player-name" cdkDragHandle>{{ item.name }}</span>
-        @if (item.isGuest) {
-        <span class="guest-badge">guest</span>
-        }
-        @if (enableShowRatings()) {
-        <span class="player-stats">- {{ item.rating }}</span>
-        }
-      </div>
+      <app-player-view
+        [player]="item"
+        [showStatistics]="false"
+        [showRating]="enableShowRatings()"
+        class="box"
+        cdkDrag></app-player-view>
       <!--        <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>-->
     </div>
     }
