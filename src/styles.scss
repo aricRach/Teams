@@ -17,6 +17,17 @@
   align-items: center;
 }
 
+.guest-badge {
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 8px;
+  background: #eee;
+  color: #666;
+  border: 1px solid #ccc;
+  white-space: nowrap;
+}
+
 .space-between {
   display: flex;
   justify-content: space-between;

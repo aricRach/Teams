@@ -5,6 +5,9 @@ import {doc, Firestore, getDoc, setDoc} from '@angular/fire/firestore';
 import {firstValueFrom} from 'rxjs';
 import {PlayersService} from '../../players/players.service';
 
+export const TOTW_MAX_TOTAL_GENERATES = 5;
+export const TOTW_MAX_DAILY_GENERATES = 3;
+
 @Injectable({
   providedIn: 'root'
 })
@@ -31,20 +34,21 @@ export class TeamOfTheWeekApiService {
       const totalTries: number = snapshotData['totalTries'] ?? 0;
       const lastGeneratedDay: string | null = snapshotData['lastGeneratedDay'] ?? null;
       const today = new Date().toISOString().slice(0, 10);
+      const dailyTries: number = lastGeneratedDay === today ? (snapshotData['dailyTries'] ?? 0) : 0;
 
       if (!createNew && snapshot.exists() && snapshotData && !snapshotData['shouldUpdate']) {
         return snapshotData;
       }
 
-      if (totalTries >= 5) {
+      if (totalTries >= TOTW_MAX_TOTAL_GENERATES) {
         throw new Error('LIMIT_TOTAL');
       }
-      if (createNew && lastGeneratedDay === today) {
+      if (createNew && dailyTries >= TOTW_MAX_DAILY_GENERATES) {
         throw new Error('LIMIT_DAILY');
       }
 
       const totwData: any = await firstValueFrom(this.httpClient.post(this.baseUrl, {players, teamSize}));
-      const result = {...totwData, shouldUpdate: false, totalTries: totalTries + 1, lastGeneratedDay: today};
+      const result = {...totwData, shouldUpdate: false, totalTries: totalTries + 1, dailyTries: dailyTries + 1, lastGeneratedDay: today};
 
       // Fire and forget
       setDoc(ref, result).catch(() => console.error('cant save'));

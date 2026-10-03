@@ -7,7 +7,9 @@ import {GameDetails, GameStatus, MatchEventsManagerService} from '../match-event
 import {NavigationService} from '../shared/navigation/navigation.service';
 import {ComputedStatisticsService} from '../statistics/services/computed-statistics.service';
 import {computeTeamScores} from '../utils/team-scores.utils';
+import {isScoringEvent} from '../match-event-manager/utils/scoring.util';
 import {RevealApiService, RevealTeam, RevealSnapshot, PositionedPlayer, Position} from '../reveal/reveal-api.service';
+import {formatTeamLabel} from '../utils/team-label.util';
 import {PopupsService} from 'ui';
 
 @Injectable()
@@ -36,17 +38,17 @@ export class GameService {
     this.router.navigate(['/reveal'], { queryParams: { groupId } });
   }
 
-  async endGame(teams: any) {
+  async endGame(teams: any, slot = 1) {
     let team1Score = 0;
     let team2Score = 0;
     const groupId = this.playersService.selectedGroup()?.id;
-    const matchId = this.matchEventsService.liveMatchId();
+    const matchId = this.matchEventsService.liveMatchIdFor(slot);
     if (groupId && matchId) {
       try {
         const eventsObservable = (this.matchEventsService as any).matchEventsApiService.getEvents(groupId, matchId);
         const events = (await firstValueFrom(eventsObservable)) as any[];
         events.forEach((ev: any) => {
-          if (ev.type === 'player_goal' && !ev.deletedAt) {
+          if (isScoringEvent(ev)) {
             if (ev.teamKey === teams.team1) team1Score++;
             if (ev.teamKey === teams.team2) team2Score++;
           }
@@ -82,10 +84,17 @@ export class GameService {
 
     const gameDetails: GameDetails = {gameStatus, winner, loser, wonTeamScore, loseTeamScore};
 
-    await this.matchEventsService.endGameAndPersist(gameDetails);
-    await this.playersService.setFantasyMetaIsActive(false);
+    await this.matchEventsService.endGameAndPersist(gameDetails, slot);
 
-    this.navigationService.unlockNavigation();
+    // Only tear down shared state once no game (single or league slot) is still live.
+    if (!this.matchEventsService.hasAnyLiveMatch()) {
+      try {
+        await this.playersService.setFantasyMetaIsActive(false);
+      } catch (e) {
+        console.error('Failed to clear fantasy meta isActive flag:', e);
+      }
+      this.navigationService.unlockNavigation();
+    }
   }
 
   private buildSnapshot(): RevealSnapshot {
@@ -93,10 +102,11 @@ export class GameService {
     const statsMap = this.computedStatsService.statsMap();
     const scores   = computeTeamScores(rawTeams, statsMap);
 
+    const aliases = this.playersService.teamAliases();
     const teams: RevealTeam[] = Object.entries(rawTeams)
       .filter(([key, team]: [string, any]) => key !== 'allPlayers' && team.players.length > 0)
       .map(([key, team]: [string, any]) => ({
-        name:         key.replace(/([A-Z])/g, ' $1').toUpperCase().trim(),
+        name:         formatTeamLabel(key, aliases[key]),
         rating:       this.averageRating(team.players),
         attackScore:  scores[key]?.attackScore  ?? 0,
         defenseScore: scores[key]?.defenseScore ?? 0,

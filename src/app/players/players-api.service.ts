@@ -2,6 +2,7 @@ import {inject, Injectable} from '@angular/core';
 import {
   collection,
   collectionData,
+  deleteField,
   doc,
   Firestore,
   getDoc,
@@ -71,6 +72,24 @@ export class PlayersApiService {
     console.log("✅ All players and stats added/updated successfully!");
 
     return true;
+  }
+
+  /**
+   * Sets (or clears, when alias is empty) the display nickname for one team slot
+   * on the group document. The slot key itself is untouched - it stays the team's id.
+   */
+  async updateTeamAlias(groupId: string, teamKey: string, alias: string) {
+    const groupDocRef = doc(this.firestore, `groups/${groupId}`);
+    return updateDoc(groupDocRef, { [`teamAliases.${teamKey}`]: alias || deleteField() });
+  }
+
+  /**
+   * Sets (or clears, when color is empty) the display color for one team slot
+   * on the group document. The slot key itself is untouched - it stays the team's id.
+   */
+  async updateTeamColor(groupId: string, teamKey: string, color: string) {
+    const groupDocRef = doc(this.firestore, `groups/${groupId}`);
+    return updateDoc(groupDocRef, { [`teamColors.${teamKey}`]: color || deleteField() });
   }
 
   getUserCreatedGroups(): Observable<any[]> {
@@ -171,7 +190,7 @@ export class PlayersApiService {
 
   async setFantasyMetaIsActive(groupId: string, isActive: boolean) {
     const metaRef = doc(this.firestore, `groups/${groupId}/fantasyDrafts/meta`);
-    await updateDoc(metaRef, { isActive });
+    await setDoc(metaRef, { isActive }, { merge: true });
   }
 
 

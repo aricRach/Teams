@@ -1,0 +1,40 @@
+<div class="in-row center gap">
+  <h1>League</h1>
+</div>
+
+<button class="button-icon" (click)="league.toggleMovePlayersLock()">
+  <img alt="lock" [src]="league.lockIcon()" height="30" width="30">
+</button>
+
+<app-game-slots-board
+  [slotViewModels]="league.visibleSlotViewModels()"
+  [availableSlots]="league.activeSlots()"
+  [matchCount]="league.matchCount()"
+  [canToggleMatchCount]="league.canToggleMatchCount()"
+  (matchCountChange)="league.setMatchCount($event)"
+  [aliases]="league.teamAliases()"
+  [colors]="league.teamColors()"
+  [teams]="league.teams()"
+  [teamCount]="league.teamCount()"
+  [isMovePlayersLocked]="league.isMovePlayersLocked()"
+  [assignments]="league.assignments()"
+  [matchIdByTeam]="league.matchIdByTeam()"
+  [lockedTeamKeys]="league.lockedTeamKeys()"
+  [showRating]="league.showRating()"
+  [isAdmin]="league.isAdmin()"
+  [playerStatsMap]="league.playerStatsMap()"
+  (start)="onStart($event)" (reset)="onReset($event)" (end)="onEnd($event)"
+  (recordGoal)="recordGoal($event)"
+  (recordOwnGoal)="recordOwnGoal($event)"
+  (teamSlotChange)="league.setAssignments($event)"
+  (dropPlayer)="league.updateTeams($event)"
+  (renameTeam)="league.renameTeam($event.teamKey, $event.alias)"
+  (changeTeamColor)="league.changeTeamColor($event.teamKey, $event.color)" />
+
+@if (league.canFinishSession()) {
+<div class="center">
+  <button class="action-btn active-btn" (click)="finishSession()">Finish league</button>
+</div>
+}
+
+<app-league-standings [rows]="league.standings()" [aliases]="league.teamAliases()" [colors]="league.teamColors()" />

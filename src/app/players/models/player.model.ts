@@ -20,6 +20,7 @@ export interface Statistics {
   draws: number;
   games: number;
   goalsConceded: number;
+  ownGoals: number;
 }
 
 

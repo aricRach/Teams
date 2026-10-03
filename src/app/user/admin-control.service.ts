@@ -5,7 +5,6 @@ export interface AdminControl {
   showProtectedPages: boolean;
   showSaveButtons: boolean;
   showMakeBalanceTeams: boolean;
-  hideGuests: boolean;
 }
 @Injectable({
   providedIn: 'root'

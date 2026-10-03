@@ -16,6 +16,12 @@ export class MatchesService {
       tooltip: '',
       isDisabled: false,
     },
+    {
+      link: 'league',
+      title: 'League',
+      tooltip: '',
+      isDisabled: false,
+    },
     ...(
       this.playersService.isAdmin() ? [{
       link: 'manage-events',

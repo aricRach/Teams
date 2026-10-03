@@ -1,0 +1,145 @@
+.panel {
+  flex: 1 1 320px;
+  min-width: 280px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  background: #fafafa;
+
+  &.live {
+    border-color: #00b894;
+    box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.25);
+  }
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+
+  .game-name {
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .mode-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: #e0e0e0;
+    color: #555;
+
+    &.league {
+      background: #dff3ff;
+      color: #0d6aa8;
+    }
+  }
+}
+
+.score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+
+  strong {
+    font-size: 1.4rem;
+    flex: 0 0 auto;
+  }
+
+  .team-name {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.home {
+      text-align: right;
+    }
+
+    &.away {
+      text-align: left;
+    }
+
+    &.has-team-color::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--team-color);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      margin: 0 0.35em;
+      vertical-align: middle;
+    }
+  }
+}
+
+.squad {
+  display: flex;
+  gap: 1rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: #666;
+
+  .squad-col {
+    flex: 1 1 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    &.away {
+      text-align: right;
+    }
+
+    li {
+      padding: 0.1rem 0;
+    }
+  }
+}
+
+.scorers {
+  display: flex;
+  gap: 1rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+
+  .scorers-col {
+    flex: 1 1 0;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    &.away {
+      text-align: right;
+    }
+
+    li {
+      padding: 0.15rem 0;
+      border-bottom: 1px dashed #e0e0e0;
+    }
+  }
+
+  .minute {
+    color: #888;
+  }
+
+  .og-tag {
+    color: #c0392b;
+    font-style: italic;
+  }
+}
+
+.hint {
+  color: #888;
+  text-align: center;
+  margin: 0.5rem 0;
+}

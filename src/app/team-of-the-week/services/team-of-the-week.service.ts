@@ -1,6 +1,6 @@
 import {computed, inject, Injectable, linkedSignal, resource} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
-import {TeamOfTheWeekApiService} from './team-of-the-week-api.service';
+import {TeamOfTheWeekApiService, TOTW_MAX_DAILY_GENERATES, TOTW_MAX_TOTAL_GENERATES} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
 import {ModalsService, PopupsService} from 'ui';
 import {SpinnerService} from '../../spinner.service';
@@ -13,6 +13,8 @@ export interface PlayerWeekStates {
   totalGoals: number,
   totalGames: number,
   totalWins: number,
+  totalGoalsConceded: number,
+  totalOwnGoals: number,
   team: string
 }
 
@@ -47,16 +49,17 @@ export class TeamOfTheWeekService {
     const totalTries: number = data['totalTries'] ?? 0;
     const lastGeneratedDay: string | null = data['lastGeneratedDay'] ?? null;
     const today = new Date().toISOString().slice(0, 10);
-    if (totalTries >= 5) return 'Max 5 generates reached for this date';
-    if (lastGeneratedDay === today) return 'Already regenerated today';
+    const dailyTries: number = lastGeneratedDay === today ? (data['dailyTries'] ?? 0) : 0;
+    if (totalTries >= TOTW_MAX_TOTAL_GENERATES) return `Max ${TOTW_MAX_TOTAL_GENERATES} generates reached for this date`;
+    if (dailyTries >= TOTW_MAX_DAILY_GENERATES) return `Max ${TOTW_MAX_DAILY_GENERATES} generates reached for today`;
     return null;
   });
 
   calculateWeekStates(date: string) {
-    const allPlayers = this.playersService.flattenPlayers();
+    const allPlayers = this.playersService.flattenPlayers(true, false);
     const statsMap = this.computedStatsService.statsMap();
     const setOfTeams = new Set<string>();
-    const players = allPlayers
+    const players: PlayerWeekStates[] = allPlayers
       .filter(player => {
         const s = statsMap.get(player.id)?.get(date);
         return s && s.games > 0;
@@ -64,7 +67,7 @@ export class TeamOfTheWeekService {
       .map(player => {
         const s = statsMap.get(player.id)!.get(date)!;
         setOfTeams.add(player.team);
-        return {name: player.name, team: player.team, totalGoals: s.goals, totalGames: s.games, totalWins: s.wins, totalGoalsConceded: s.goalsConceded};
+        return {name: player.name, team: player.team, totalGoals: s.goals, totalGames: s.games, totalWins: s.wins, totalGoalsConceded: s.goalsConceded, totalOwnGoals: s.ownGoals};
       });
     return {players, teamSize: Math.ceil(players.length / setOfTeams.size)};
   }

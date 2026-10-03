@@ -5,6 +5,7 @@ export type MatchEventType =
   | 'match_ended'
   | 'team_result'
   | 'player_goal'
+  | 'own_goal'
   | 'player_assist'
   | 'stat_correction'
   | 'custom';
@@ -24,6 +25,15 @@ export interface MatchRecord {
   createdAt?: any;
   updatedAt?: any;
   createdBy: string;
+  // League mode - all optional, absent means a classic single match.
+  mode?: 'single' | 'league';
+  sessionId?: string;
+  slot?: number;
+  round?: number;
+  teamKeys?: string[];
+  /** Copy of the group's teamAliases map at the moment this match was created,
+   *  so historical views render the name a team had when it was played. */
+  teamAliasSnapshot?: Record<string, string>;
 }
 
 export interface MatchEventRecord {

@@ -1,0 +1,43 @@
+@if (teamCount() === 4) {
+<div class="mode-toggle-row">
+  <div class="mode-toggle" [class.locked]="!canToggleMatchCount()">
+    <button type="button" [class.active]="matchCount() === 1" [disabled]="!canToggleMatchCount()"
+      (click)="matchCountChange.emit(1)">Single</button>
+    <button type="button" [class.active]="matchCount() === 2" [disabled]="!canToggleMatchCount()"
+      (click)="matchCountChange.emit(2)">Multiple</button>
+  </div>
+  @if (!canToggleMatchCount()) {
+  <span class="lock-hint">End the running game to switch</span>
+  }
+</div>
+}
+
+<div class="games-row">
+  @for (vm of slotViewModels(); track vm.slot) {
+  <app-game-slot-panel [slot]="vm.slot" [teamKeys]="vm.teamKeys" [ready]="vm.ready"
+    [live]="vm.live" [score]="vm.score" [scorers]="vm.scorers"
+    [aliases]="aliases()" [colors]="colors()"
+    (start)="start.emit(vm.slot)" (reset)="reset.emit(vm.slot)" (end)="end.emit(vm.slot)" />
+  }
+</div>
+
+<app-players-drag-drop-table
+  [clonedTeams]="teams()"
+  [isLocked]="isMovePlayersLocked()"
+  [numberOfTeams]="teamCount()"
+  [availableSlots]="availableSlots()"
+  [aliases]="aliases()"
+  [colors]="colors()"
+  [canRenameTeams]="isAdmin()"
+  [teamSlots]="assignments()"
+  [matchIdByTeam]="matchIdByTeam()"
+  [lockedTeamKeys]="lockedTeamKeys()"
+  [enableShowRatings]="showRating()"
+  [enableMakeBalancedTeams]="false"
+  [playerStatsMap]="playerStatsMap()"
+  (recordGoalEvent)="recordGoal.emit($event)"
+  (recordOwnGoalEvent)="recordOwnGoal.emit($event)"
+  (teamSlotChange)="teamSlotChange.emit($event)"
+  (dropPlayer)="dropPlayer.emit($event)"
+  (renameTeam)="renameTeam.emit($event)"
+  (changeTeamColor)="changeTeamColor.emit($event)" />

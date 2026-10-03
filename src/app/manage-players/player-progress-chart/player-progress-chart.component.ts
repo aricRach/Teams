@@ -2,10 +2,11 @@ import {Component, HostListener, inject, ViewChild} from '@angular/core';
 import {BaseChartDirective, provideCharts, withDefaultRegisterables} from 'ng2-charts';
 import {PlayerProgressChartService} from '../services/player-progress-chart.service';
 import {FormsModule} from '@angular/forms';
+import {AutoCompleteComponent} from 'ui';
 
 @Component({
   selector: 'app-player-progress-chart',
-  imports: [BaseChartDirective, FormsModule],
+  imports: [BaseChartDirective, FormsModule, AutoCompleteComponent],
   providers: [PlayerProgressChartService,
   provideCharts(withDefaultRegisterables())],
   templateUrl: './player-progress-chart.component.html',

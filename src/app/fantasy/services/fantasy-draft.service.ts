@@ -51,8 +51,10 @@ export class FantasyDraftService {
     );
 
     if (picks?.playerIds?.length) {
+      // look up in all players (guests included) so a pick made before the player became a guest is kept
+      const playersIncludingGuests = this.playersService.flattenPlayers(true, true);
       const selected = picks.playerIds.map(id =>
-        this.allPlayers().find(p => p.id === id) || null
+        playersIncludingGuests.find(p => p.id === id) || null
       );
       this.captain.set(picks.captain);
       const totalSlots = this.draftMetaData().numberOfPicks;

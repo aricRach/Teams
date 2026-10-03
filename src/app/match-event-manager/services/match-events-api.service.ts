@@ -139,7 +139,7 @@ export class MatchEventsApiService {
     await batch.commit();
   }
 
-  async createCorrectionMatch(groupId: string, dateKey: string, createdBy: string): Promise<string> {
+  async createCorrectionMatch(groupId: string, dateKey: string, createdBy: string, aliases: Record<string, string>): Promise<string> {
     const [day, month, year] = dateKey.split('-').map(Number);
     const matchDate = new Date(year, month - 1, day, 12, 0, 0);
     const matchesRef = collection(this.firestore, `groups/${groupId}/matches`);
@@ -147,7 +147,10 @@ export class MatchEventsApiService {
       status: 'correction',
       createdBy,
       createdAt: Timestamp.fromDate(matchDate),
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
+      // Best-effort: reflects alias state at doc-creation time, not the backdated dateKey,
+      // since no historical alias value can be recovered from before this field existed.
+      teamAliasSnapshot: aliases
     });
     return docRef.id;
   }

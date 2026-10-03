@@ -1,6 +1,7 @@
 import {Component, computed, HostListener, inject, input, linkedSignal, output, signal,} from '@angular/core';
 import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
+import {form, FormField, maxLength} from '@angular/forms/signals';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
 import {GoalModalEvent, Player, Statistics, TeamsOptions} from '../models/player.model';
 import {currentDate} from '../../utils/date-utils';
@@ -8,10 +9,13 @@ import {PlayerViewComponent} from '../player-view/player-view.component';
 import {ModalComponent} from '../../../modals/modal/modal.component';
 import {PlayersDragDropTableService} from './players-drag-drop-table.service';
 import {TeamScoreBarsComponent} from '../../shared/team-score-bars/team-score-bars.component';
+import {TeamLabelPipe} from '../../pipes/team-label.pipe';
+import {TEAM_ALIAS_MAX_LENGTH} from '../../utils/team-label.util';
+import {TeamColorPickerComponent} from '../../shared/team-color-picker/team-color-picker.component';
 
 @Component({
   selector: 'app-players-drag-drop-table',
-  imports: [DragDropModule, CommonModule, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent],
+  imports: [DragDropModule, CommonModule, FormField, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent, TeamLabelPipe, TeamColorPickerComponent],
   standalone: true,
   providers: [PlayersDragDropTableService],
   templateUrl: './players-drag-drop-table.component.html',
@@ -26,17 +30,54 @@ export class PlayersDragDropTableComponent {
   clonedTeams = input<any>();
   enableShowRatings = input(false);
   enableMakeBalancedTeams = input(true);
+  // Per-slot display nicknames, e.g. { teamA: 'Rockets' }. Purely for display - the parent owns the data.
+  aliases = input<Record<string, string>>({});
+  // When true, a pencil is shown on each team header to edit its nickname. The parent decides
+  // (e.g. gates it on admin) and handles the actual write via the `renameTeam` output.
+  canRenameTeams = input(false);
+  renameTeam = output<{teamKey: string, alias: string}>();
+  // Per-slot display color, e.g. { teamA: '#e6194b' }. Purely for display - the parent owns the data.
+  colors = input<Record<string, string>>({});
+  // A color swatch is always shown on each team header to pick its color - this component
+  // only ever renders behind an admin-only route, so there's no separate gate like
+  // `canRenameTeams` here. The parent handles the actual write via this output.
+  changeTeamColor = output<{teamKey: string, color: string}>();
   numberOfTeams = input<number>(Infinity);
   playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
   currentMatchId = input<string | null>(null);
   showStatisticsInput = input(false);
   showStatistics = linkedSignal(() => this.showStatisticsInput())
 
+  // Parallel-slots modes (single, league): which slots a team can be assigned to.
+  // One slot -> a plain "playing" checkbox; more than one -> a G1 / G2 / – selector.
+  availableSlots = input<readonly number[]>([]);
+  teamSlots = input<Record<string, number>>({});
+  teamSlotChange = output<Record<string, number>>();
+  // teamKey -> the live matchId of the game that team is playing (null when its game isn't live).
+  matchIdByTeam = input<Record<string, string | null>>({});
+  // Teams whose game has started - their drop list is frozen even though the rest of the board isn't.
+  lockedTeamKeys = input<string[]>([]);
+
+  private liveMatchKey = computed(() =>
+    Object.values(this.matchIdByTeam()).filter(Boolean).sort().join(',')
+  );
+
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent);
   makeBalancedTeamsModalVisible = signal(false);
 
-  // Resets to an empty map whenever currentMatchId changes (new game starts or game ends)
-  liveSessionGoals = linkedSignal<Map<string, number>>(() => { this.currentMatchId(); return new Map(); });
+  // ── Team nickname editing ──────────────────────────────────────────────────
+  renamingTeamKey = signal<string | null>(null);
+  teamAliasModel = signal({ alias: '' });
+  teamAliasForm = form(this.teamAliasModel, (fields) => {
+    maxLength(fields.alias, TEAM_ALIAS_MAX_LENGTH);
+  });
+
+  // Resets to an empty map whenever the live match(es) change (new game starts or game ends)
+  liveSessionGoals = linkedSignal<Map<string, number>>(() => {
+    this.currentMatchId();
+    this.liveMatchKey();
+    return new Map();
+  });
 
   getGoalModalDataByPlayer = linkedSignal(() => {
     const playerId = this.setGoalModalData().player?.id ?? '';
@@ -58,31 +99,61 @@ export class PlayersDragDropTableComponent {
   totalRatings = linkedSignal(() => this.setTotalRatingToAllTeams());
 
   recordGoalEvent = output<{player: Player, teamKey: string}>();
+  // teamKey = the conceding player's own team; the parent credits the goal to the opponent.
+  recordOwnGoalEvent = output<{player: Player, teamKey: string}>();
   removePlayer = output<{team: string, index: number}>();
+
+  // Two-tap guard for the "Own Goal" action in the mini modal (mirrors the +/set flow).
+  ownGoalArmed = signal(false);
 
   readonly teamKeys = computed(() =>
     Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.numberOfTeams()) as TeamsOptions[]
   );
 
+  // A locked team (globally locked, or its game is live) must not be a drop target for
+  // anyone else - only its own (disabled) list should reference it, so it neither
+  // accepts a drop nor can be dragged out of.
+  readonly unlockedTeamKeys = computed(() =>
+    this.teamKeys().filter(key => !this.isTeamLocked(key))
+  );
+
   readonly dropListRefs = computed(() =>
-    [...this.teamKeys(), 'allPlayers']
+    [...this.unlockedTeamKeys(), 'allPlayers']
   );
 
   dropPlayer = output();
   updateTeamStatistics = output<{players: Player[], team: TeamsOptions, name: string, number: number}>();
 
-  playingTeams = input<string[]>([]);
-  playingTeamsChange = output<string[]>();
+  slotTeamCount(slot: number, exceptTeamKey?: string): number {
+    return Object.entries(this.teamSlots())
+      .filter(([key, value]) => value === slot && key !== exceptTeamKey)
+      .length;
+  }
 
-  togglePlayingTeam(teamKey: string) {
-    const current = this.playingTeams();
-    if (current.includes(teamKey)) {
-      this.playingTeamsChange.emit(current.filter(t => t !== teamKey));
+  isSlotButtonDisabled(teamKey: string, slot: number): boolean {
+    if (this.isTeamLocked(teamKey)) return true;
+    return this.teamSlots()[teamKey] !== slot && this.slotTeamCount(slot, teamKey) >= 2;
+  }
+
+  setTeamSlot(teamKey: string, slot: number | null) {
+    if (this.isTeamLocked(teamKey)) return;
+    const current = { ...this.teamSlots() };
+    if (slot === null || current[teamKey] === slot) {
+      delete current[teamKey];
     } else {
-      if (current.length < 2) {
-        this.playingTeamsChange.emit([...current, teamKey]);
-      }
+      if (this.slotTeamCount(slot, teamKey) >= 2) return;
+      current[teamKey] = slot;
     }
+    this.teamSlotChange.emit(current);
+  }
+
+  isTeamLocked(teamKey: string): boolean {
+    return !!this.isLocked() || this.lockedTeamKeys().includes(teamKey);
+  }
+
+  /** Whether double-clicking a player in this team should open the goal modal. */
+  isGoalTaggingEnabled(teamKey: string): boolean {
+    return !!this.matchIdByTeam()[teamKey];
   }
 
   private setTotalRatingToAllTeams() {
@@ -99,6 +170,7 @@ export class PlayersDragDropTableComponent {
 
   closeSetGoalModal() {
     this.isSetGoalModalVisible.set(false);
+    this.ownGoalArmed.set(false);
   }
 
   calculateRating(players: Player[]) {
@@ -136,6 +208,7 @@ export class PlayersDragDropTableComponent {
       player: data.player,
       team: data.team
     });
+    this.ownGoalArmed.set(false);
     this.isSetGoalModalVisible.set(true);
   }
 
@@ -157,6 +230,15 @@ export class PlayersDragDropTableComponent {
       const updated = new Map(this.liveSessionGoals());
       updated.set(player.id, (updated.get(player.id) || 0) + 1);
       this.liveSessionGoals.set(updated);
+    }
+    this.closeSetGoalModal();
+  }
+
+  setOwnGoal() {
+    const { player, team: teamKey } = this.setGoalModalData();
+    // No liveSessionGoals bump - an own goal must not credit the conceding player.
+    if (player) {
+      this.recordOwnGoalEvent.emit({player, teamKey});
     }
     this.closeSetGoalModal();
   }
@@ -193,5 +275,25 @@ export class PlayersDragDropTableComponent {
 
   toggleShowStatistics() {
     this.showStatistics.set(!this.showStatistics());
+  }
+
+  startTeamRename(teamKey: string) {
+    this.teamAliasModel.set({ alias: this.aliases()[teamKey] ?? '' });
+    this.renamingTeamKey.set(teamKey);
+  }
+
+  cancelTeamRename() {
+    this.renamingTeamKey.set(null);
+  }
+
+  saveTeamRename(teamKey: string) {
+    this.renameTeam.emit({ teamKey, alias: this.teamAliasModel().alias });
+    this.renamingTeamKey.set(null);
+  }
+
+  takenColorsExcluding(teamKey: string): string[] {
+    return Object.entries(this.colors())
+      .filter(([key]) => key !== teamKey)
+      .map(([, value]) => value);
   }
 }

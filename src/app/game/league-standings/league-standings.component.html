@@ -1,0 +1,42 @@
+<div class="standings">
+  <h3>{{ title() }}</h3>
+  @if (rows().length === 0) {
+  <p class="empty">No completed games yet.</p>
+  } @else {
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th class="team">Team</th>
+          <th>P</th>
+          <th>W</th>
+          <th>D</th>
+          <th>L</th>
+          <th>GD</th>
+          <th>Pts</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.teamKey) {
+        <tr>
+          <td class="team">
+            <div class="team-cell">
+              <span class="letter" [appTeamColor]="colors()[row.teamKey]">{{ teamLetter(row.teamKey) }}</span>
+              @if (teamAlias(row.teamKey); as alias) {
+              <span class="alias">{{ alias }}</span>
+              }
+            </div>
+          </td>
+          <td>{{ row.played }}</td>
+          <td>{{ row.won }}</td>
+          <td>{{ row.drawn }}</td>
+          <td>{{ row.lost }}</td>
+          <td>{{ row.goalDiff > 0 ? '+' : '' }}{{ row.goalDiff }}</td>
+          <td class="pts">{{ row.points }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  }
+</div>

@@ -1,0 +1,33 @@
+<div class="in-row center gap">
+  <h1>Teams</h1>
+  <button class="action-btn" (click)="single.revealTeams()">Save Team Selection</button>
+</div>
+
+<button class="button-icon" (click)="single.toggleMovePlayersLock()">
+  <img alt="lock" [src]="single.lockIcon()" height="30" width="30">
+</button>
+
+<app-game-slots-board
+  [slotViewModels]="single.visibleSlotViewModels()"
+  [availableSlots]="single.activeSlots()"
+  [matchCount]="single.matchCount()"
+  [canToggleMatchCount]="single.canToggleMatchCount()"
+  (matchCountChange)="single.setMatchCount($event)"
+  [aliases]="single.teamAliases()"
+  [colors]="single.teamColors()"
+  [teams]="single.teams()"
+  [teamCount]="single.teamCount()"
+  [isMovePlayersLocked]="single.isMovePlayersLocked()"
+  [assignments]="single.assignments()"
+  [matchIdByTeam]="single.matchIdByTeam()"
+  [lockedTeamKeys]="single.lockedTeamKeys()"
+  [showRating]="single.showRating()"
+  [isAdmin]="single.isAdmin()"
+  [playerStatsMap]="single.playerStatsMap()"
+  (start)="onStart($event)" (reset)="onReset($event)" (end)="onEnd($event)"
+  (recordGoal)="recordGoal($event)"
+  (recordOwnGoal)="recordOwnGoal($event)"
+  (teamSlotChange)="single.setAssignments($event)"
+  (dropPlayer)="single.updateTeams($event)"
+  (renameTeam)="single.renameTeam($event.teamKey, $event.alias)"
+  (changeTeamColor)="single.changeTeamColor($event.teamKey, $event.color)" />

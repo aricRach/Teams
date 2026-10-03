@@ -1,0 +1,8 @@
+:host {
+  display: block;
+}
+
+// Keep the title + "Save Team Selection" button from overflowing on narrow screens.
+.in-row.center.gap {
+  flex-wrap: wrap;
+}

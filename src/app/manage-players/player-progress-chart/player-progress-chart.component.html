@@ -1,3 +1,21 @@
+@if(playerProgressChartService.managePlayersService.selectedPlayer() ) {
+  <div class="center gap-10">
+    <label>
+      compare with player
+      <input [(ngModel)]="playerProgressChartService.isCompareMode" (change)="playerProgressChartService.compareModeToggle()" type="checkbox">
+    </label>
+
+    @if(playerProgressChartService.isCompareMode) {
+      <app-auto-complete
+        [inputValue]="playerProgressChartService.compareWithPlayer()?.name || ''"
+        [options]="playerProgressChartService.compareWithPlayerAutoCompleteOptions()"
+        (optionSelected)="playerProgressChartService.onChangeComparePlayer($event)"
+        (optionCleaned)="playerProgressChartService.removeComparePlayer()">
+      </app-auto-complete>
+    }
+  </div>
+}
+
 @if(playerProgressChartService.managePlayersService.selectedPlayer()) {
   <div class="stat-toggle">
     <button
@@ -15,7 +33,27 @@
     >
       Wins
     </button>
+
+    <button
+      class="link-btn"
+      [class.active]="playerProgressChartService.statToShow() === 'performance'"
+      (click)="playerProgressChartService.toggleStat('performance')"
+    >
+      Performance
+    </button>
   </div>
+
+  @if(playerProgressChartService.performanceSummary(); as summary) {
+    <div class="performance-summary">
+      @if(summary.length > 1) {
+        <span>{{ summary[0].name }}: {{ summary[0].average }}</span>
+        <span class="vs">vs</span>
+        <span>{{ summary[1].name }}: {{ summary[1].average }}</span>
+      } @else {
+        <span>Avg performance: {{ summary[0].average }}</span>
+      }
+    </div>
+  }
 
   <canvas
     class="chart-canvas"
@@ -31,19 +69,5 @@
   </div>
 }
 
-@if(playerProgressChartService.managePlayersService.selectedPlayer() ) {
-  <label>
-    compare with player
-    <input [(ngModel)]="playerProgressChartService.isCompareMode" (change)="playerProgressChartService.compareModeToggle()" type="checkbox">
-  </label>
-
-  @if(playerProgressChartService.isCompareMode) {
-    <select id="select-player" [(ngModel)]="playerProgressChartService.selectedPlayerOption" (change)="playerProgressChartService.onChangePlayer()">
-      @for(player of playerProgressChartService.compareWithPlayerOptions(); track player.name) {
-        <option>{{player.name}}</option>
-      }
-    </select>
-  }
-}
 
 

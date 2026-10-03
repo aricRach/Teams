@@ -1,3 +1,10 @@
+<div class="center">
+  <label>
+    show guests
+    <input type="checkbox" [checked]="playersStatisticsTableService.showGuests()" (change)="playersStatisticsTableService.showGuests.set($any($event.target).checked)">
+  </label>
+</div>
+
 <div class="stats-grid">
   <app-grid
     [changeToListInSmallScreens]="false"

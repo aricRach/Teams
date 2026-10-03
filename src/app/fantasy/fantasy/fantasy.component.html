@@ -13,7 +13,7 @@
   @if(canDraft()) {
     <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="draft" [queryParams]="{reload: reloadParam()}">Draft</a>
   }
-  <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="analytics" [queryParams]="{reload: reloadParam()}">Analytics</a>
+  <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="analytics" [queryParams]="{reload: reloadParam()}">Leaderboard</a>
   @if(fantasyService.isAdmin()) {
     <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="manage-fantasy-meta" [queryParams]="{reload: reloadParam()}">Manage fantasy</a>
   }

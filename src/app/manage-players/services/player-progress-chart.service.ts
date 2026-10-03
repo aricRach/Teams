@@ -1,9 +1,11 @@
-import {computed, inject, Injectable, linkedSignal, signal} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {ChartData, ChartDataset, ChartOptions} from 'chart.js';
 import {PlayersService} from '../../players/players.service';
 import {Player} from '../../players/models/player.model';
 import {ManagePlayersService} from './manage-players.service';
 import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
+import {averagePerformance, calculatePerformance} from '../../statistics/utils/performance.util';
+import {AutoCompleteOption} from 'ui';
 
 export enum ViewMode{
   WIN = 'win',
@@ -14,7 +16,7 @@ export class PlayerProgressChartService {
   managePlayersService = inject(ManagePlayersService);
   playersService = inject(PlayersService);
   private computedStatsService = inject(ComputedStatisticsService);
-  statToShow = signal<'goals' | 'wins'>('goals');
+  statToShow = signal<'goals' | 'wins' | 'performance'>('goals');
   lineChartOptions = computed((): ChartOptions<'line'> => {
     return {
       responsive: true,
@@ -52,19 +54,22 @@ export class PlayerProgressChartService {
   });
 
   lineChartLegend = true;
-  selectedPlayerOption = '';
   isCompareMode = false;
 
   compareWithPlayerOptions = computed(() => {
     return [...this.playersService.flattenPlayers().filter((p: Player) => p.name !== this.managePlayersService.selectedPlayer()?.name)];
   });
-  compareWithPlayer = linkedSignal<any>(() => {
-    debugger
-    return this.compareWithPlayerOptions().filter((p => p.name === this.selectedPlayerOption))[0] || null;
+  compareWithPlayerAutoCompleteOptions = computed(() => {
+    return this.compareWithPlayerOptions().map((p: Player) => ({value: p.id, alias: p.name}));
   });
-  onChangePlayer() {
-    debugger
-    this.compareWithPlayer.set(this.compareWithPlayerOptions().filter((p => p.name === this.selectedPlayerOption))[0]);
+  compareWithPlayer = signal<Player | null>(null);
+
+  onChangeComparePlayer(option: AutoCompleteOption) {
+    this.compareWithPlayer.set(this.compareWithPlayerOptions().find(p => p.id === option.value) ?? null);
+  }
+
+  removeComparePlayer() {
+    this.compareWithPlayer.set(null);
   }
 
   lineChartData = computed((): ChartData<'line', { x: Date; y: number }[]> => {
@@ -84,7 +89,8 @@ export class PlayerProgressChartService {
         .filter(([_, stats]) => stats.games > 0)
         .map(([dateStr, stats]) => {
           const [day, month, year] = dateStr.split('-').map(Number);
-          return {x: new Date(year, month - 1, day), y: stats[statType] ?? 0};
+          const y = statType === 'performance' ? calculatePerformance(stats) : (stats[statType] ?? 0);
+          return {x: new Date(year, month - 1, day), y};
         })
         .sort((a, b) => a.x.getTime() - b.x.getTime())
         .slice(-9);
@@ -102,12 +108,25 @@ export class PlayerProgressChartService {
     };
   });
 
-  toggleStat(stat: 'goals' | 'wins') {
+  performanceSummary = computed(() => {
+    if (this.statToShow() !== 'performance') return null;
+    const player = this.managePlayersService.selectedPlayer() as Player;
+    if (!player) return null;
+
+    const comparedPlayer = this.compareWithPlayer();
+    const players = comparedPlayer ? [player, comparedPlayer as Player] : [player];
+
+    return players.map(p => ({
+      name: p.name,
+      average: averagePerformance(Array.from(this.computedStatsService.statsForPlayer(p.id).values())),
+    }));
+  });
+
+  toggleStat(stat: 'goals' | 'wins' | 'performance') {
     this.statToShow.set(stat);
   }
 
   compareModeToggle() {
-    this.selectedPlayerOption = '';
     this.compareWithPlayer.set(null);
   }
 }

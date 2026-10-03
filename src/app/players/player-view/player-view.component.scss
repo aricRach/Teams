@@ -2,6 +2,42 @@
   user-select: none;
   word-break: break-word;
   overflow-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  gap: 2px;
+}
+
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+// Only this element starts a drag - touching the rest of the box (padding, stats) does not.
+.player-name {
+  cursor: grab;
+  position: relative;
+
+  // Invisible grab area around the name so short names are still easy to grab.
+  // Doesn't affect layout; never narrower than 72px.
+  &::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% + 24px);
+    min-width: 72px;
+  }
+}
+
+.player-stats {
+  font-size: 0.75rem;
+  color: #666;
 }
 
 .up {
