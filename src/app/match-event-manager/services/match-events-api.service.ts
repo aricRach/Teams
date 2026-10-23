@@ -24,9 +24,6 @@ import { MatchEventRecord, MatchRecord } from '../models/match-event.model';
 export class MatchEventsApiService {
   private firestore = inject(Firestore);
 
-  /**
-   * Mark every `live` match in the group as abandoned (cleanup before starting a new one).
-   */
   async abandonAllLiveMatches(groupId: string): Promise<void> {
     const matchesRef = collection(this.firestore, `groups/${groupId}/matches`);
     const q = query(matchesRef, where('status', '==', 'live'));
@@ -91,14 +88,12 @@ export class MatchEventsApiService {
     return collectionData(q, { idField: 'id' }) as unknown as Observable<MatchRecord[]>;
   }
 
-  // For the matches timeline — orders by game minute, excludes events without timerMs (e.g. stat_correction)
   getEvents(groupId: string, matchId: string): Observable<MatchEventRecord[]> {
     const eventsRef = collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`);
     const q = query(eventsRef, orderBy('payload.timerMs', 'asc'));
     return collectionData(q, { idField: 'id' }) as unknown as Observable<MatchEventRecord[]>;
   }
 
-  // For statistics computation — orders by createdAt so all event types are included
   getAllEvents(groupId: string, matchId: string): Observable<MatchEventRecord[]> {
     const eventsRef = collection(this.firestore, `groups/${groupId}/matches/${matchId}/events`);
     const q = query(eventsRef, orderBy('createdAt', 'asc'));

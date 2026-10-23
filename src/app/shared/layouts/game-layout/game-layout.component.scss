@@ -1,0 +1,7 @@
+@use '../layouts';
+
+:host {
+  @include layouts.frame;
+}
+
+@include layouts.header;

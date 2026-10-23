@@ -47,12 +47,10 @@ export class StopwatchComponent {
     this.timeResetEvent.emit();
   }
 
-  /** Elapsed time in ms (matches displayed timer when running or paused). */
   getElapsedMs(): number {
     return this.time;
   }
 
-  /** Zero the timer without emitting any event (used after a league game ends). */
   clear(): void {
     clearInterval(this.interval);
     this.running = false;

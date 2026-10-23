@@ -1,0 +1,13 @@
+@if (heading()) {
+  <h1 class="section-layout-title">{{ heading() }}</h1>
+}
+
+<div class="section-layout-intro"><ng-content select="[section-intro]" /></div>
+
+@if (tabs().length) {
+  <app-inner-tabs [tabs]="tabs()" />
+}
+
+<div class="section-layout-toolbar"><ng-content select="[section-toolbar]" /></div>
+
+<ng-content />

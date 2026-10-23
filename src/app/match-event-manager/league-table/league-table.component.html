@@ -1,18 +1,18 @@
-<div class="league-table-page">
-  <h2>League Table</h2>
-
-  @if (league.availableDates().length === 0) {
-  <p class="empty">No league games have been played yet.</p>
-  } @else {
-  <div class="date-selector">
-    <label for="league-date-select">Select Date: </label>
-    <select id="league-date-select" [ngModel]="league.selectedDate()" (change)="league.onDateChange($event)">
-      @for (date of league.availableDates(); track date) {
-      <option [value]="date">{{ date }}</option>
-      }
-    </select>
-  </div>
+<app-data-layout
+  heading="League Table"
+  [loading]="league.isLoading()"
+  [error]="league.hasError()"
+  errorHeading="Couldn't load standings"
+  [empty]="league.hasNoLeagueGames()"
+  emptyHeading="No league games have been played yet."
+  (retry)="league.reload()">
+  @if (!league.isLoading() && !league.hasError() && !league.hasNoLeagueGames()) {
+    <app-date-filter
+      layout-toolbar
+      [dates]="league.availableDates()"
+      [selectedDate]="league.selectedDate()"
+      (dateSelected)="league.onDateChange($event)" />
+  }
 
   <app-league-standings [rows]="league.rows()" [title]="league.selectedDate()" [aliases]="league.dateAliases()" [colors]="league.dateColors()" />
-  }
-</div>
+</app-data-layout>

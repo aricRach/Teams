@@ -1,73 +1,88 @@
-@if(playerProgressChartService.managePlayersService.selectedPlayer() ) {
-  <div class="center gap-10">
-    <label>
+<app-data-layout
+  [empty]="!playerProgressChartService.managePlayersService.selectedPlayer()"
+  emptyHeading="Please select a player from the list">
+  @if(playerProgressChartService.managePlayersService.selectedPlayer()) {
+    <label layout-toolbar>
       compare with player
       <input [(ngModel)]="playerProgressChartService.isCompareMode" (change)="playerProgressChartService.compareModeToggle()" type="checkbox">
     </label>
-
-    @if(playerProgressChartService.isCompareMode) {
-      <app-auto-complete
-        [inputValue]="playerProgressChartService.compareWithPlayer()?.name || ''"
-        [options]="playerProgressChartService.compareWithPlayerAutoCompleteOptions()"
-        (optionSelected)="playerProgressChartService.onChangeComparePlayer($event)"
-        (optionCleaned)="playerProgressChartService.removeComparePlayer()">
-      </app-auto-complete>
-    }
-  </div>
-}
-
-@if(playerProgressChartService.managePlayersService.selectedPlayer()) {
-  <div class="stat-toggle">
-    <button
-      class="link-btn"
-      [class.active]="playerProgressChartService.statToShow() === 'goals'"
-      (click)="playerProgressChartService.toggleStat('goals')"
-    >
-      Goals
-    </button>
-
-    <button
-      class="link-btn"
-      [class.active]="playerProgressChartService.statToShow() === 'wins'"
-      (click)="playerProgressChartService.toggleStat('wins')"
-    >
-      Wins
-    </button>
-
-    <button
-      class="link-btn"
-      [class.active]="playerProgressChartService.statToShow() === 'performance'"
-      (click)="playerProgressChartService.toggleStat('performance')"
-    >
-      Performance
-    </button>
-  </div>
-
-  @if(playerProgressChartService.performanceSummary(); as summary) {
-    <div class="performance-summary">
-      @if(summary.length > 1) {
-        <span>{{ summary[0].name }}: {{ summary[0].average }}</span>
-        <span class="vs">vs</span>
-        <span>{{ summary[1].name }}: {{ summary[1].average }}</span>
-      } @else {
-        <span>Avg performance: {{ summary[0].average }}</span>
-      }
-    </div>
   }
 
-  <canvas
-    class="chart-canvas"
-    baseChart
-    [type]="'line'"
-    [data]="playerProgressChartService.lineChartData()"
-    [options]="playerProgressChartService.lineChartOptions()"
-    [legend]="playerProgressChartService.lineChartLegend">
-  </canvas>
-} @else {
-  <div class="center">
-    Please select a player from the list
-  </div>
-}
+  @if(playerProgressChartService.managePlayersService.selectedPlayer() && playerProgressChartService.isCompareMode) {
+    <app-auto-complete
+      layout-toolbar
+      [inputValue]="playerProgressChartService.compareWithPlayer()?.name || ''"
+      [options]="playerProgressChartService.compareWithPlayerAutoCompleteOptions()"
+      (optionSelected)="playerProgressChartService.onChangeComparePlayer($event)"
+      (optionCleaned)="playerProgressChartService.removeComparePlayer()">
+    </app-auto-complete>
+  }
 
+  <!-- Kept behind the player check: projected content is created even while the layout shows its empty state. -->
+  @if(playerProgressChartService.managePlayersService.selectedPlayer()) {
+    <div class="chart">
+      <div class="stat-toggle">
+        <button
+          class="link-btn"
+          [class.active]="playerProgressChartService.statToShow() === 'goals'"
+          (click)="playerProgressChartService.toggleStat('goals')"
+        >
+          Goals
+        </button>
 
+        <button
+          class="link-btn"
+          [class.active]="playerProgressChartService.statToShow() === 'wins'"
+          (click)="playerProgressChartService.toggleStat('wins')"
+        >
+          Wins
+        </button>
 
+        <button
+          class="link-btn"
+          [class.active]="playerProgressChartService.statToShow() === 'performance'"
+          (click)="playerProgressChartService.toggleStat('performance')"
+        >
+          Performance
+        </button>
+
+        <button
+          type="button"
+          class="info-btn"
+          aria-label="How performance is calculated"
+          #performanceTip="matTooltip"
+          [matTooltip]="playerProgressChartService.performanceDescription"
+          matTooltipClass="tooltip-lines"
+          (click)="performanceTip.toggle()"
+        >
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+            <line x1="12" y1="11" x2="12" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="7.5" r="1.25" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      @if(playerProgressChartService.performanceSummary(); as summary) {
+        <div class="performance-summary">
+          @if(summary.length > 1) {
+            <span>{{ summary[0].name }}: {{ summary[0].average }}</span>
+            <span class="vs">vs</span>
+            <span>{{ summary[1].name }}: {{ summary[1].average }}</span>
+          } @else {
+            <span>Avg performance: {{ summary[0].average }}</span>
+          }
+        </div>
+      }
+
+      <canvas
+        class="chart-canvas"
+        baseChart
+        [type]="'line'"
+        [data]="playerProgressChartService.lineChartData()"
+        [options]="playerProgressChartService.lineChartOptions()"
+        [legend]="playerProgressChartService.lineChartLegend">
+      </canvas>
+    </div>
+  }
+</app-data-layout>

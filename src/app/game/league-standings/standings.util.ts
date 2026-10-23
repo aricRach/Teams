@@ -12,10 +12,6 @@ export interface StandingsRow {
   points: number;
 }
 
-/**
- * Build a league table from a pre-filtered list of completed matches
- * (caller decides the scope - one session, one day, ...).
- */
 export function computeStandings(matches: MatchRecord[]): StandingsRow[] {
   const rows = new Map<string, StandingsRow>();
   const ensure = (teamKey: string): StandingsRow => {

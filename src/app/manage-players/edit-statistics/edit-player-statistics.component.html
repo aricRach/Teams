@@ -1,9 +1,11 @@
-@if(editStatisticsService.showForm()) {
-  <app-generic-form
-    [formFields]=editStatisticsService.gameControls()
-    [title]="editStatisticsService.editStatisticsFormTitle()"
-    (formSubmit)="editStatisticsService.editLastStatistics($event)">
-  </app-generic-form>
-} @else {
-  <h5 class="center">This player has not played yet, nothing to edit</h5>
-}
+<app-form-layout [heading]="editStatisticsService.showForm() ? editStatisticsService.editStatisticsFormTitle() : undefined">
+  @if(editStatisticsService.showForm()) {
+    <app-generic-form
+      [class.form-is-pending]="editStatisticsService.saveCorrection.pending()"
+      [formFields]=editStatisticsService.gameControls()
+      (formSubmit)="editStatisticsService.editLastStatistics($event)">
+    </app-generic-form>
+  } @else {
+    <app-state-message kind="empty" heading="This player has not played yet, nothing to edit" />
+  }
+</app-form-layout>

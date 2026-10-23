@@ -1,8 +1,8 @@
 import { Player, Statistics } from '../players/models/player.model';
 
 export interface TeamScores {
-  attackScore: number;  // 0–100 normalised (best attacking team = 100)
-  defenseScore: number; // 0–100 normalised (best defending team = 100)
+  attackScore: number;
+  defenseScore: number;
 }
 
 export function computeTeamScores(

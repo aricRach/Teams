@@ -1,11 +1,11 @@
 .table-container {
-  width: fit-content;
   overflow-x: auto;
   border: 1px solid #ddd;
   padding: 15px 5px 5px;
 }
 
 table {
+  width: 100%;
   border-collapse: collapse;
   th,
   td {
@@ -16,6 +16,16 @@ table {
 
   td {
     vertical-align: top;
+  }
+
+  td input:not([type='checkbox']) {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  td.guest,
+  td.delete-row {
+    width: 1%;
   }
 
   td.delete-row {
@@ -50,11 +60,6 @@ td input + .input-error:empty {
   visibility: hidden;
 }
 
-.actions {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
 
 @media (max-width: 400px) {
   .table-container{

@@ -1,14 +1,15 @@
 import {Component, inject, input, OnInit} from '@angular/core';
 import {FantasyAnalyticsService} from '../services/fantasy-analytics.service';
-import {JsonPipe} from '@angular/common';
 import {GridComponent} from 'ui';
 import {FantasyData, FantasyMeta} from '../services/fantasy-api.service';
 import {ActivatedRoute} from '@angular/router';
 import {Player} from '../../players/models/player.model';
+import {DateFilterComponent} from '../../shared/date-filter/date-filter.component';
+import {DataLayoutComponent} from '../../shared/layouts/data-layout/data-layout.component';
 
 @Component({
   selector: 'app-fantasy-analytics',
-  imports: [JsonPipe, GridComponent],
+  imports: [GridComponent, DateFilterComponent, DataLayoutComponent],
   providers: [FantasyAnalyticsService],
   templateUrl: './fantasy-analytics.component.html',
   styleUrl: './fantasy-analytics.component.scss'

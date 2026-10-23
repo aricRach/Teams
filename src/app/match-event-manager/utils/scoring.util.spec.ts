@@ -42,7 +42,6 @@ describe('computeGoalTally', () => {
   });
 
   it('adds own_goal to the beneficiary team (its teamKey), not the conceding team', () => {
-    // player on teamA scored into their own net -> teamB benefits
     const events = [
       ev({ type: 'player_goal', teamKey: 'teamA' }),
       ev({ type: 'own_goal', teamKey: 'teamB', playerId: 'a1' }),

@@ -1,4 +1,5 @@
 import {Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {FormLayoutComponent} from '../../shared/layouts/form-layout/form-layout.component';
 import {ReactiveFormsModule} from '@angular/forms';
 
 import {RegisterPlayersService} from '../services/register-players.service';
@@ -7,7 +8,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-register-players',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, FormLayoutComponent],
   templateUrl: './register-players.component.html',
   styleUrl: './register-players.component.scss',
   providers: [RegisterPlayersService]

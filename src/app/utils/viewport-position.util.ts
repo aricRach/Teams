@@ -1,8 +1,3 @@
-/**
- * Left offset (relative to `anchorRect.left`) to apply to an element so it sits
- * centered under the anchor, clamped so it never overflows either edge of the
- * viewport.
- */
 export function centerUnderAnchor(
   anchorRect: { left: number; width: number },
   elementWidth: number,

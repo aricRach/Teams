@@ -1,32 +1,32 @@
-<div class="matches-container">
-  <h2>Matches Timeline</h2>
-
-  <div class="date-selector">
-    <label for="date-select">Select Date: </label>
-    <select id="date-select" [ngModel]="matchTimelineService.selectedDate()" (change)="matchTimelineService.onDateChange($event)">
-      @for (date of matchTimelineService.availableDates(); track date) {
-        <option [value]="date">{{ date }}</option>
-      }
-    </select>
-  </div>
+<app-data-layout
+  heading="Matches Timeline"
+  [loading]="matchTimelineService.isLoading()"
+  [error]="matchTimelineService.hasError()"
+  errorHeading="Couldn't load matches"
+  [empty]="matchTimelineService.hasNoMatches()"
+  emptyHeading="No matches found for selected date."
+  (retry)="matchTimelineService.reload()">
+  @if (matchTimelineService.availableDates().length) {
+    <app-date-filter
+      layout-toolbar
+      [dates]="matchTimelineService.availableDates()"
+      [selectedDate]="matchTimelineService.selectedDate()"
+      (dateSelected)="matchTimelineService.onDateChange($event)" />
+  }
 
   <div class="match-panels">
-    @if (matchTimelineService.matchPanelsData().length === 0) {
-      <p class="no-matches">No matches found for selected date.</p>
-    } @else {
-      @for (panel of matchTimelineService.matchPanelsData(); track panel.slot) {
-        <app-game-slot-panel
-          label="Match"
-          [slot]="panel.slot"
-          [teamKeys]="panel.teamKeys"
-          [score]="panel.score"
-          [scorers]="panel.scorers"
-          [squad]="panel.squad"
-          [aliases]="panel.aliases"
-          [showTimer]="false"
-          [mode]="panel.mode"
-        ></app-game-slot-panel>
-      }
+    @for (panel of matchTimelineService.matchPanelsData(); track panel.slot) {
+      <app-game-slot-panel
+        label="Match"
+        [slot]="panel.slot"
+        [teamKeys]="panel.teamKeys"
+        [score]="panel.score"
+        [scorers]="panel.scorers"
+        [squad]="panel.squad"
+        [aliases]="panel.aliases"
+        [showTimer]="false"
+        [mode]="panel.mode"
+      ></app-game-slot-panel>
     }
   </div>
-</div>
+</app-data-layout>

@@ -134,15 +134,16 @@ export class CreateDraftSessionService {
     }
   }
 
-  async removeSession(sessionId: string): Promise<void> {
-    await this.playersService.removeDraftSession(sessionId);
+  async removeSession(sessionId: string): Promise<boolean> {
+    if (!await this.playersService.removeDraftSession.run(sessionId)) return false;
     this.navigationService.unlockNavigation();
     this.router.navigate(['/home']);
+    return true;
   }
 
   async finishTeamDraftSession(sessionData: any) {
     this.setTeamsAfterDraft(sessionData.teamCount, sessionData.teams);
-    await this.removeSession(sessionData.id);
+    if (!await this.removeSession(sessionData.id)) return;
     this.popoutService.addSuccessPopOut('New teams were set successfully');
     this.navigationService.unlockNavigation();
     this.router.navigate(['home', 'game']);
@@ -188,7 +189,7 @@ export class CreateDraftSessionService {
 
     // Step 5: Save or emit the updated teams
     this.playersService.setTeams(newTeams);
-    this.playersService.savePlayers().then();
+    void this.playersService.savePlayers.run();
   }
 
   lockNavigation() {

@@ -1,13 +1,15 @@
 import {Component, inject} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {StatisticsService} from '../services/statistics.service';
-import {InnerTabsComponent} from '../../shared/inner-tabs/inner-tabs.component';
+import {SectionLayoutComponent} from '../../shared/layouts/section-layout/section-layout.component';
+import {DateFilterComponent} from '../../shared/date-filter/date-filter.component';
 
 @Component({
   selector: 'app-statistics',
   imports: [
+    SectionLayoutComponent,
     RouterOutlet,
-    InnerTabsComponent
+    DateFilterComponent
   ],
   templateUrl: './statistics.component.html',
   standalone: true,

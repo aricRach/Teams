@@ -1,14 +1,16 @@
 import {Component, computed, inject, input, OnInit} from '@angular/core';
-import {ActivatedRoute, RouterModule} from '@angular/router';
+import {ActivatedRoute, RouterOutlet} from '@angular/router';
 import {FantasyService} from '../services/fantasy.service';
 import {FantasyMeta} from '../services/fantasy-api.service';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {map} from 'rxjs';
 import {compareDateWithToday} from '../../utils/date-utils';
+import {SectionLayoutComponent} from '../../shared/layouts/section-layout/section-layout.component';
+import {InnerTab} from '../../shared/inner-tabs/inner-tabs.component';
 
 @Component({
   selector: 'app-fantasy',
-  imports: [RouterModule],
+  imports: [SectionLayoutComponent, RouterOutlet],
   providers: [FantasyService],
   templateUrl: './fantasy.component.html',
   styleUrl: './fantasy.component.scss'
@@ -34,4 +36,14 @@ export class FantasyComponent {
       })
     )
   );
+
+  tabs = computed((): InnerTab[] => {
+    const queryParams = {reload: this.reloadParam()};
+    const tab = (link: string, title: string): InnerTab => ({link, title, tooltip: '', isDisabled: false, queryParams});
+    return [
+      ...(this.canDraft() ? [tab('draft', 'Draft')] : []),
+      tab('analytics', 'Leaderboard'),
+      ...(this.fantasyService.isAdmin() ? [tab('manage-fantasy-meta', 'Manage fantasy')] : []),
+    ];
+  });
 }

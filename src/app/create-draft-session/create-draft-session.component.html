@@ -1,85 +1,82 @@
-<header>
-<h2>Create Draft Session</h2>
-</header>
-
+<app-form-layout heading="Create Draft Session">
   @if(sessionUrlToShow()) {
     <div class="share-draft">
-    <p class="center">Send the following link to the relevant players:</p>
-    <div class="in-row center">
-      <div class="invite-url ">{{sessionUrlToShow()}}</div>
-      <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(activeSession())">
-        <img src="assets/icons/whatsapp.svg" alt="whatsapp">
-      </button>
+      <p class="center">Send the following link to the relevant players:</p>
+      <div class="in-row center">
+        <div class="invite-url ">{{sessionUrlToShow()}}</div>
+        <button class="whatsapp-btn" (click)="createDraftSessionService.shareTeamDraftOnWhatsApp(activeSession())">
+          <img src="assets/icons/whatsapp.svg" alt="whatsapp">
+        </button>
+      </div>
     </div>
-    </div>
-
-    <section>
-      <a class="link-btn team-draft-link" [routerLink]="sessionRouterLink()">Go To Team Draft</a>
-
-      <button class="active-btn alert-btn" (click)="createDraftSessionService.removeSession(activeSession())">delete session</button>
-
-      @if(existingSession()?.status === 'completed') {
-        <button class="active-btn action-btn set-teams-after-draft" (click)="createDraftSessionService.finishTeamDraftSession(existingSession())">Submit and set teams</button>
-      }
-    </section>
-
+  } @else {
+    <main>
+      <section>
+        <small>Choose the players that will be participate in the next meeting and the captains<br></small>
+        <small>Send the link to the captains and start the draft, the order of the selection is randomly</small>
+      </section>
+        <div class="number-of-selected-players"> selected players: {{this.createDraftSessionService.checkedPlayers.size}}</div>
+      <div class="check-players">
+        @for (player of createDraftSessionService.allPlayers(); track player.id) {
+          <label class="select-player">
+            <input type="checkbox"
+                   [checked]="createDraftSessionService.checkedPlayers.has(player.id)"
+                   [value]="player"
+                   (change)="createDraftSessionService.togglePlayer(player, $event.target)"
+            />
+            {{ player.name }}
+          </label>
+        }
+      </div>
+  
+      <section class="in-row center gap-10">
+        <form [formGroup]="form" (ngSubmit)="submit()">
+            <label for="select-number-of-teams">
+                Number of teams:
+            </label>
+          <select id="select-number-of-teams" formControlName="numberOfTeams" class="select-number-of-teams">
+            <option [ngValue]="2">2</option>
+            <option [ngValue]="3">3</option>
+            <option [ngValue]="4">4</option>
+          </select>
+  
+          <div formArrayName="captains">
+              <small>select captain for each team and email to get link for team draft</small>
+            @for (captainGroup of captains.controls; track captainGroup; let i = $index) {
+              <div class="in-row gap-10 btn-mrg" [formGroupName]="i">
+                <input formControlName="captainEmail" placeholder="Captain email" />
+                <select formControlName="player" [compareWith]="comparePlayers">
+                    @for(player of createDraftSessionService.captainOptions()[i]; track player) {
+                        <option [ngValue]="player">
+                        {{ player.name }}
+                        </option>
+                    }
+                </select>
+              </div>
+            }
+          </div>
+          <label [matTooltip]="'By select it, selection order will be 1,2,3,3,2,1..'">
+            <input type="checkbox" formControlName="isSnakeMode" />
+            Use snake mode
+          </label>
+        </form>
+      </section>
+    </main>
   }
 
-@if(!sessionUrlToShow()){
-  <main>
-    <section>
-      <small>Choose the players that will be participate in the next meeting and the captains<br></small>
-      <small>Send the link to the captains and start the draft, the order of the selection is randomly</small>
-    </section>
-      <div class="number-of-selected-players"> selected players: {{this.createDraftSessionService.checkedPlayers.size}}</div>
-    <div class="check-players">
-      @for (player of createDraftSessionService.allPlayers(); track player.id) {
-        <label class="select-player">
-          <input type="checkbox"
-                 [checked]="createDraftSessionService.checkedPlayers.has(player.id)"
-                 [value]="player"
-                 (change)="createDraftSessionService.togglePlayer(player, $event.target)"
-          />
-          {{ player.name }}
-        </label>
+  @if(sessionUrlToShow()) {
+    <ng-container ngProjectAs="[form-actions]">
+      <a class="link-btn team-draft-link" [routerLink]="sessionRouterLink()">Go To Team Draft</a>
+
+      <button class="active-btn alert-btn" (click)="createDraftSessionService.removeSession(activeSession())"
+              [disabled]="createDraftSessionService.playersService.removeDraftSession.pending()"
+              [class.is-pending]="createDraftSessionService.playersService.removeDraftSession.pending()">delete session</button>
+
+      @if(existingSession()?.status === 'completed') {
+        <button class="active-btn action-btn" (click)="createDraftSessionService.finishTeamDraftSession(existingSession())">Submit and set teams</button>
       }
-    </div>
-
-    <section class="in-row center gap-10">
-      <form [formGroup]="form" (ngSubmit)="submit()">
-          <label for="select-number-of-teams">
-              Number of teams:
-          </label>
-        <select id="select-number-of-teams" formControlName="numberOfTeams" class="select-number-of-teams">
-          <option [ngValue]="2">2</option>
-          <option [ngValue]="3">3</option>
-          <option [ngValue]="4">4</option>
-        </select>
-
-        <div formArrayName="captains">
-            <small>select captain for each team and email to get link for team draft</small>
-          @for (captainGroup of captains.controls; track captainGroup; let i = $index) {
-            <div class="in-row gap-10 btn-mrg" [formGroupName]="i">
-              <input formControlName="captainEmail" placeholder="Captain email" />
-              <select formControlName="player" [compareWith]="comparePlayers">
-                  @for(player of createDraftSessionService.captainOptions()[i]; track player) {
-                      <option [ngValue]="player">
-                      {{ player.name }}
-                      </option>
-                  }
-              </select>
-            </div>
-          }
-        </div>
-        <label [matTooltip]="'By select it, selection order will be 1,2,3,3,2,1..'">
-          <input type="checkbox" formControlName="isSnakeMode" />
-          Use snake mode
-        </label>
-      </form>
-    </section>
-  </main>
-
-   <footer class="center">
-    <button [disabled]="notValid" class="active-btn submit-btn" [class.disabled]="notValid" (click)="submit()">Submit</button>
-  </footer>
-}
+    </ng-container>
+  } @else {
+    <button form-actions [disabled]="notValid" class="active-btn submit-btn" [class.disabled]="notValid" (click)="submit()">Submit</button>
+  }
+</app-form-layout>

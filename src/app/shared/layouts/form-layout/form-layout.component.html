@@ -1,0 +1,7 @@
+@if (heading()) {
+  <h1 class="form-layout-title">{{ heading() }}</h1>
+}
+
+<ng-content />
+
+<div class="form-layout-actions"><ng-content select="[form-actions]" /></div>

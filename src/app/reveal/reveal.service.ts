@@ -25,8 +25,6 @@ export class RevealService implements OnDestroy {
 
   readonly currentTeam = computed(() => this.teams()[this.teamIndex()]);
 
-  // FWD at top → MID → DEF at bottom for pitch layout.
-  // startIndex tracks position in flat DEF→MID→FWD order for staggered animation.
   readonly currentGroups = computed(() => this.groupsByPosition(this.currentTeam()));
   readonly allTeamGroups = computed(() =>
     this.teams().map(team => ({ team, groups: this.groupsByPosition(team) }))

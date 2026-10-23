@@ -1,6 +1,4 @@
-<div class="create-group">
-  <h2>Create Group</h2>
-
+<app-form-layout heading="Create Group">
   <div class="field">
     <label>Group Name</label>
     <input type="text" placeholder="Group name" [formField]="createGroupService.nameForm.name" />
@@ -49,10 +47,8 @@
     </div>
   </div>
 
-  <div class="actions">
-    <button class="primary-btn" [disabled]="createGroupService.nameForm().invalid() || createGroupService.submitting()" (click)="createGroupService.submit()">
-      {{ createGroupService.submitting() ? 'Creating...' : 'Create Group' }}
-    </button>
-    <a routerLink="/select-group">Cancel</a>
-  </div>
-</div>
+  <button form-actions class="primary-btn" [disabled]="createGroupService.nameForm().invalid() || createGroupService.submitting()" (click)="createGroupService.submit()">
+    {{ createGroupService.submitting() ? 'Creating...' : 'Create Group' }}
+  </button>
+  <a form-actions class="cancel-link" routerLink="/select-group">Cancel</a>
+</app-form-layout>

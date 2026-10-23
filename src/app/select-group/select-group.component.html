@@ -12,7 +12,7 @@
   }
 </select>
     @if(selectedGroup) {
-      <button class="action-btn" (click)="setSelectedGroup()">Set</button>
+      <button class="active-btn action-btn" (click)="setSelectedGroup()">Set</button>
     }
 
   </section>
@@ -37,7 +37,7 @@
   }
 
   @if(selectedGroup && groupChangedSubmitted()) {
-    <button class="action-btn" (click)="submit()">Continue</button>
+    <button class="active-btn action-btn" (click)="submit()">Continue</button>
   }
 </div>
 

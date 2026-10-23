@@ -24,7 +24,6 @@ export enum GameStatus {
   Decided = 'decided',
 }
 
-/** Options passed when a match is started for a given slot. */
 export interface StartMatchOptions {
   mode?: 'single' | 'league';
   sessionId?: string;
@@ -32,7 +31,6 @@ export interface StartMatchOptions {
   teamKeys?: string[];
 }
 
-/** slot number a single match always lives on. */
 export const SINGLE_SLOT = 1;
 
 @Injectable({
@@ -50,13 +48,10 @@ export class MatchEventsManagerService {
     return user?.email ?? user?.uid ?? '';
   }
 
-  /** slot -> live matchId. Empty when nothing is live. */
   private readonly liveMatches = signal<Record<number, string | null>>({});
 
-  /** Whether the currently live game(s) are a single match or a league session. */
   readonly liveMode = signal<'single' | 'league' | null>(null);
 
-  /** Back-compat: the single-mode live match id (slot 1). */
   readonly liveMatchId = computed(() => this.liveMatchIdFor(SINGLE_SLOT));
 
   readonly hasAnyLiveMatch = computed(() =>
@@ -67,7 +62,6 @@ export class MatchEventsManagerService {
     return this.liveMatches()[slot] ?? null;
   }
 
-  /** All slots that currently have a live match, ascending. */
   liveSlots(): number[] {
     return Object.entries(this.liveMatches())
       .filter(([, id]) => !!id)
@@ -103,7 +97,6 @@ export class MatchEventsManagerService {
     }
 
     try {
-      // Keep single-mode match docs byte-identical to before; only tag league matches.
       const matchDoc: Omit<MatchRecord, 'id'> = {
         status: 'live',
         startedAt: new Date(),
@@ -198,11 +191,6 @@ export class MatchEventsManagerService {
     }
   }
 
-  /**
-   * Records an own goal: `concedingPlayer` (on the other team) put it into their own net,
-   * so the event is credited to `beneficiaryTeamKey` - the team whose score goes up.
-   * No player is credited with a personal goal.
-   */
   async recordOwnGoalFromTimer(concedingPlayer: Player, beneficiaryTeamKey: string, elapsedMs: number, slot = SINGLE_SLOT): Promise<void> {
     const selectedGroup = this.playersService.selectedGroup();
     const matchId = this.liveMatchIdFor(slot);

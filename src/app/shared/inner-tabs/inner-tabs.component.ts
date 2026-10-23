@@ -1,5 +1,5 @@
 import {Component, input} from '@angular/core';
-import {RouterLink, RouterLinkActive} from '@angular/router';
+import {Params, RouterLink, RouterLinkActive} from '@angular/router';
 import {MatTooltip} from '@angular/material/tooltip';
 
 export interface InnerTab {
@@ -7,6 +7,7 @@ export interface InnerTab {
   link: string;
   tooltip: string;
   isDisabled: boolean;
+  queryParams?: Params;
 }
 @Component({
   selector: 'app-inner-tabs',

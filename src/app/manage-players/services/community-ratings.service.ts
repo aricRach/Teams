@@ -4,8 +4,9 @@ import {finalize, map} from 'rxjs';
 import {CommunityRatingsApiService} from './community-ratings-api.service';
 import {SpinnerService} from '../../spinner.service';
 import {Router} from '@angular/router';
-import {ModalsService} from 'ui';
+import {ModalsService, PopupsService} from 'ui';
 import {environment} from '../../../environments/environment';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 
 export interface PlayerRating {
   name: string;
@@ -23,6 +24,17 @@ export class CommunityRatingsService {
   spinnerService = inject(SpinnerService);
   router = inject(Router);
   modalsService = inject(ModalsService);
+  private popupsService = inject(PopupsService);
+  readonly saveRatings = createMutation({
+    run: () => this.communityRatingsApiService.setCommunityRatings(this.playersService.selectedGroup().id, this.ratings()),
+    onSuccess: () => this.router.navigate(['/home/players']),
+    onError: () => this.popupsService.addErrorPopOut("Couldn't update the ratings, please try again."),
+  });
+  readonly deleteAllRatings = createMutation({
+    run: () => this.communityRatingsApiService.deleteAllRatings(this.playersService.selectedGroup().id),
+    onSuccess: () => this.router.navigate(['/home/players']),
+    onError: () => this.popupsService.addErrorPopOut("Couldn't delete the ratings, please try again."),
+  });
 
   shareOnWhatsApp() {
     let domain = environment.domain;
@@ -117,14 +129,7 @@ export class CommunityRatingsService {
       description: 'By confirm all the existing ratings of this players will be override.'
     }).afterClosed().subscribe((confirm) => {
       if(confirm) {
-        this.spinnerService.setIsLoading(true);
-        this.communityRatingsApiService.setCommunityRatings(this.playersService.selectedGroup().id, this.ratings())
-          .then(() => {
-            this.router.navigate(['/home/players'])
-          })
-          .finally(() => {
-            this.spinnerService.setIsLoading(false);
-          });
+        void this.saveRatings.run();
       }
     })
   }
@@ -135,16 +140,7 @@ export class CommunityRatingsService {
       description: 'By confirm all the previous ratings will be removed and will not count in calculating the average.'
     }).afterClosed().subscribe((confirm) => {
       if(confirm) {
-        this.spinnerService.setIsLoading(true);
-        this.communityRatingsApiService.deleteAllRatings(this.playersService.selectedGroup().id)
-          .then(() => {
-            this.router.navigate(['/home/players'])
-          }).catch(e => {
-          console.log(e)
-        })
-          .finally(() => {
-            this.spinnerService.setIsLoading(false);
-          });
+        void this.deleteAllRatings.run();
       }
     })
   }

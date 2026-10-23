@@ -1,3 +1,5 @@
+@use '../../game/shared/game-board';
+
 .table-actions {
   display: flex;
   flex-wrap: wrap;
@@ -21,12 +23,10 @@
 }
 
 .team-name {
-  // Never wraps: a team name that wrapped to a second line would push that team's
-  // player list down further than teams whose name fit on one line, staggering the
-  // columns into a staircase. Truncating instead keeps every header the same height.
+  // Truncate instead of wrapping, so all team columns start at the same height.
   display: flex;
   align-items: center;
-  flex: 1 1 auto; // claim the row's free space instead of sitting shrink-wrapped
+  flex: 1 1 auto;
   min-width: 0;
   gap: 0.35rem;
 
@@ -93,15 +93,15 @@ app-team-color-picker {
 
 .slot-selector {
   display: inline-flex;
-  border: 1px solid #bbb;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;
 
   button {
     border: 0;
-    border-left: 1px solid #bbb;
-    background: #f4f4f4;
+    border-left: 1px solid var(--border-strong);
+    background: var(--surface-raised);
     padding: 0.35rem 0.7rem;
     font-weight: bold;
     cursor: pointer;
@@ -110,8 +110,8 @@ app-team-color-picker {
     &:first-child { border-left: 0; }
 
     &.active {
-      background: #00b894;
-      color: #fff;
+      background: var(--primary);
+      color: var(--on-primary);
     }
 
     &:disabled {
@@ -122,20 +122,10 @@ app-team-color-picker {
 }
 
 .list-container {
-  width: 400px;
-  max-width: 100%;
-  margin: 0 0 25px;
-  display: inline-block;
-  vertical-align: top;
-
+  @include game-board.team-column;
 
   .list {
-    border: solid 1px #ccc;
-    min-height: 60px;
-    background: white;
-    border-radius: 4px;
-    overflow: hidden;
-    display: block;
+    @include game-board.team-list;
   }
 
   .edit-buttons {
@@ -156,16 +146,7 @@ app-team-color-picker {
 }
 
 .box {
-  padding: 20px 10px;
-  border-bottom: solid 1px #ccc;
-  color: rgba(0, 0, 0, 0.87);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  background: white;
-  font-size: 14px;
+  @include game-board.player-row;
 }
 
 .cdk-drag-preview {
@@ -185,32 +166,14 @@ app-team-color-picker {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.box:last-child {
-  border: none;
-}
-
 .list.cdk-drop-list-dragging .box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 .all-teams-container {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 25px;
+  @include game-board.teams-grid;
 }
 
 @media (max-width: 640px) {
-  .all-teams-container {
-    gap: 8px;
-  }
-
-  .list-container {
-    // Two team columns per row on phones (2x2 for four teams).
-    width: calc(50% - 4px);
-    margin-bottom: 8px;
-  }
-
   .slot-selector button {
     min-width: 0;
     padding: 0.35rem 0.5rem;
@@ -227,26 +190,11 @@ app-team-color-picker {
   justify-content: normal;
 }
 
-.remove-player {
-  margin-left: 5px;
-  cursor: pointer;
-}
-
-
-.long-press-area {
-  width: 200px;
-  height: 100px;
-  background-color: lightblue;
-  text-align: center;
-  line-height: 100px;
-  cursor: pointer;
-}
-
 .set-goal-modal {
   position: absolute;
   width: 150px;
-  background: white;
-  border: 1px solid #ccc;
+  background: var(--surface);
+  border: 1px solid var(--border);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   padding: 10px;
   z-index: 1000;
@@ -275,11 +223,10 @@ app-team-color-picker {
     }
   }
 
-  // Secondary, deliberately small so it can't be hit by mistake instead of a normal goal.
   .own-goal-container {
     margin-top: 0.6rem;
     padding-top: 0.4rem;
-    border-top: 1px dashed #ddd;
+    border-top: 1px dashed var(--border-light);
     text-align: center;
 
     .own-goal-btn {
@@ -293,16 +240,12 @@ app-team-color-picker {
       cursor: pointer;
 
       &.danger {
-        color: #c0392b;
+        color: var(--danger);
         font-weight: 700;
         text-decoration: none;
       }
     }
   }
-}
-
-.statistics-button {
-  margin-bottom: 10px;
 }
 
 .player {

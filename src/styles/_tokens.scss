@@ -1,0 +1,37 @@
+:root {
+  --font-body: Roboto, 'Helvetica Neue', sans-serif;
+
+  --surface: #ffffff;
+  --surface-raised: #f4f4f4;
+  --border: #ccc;
+  --border-strong: #bbb;
+  --border-light: #ddd;
+  --divider: #e0e0e0;
+
+  --text: #000000;
+  --text-muted: #666;
+  --text-subtle: #888;
+  --link: #0d6efd;
+
+  --accent: cornflowerblue;
+  --on-accent: #ffffff;
+  --primary: #00b894;
+  --on-primary: #ffffff;
+  --danger: #c0392b;
+
+  --shadow-1: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  --radius-control: 4px;
+  --radius-card: 8px;
+  --radius-pill: 999px;
+
+  --layout-form: 520px;
+  --layout-data: 900px;
+}

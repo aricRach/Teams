@@ -1,11 +1,10 @@
 import {Component, ElementRef, inject, OnInit, ViewChild, viewChild} from '@angular/core';
 import {MediaService} from '../media.service';
-import { AsyncPipe } from "@angular/common";
 import {ModalsService, PopupsService} from 'ui';
 
 @Component({
   selector: 'app-capture-media',
-  imports: [AsyncPipe],
+  imports: [],
   templateUrl: './capture-media.component.html',
   styleUrl: './capture-media.component.scss'
 })

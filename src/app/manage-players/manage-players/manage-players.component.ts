@@ -1,13 +1,12 @@
 import {Component, inject} from '@angular/core';
-import {RouterModule} from '@angular/router';
+import {RouterOutlet} from '@angular/router';
 import {ManagePlayersService} from '../services/manage-players.service';
-import {FormsModule} from '@angular/forms';
 import {AutoCompleteComponent} from 'ui';
-import {InnerTabsComponent} from '../../shared/inner-tabs/inner-tabs.component';
+import {SectionLayoutComponent} from '../../shared/layouts/section-layout/section-layout.component';
 
 @Component({
   selector: 'app-manage-players',
-  imports: [FormsModule, RouterModule, AutoCompleteComponent, InnerTabsComponent],
+  imports: [AutoCompleteComponent, SectionLayoutComponent, RouterOutlet],
   providers: [ManagePlayersService],
   templateUrl: './manage-players.component.html',
   styleUrl: './manage-players.component.scss'

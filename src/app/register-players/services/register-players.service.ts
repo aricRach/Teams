@@ -4,7 +4,7 @@ import {RegisterPlayersApiService} from './register-players-api.service';
 import {PlayersService} from '../../players/players.service';
 import {MembersService} from '../../admin/services/members.service';
 import {DuplicatePlayerError} from '../../players/errors/duplicate-player-error';
-import {SpinnerService} from '../../spinner.service';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 import {Statistics, PLAYER_NAME_MAX_LENGTH} from '../../players/models/player.model';
 import {Router} from '@angular/router';
 import {NavigationService} from '../../shared/navigation/navigation.service';
@@ -28,8 +28,20 @@ export class RegisterPlayersService {
   membersService = inject(MembersService);
   navigationService = inject(NavigationService);
   router = inject(Router);
-  private spinnerService = inject(SpinnerService);
   private popoutService = inject(PopupsService);
+  readonly registerPlayers = createMutation({
+    run: async (newPlayersDetails: NewPlayer[]) => {
+      await this.addPlayers(newPlayersDetails);
+      await this.addMembers(newPlayersDetails);
+    },
+    onSuccess: () => {
+      this.navigationService.unlockNavigation();
+      this.router.navigate(['home', 'game']);
+    },
+    onError: (error) => this.popoutService.addErrorPopOut(error instanceof DuplicatePlayerError
+      ? error.message
+      : 'An Error occurred, please try again later.'),
+  });
   fb = inject(FormBuilder);
   form = signal(this.fb.group({
     players: this.fb.array([this.createPlayerRow()])
@@ -115,21 +127,7 @@ export class RegisterPlayersService {
       this.popupsService.addErrorPopOut(uniqueCheck.duplicates);
       return;
     }
-    try {
-      this.spinnerService.setIsLoading(true);
-      await this.addPlayers(newPlayersDetails);
-      await this.addMembers(newPlayersDetails);
-      this.navigationService.unlockNavigation();
-      this.router.navigate(['home', 'game'])
-    } catch (error: any) {
-      if (error instanceof DuplicatePlayerError) {
-        this.popoutService.addErrorPopOut(error.message);
-      } else {
-        this.popoutService.addErrorPopOut('An Error occurred, please try again later.');
-      }
-    } finally {
-      this.spinnerService.setIsLoading(false);
-    }
+    await this.registerPlayers.run(newPlayersDetails);
   }
 
   async addPlayers(newPlayersDetails: NewPlayer[]) {

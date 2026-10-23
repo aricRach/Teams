@@ -1,0 +1,23 @@
+<div class="soccer-field">
+  @for (row of rows; track $index) {
+    <div class="position-row">
+      @for (card of row; track $index) {
+        <div class="player-card">
+          <span class="skeleton skeleton-name"></span>
+          <div class="stats">
+            <span class="skeleton skeleton-stat"></span>
+            <span class="skeleton skeleton-stat"></span>
+            <span class="skeleton skeleton-stat"></span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+<div class="center">
+  <div class="reasons">
+    @for (width of reasonWidths; track $index) {
+      <span class="skeleton skeleton-line" [style.width.%]="width"></span>
+    }
+  </div>
+</div>

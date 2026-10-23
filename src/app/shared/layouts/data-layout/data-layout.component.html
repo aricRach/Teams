@@ -1,0 +1,15 @@
+@if (heading()) {
+  <h1 class="data-layout-title">{{ heading() }}</h1>
+}
+
+<div class="data-layout-toolbar"><ng-content select="[layout-toolbar]" /></div>
+
+@if (!loading()) {
+  @if (error()) {
+    <app-state-message kind="error" [heading]="errorHeading()" (actionClicked)="retry.emit()" />
+  } @else if (empty()) {
+    <app-state-message kind="empty" [heading]="emptyHeading()" [detail]="emptyDetail()" />
+  } @else {
+    <ng-content />
+  }
+}

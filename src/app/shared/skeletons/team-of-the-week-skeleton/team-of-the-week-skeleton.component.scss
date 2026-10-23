@@ -1,0 +1,52 @@
+@use '../../../team-of-the-week/pitch';
+
+:host {
+  display: block;
+}
+
+.soccer-field {
+  @include pitch.field;
+}
+
+.position-row {
+  @include pitch.position-row;
+}
+
+.player-card {
+  @include pitch.player-card;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+}
+
+.skeleton-name {
+  width: 70%;
+  height: 1rem;
+}
+
+.skeleton-stat {
+  width: 2.5rem;
+  height: 0.75rem;
+}
+
+.reasons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(600px, 100%);
+  margin-top: var(--space-4);
+}
+
+.skeleton-line {
+  height: 0.9rem;
+}

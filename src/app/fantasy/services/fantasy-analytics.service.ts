@@ -1,7 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {FantasyData, FantasyMeta} from './fantasy-api.service';
-import {SpinnerService} from '../../spinner.service';
 import {Player, Statistics} from '../../players/models/player.model';
 import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
 
@@ -9,7 +8,6 @@ import {ComputedStatisticsService} from '../../statistics/services/computed-stat
 export class FantasyAnalyticsService {
 
   playersService = inject(PlayersService);
-  spinnerService = inject(SpinnerService);
   private computedStatsService = inject(ComputedStatisticsService);
 
   allUniqueDates = signal([] as string[]);
@@ -192,8 +190,7 @@ export class FantasyAnalyticsService {
     ]);
   }
 
-  setSelectedDate(event: Event) {
-    const date = (event.target as HTMLSelectElement).value;
+  setSelectedDate(date: string) {
     this.selectedDate.set(date);
   }
 

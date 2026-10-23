@@ -1,0 +1,82 @@
+.button-icon {
+  cursor: pointer;
+  background-color: var(--surface);
+  border: none;
+}
+
+// The lib gives .link-btn a fixed 65px width.
+.link-btn {
+  width: auto !important;
+}
+
+.segmented-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+
+  > button {
+    border: 0;
+    border-left: 1px solid var(--border-strong);
+    background: var(--surface-raised);
+    padding: 0.5rem 1.4rem;
+    font-weight: bold;
+    cursor: pointer;
+
+    &:first-child { border-left: 0; }
+
+    &.active {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+
+    &:disabled { cursor: not-allowed; }
+  }
+
+  &.locked { opacity: 0.7; }
+}
+
+.segmented-hint {
+  font-size: 0.8rem;
+  color: var(--text-subtle);
+  text-align: center;
+  padding: 0 1rem;
+}
+
+// The lib's app-generic-form owns its submit button, so for it put [class.form-is-pending] on the form host instead.
+.is-pending,
+app-generic-form.form-is-pending button[type='submit'] {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+
+  &:disabled { opacity: 0.8; cursor: progress; }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    width: 1rem;
+    height: 1rem;
+    margin: auto;
+    border: 2px solid var(--text);
+    border-right-color: transparent;
+    border-radius: var(--radius-pill);
+    animation: button-pending-spin 0.7s linear infinite;
+  }
+}
+
+@keyframes button-pending-spin { to { transform: rotate(360deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .is-pending::after,
+  app-generic-form.form-is-pending button[type='submit']::after { animation: none; }
+}

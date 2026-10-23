@@ -2,13 +2,13 @@
   <!--  <div class="center gap statistics-button">-->
   <div class="table-actions">
     @if(showStatistics()) {
-    <button class="action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
+    <button class="active-btn action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
     } @else {
-    <button class="action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
+    <button class="active-btn action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
     }
 
     @if(enableMakeBalancedTeams()) {
-    <button class="action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
+    <button class="active-btn action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
     }
   </div>
   <div class="all-teams-container">
@@ -129,7 +129,6 @@
         [showRating]="enableShowRatings()"
         class="box"
         cdkDrag></app-player-view>
-      <!--        <span class="remove-player" (click)="removeFromList('allPlayers', idx)">X</span>-->
     </div>
     }
   </div>

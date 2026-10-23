@@ -23,8 +23,6 @@ export class PlayerViewComponent {
   dateStats = input<Statistics | undefined>();
   allPlayerStats = input<Map<string, Statistics>>(new Map());
 
-  // Suffix shown alongside the name (rating/stats) - kept separate from the name so only
-  // the name itself acts as the drag handle.
   statsText = computed(() => {
     const stats = this.dateStats();
     if(!stats || !this.showStatistics()) {

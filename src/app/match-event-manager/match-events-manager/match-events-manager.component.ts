@@ -12,11 +12,12 @@ import { formatElapsedMsAsMmSs, parseMmSsToMinute, parseMmSsToMs } from '../util
 import { MatchEventRecord, MatchRecord, MatchStatus } from '../models/match-event.model';
 import { isScoringEvent } from '../utils/scoring.util';
 import { formatTeamLabel } from '../../utils/team-label.util';
+import { FormLayoutComponent } from '../../shared/layouts/form-layout/form-layout.component';
 
 @Component({
   selector: 'app-match-events-manager',
   standalone: true,
-  imports: [FormField],
+  imports: [FormField, FormLayoutComponent],
   providers: [DatePipe],
   templateUrl: './match-events-manager.component.html',
   styleUrl: './match-events-manager.component.scss'
@@ -33,17 +34,12 @@ export class MatchEventsManagerComponent {
 
   playingTeamKeys = computed(() => this.playersService.selectedTeamsKeys())
 
-  /** Display label for a team slot key (letter + nickname), using the live alias.
-   *  For the current-team selectors while editing a draft - not a historical record. */
   teamLabelOf = (teamKey: string | undefined | null): string =>
     teamKey ? formatTeamLabel(teamKey, this.playersService.teamAliases()[teamKey]) : '';
 
-  /** Display label for a team slot key as it was when the given match was recorded.
-   *  No live-alias fallback: a match predating snapshots just renders its plain letter. */
   private matchTeamLabelOf = (teamKey: string | undefined | null, match: MatchRecord): string =>
     teamKey ? formatTeamLabel(teamKey, match.teamAliasSnapshot?.[teamKey]) : '';
 
-  // ── Matches: live Firestore stream, re-runs when the group changes ──────────
   private matchesResource = rxResource({
     params: () => ({
       groupId: this.playersService.selectedGroup()?.id,
@@ -57,7 +53,6 @@ export class MatchEventsManagerComponent {
 
   matches = computed(() => (this.matchesResource.value() ?? []) as MatchRecord[]);
 
-  /** Formatted match options for the dropdown to avoid template logic. */
   matchOptions = computed(() => {
     return this.matches().map((match) => {
       let label = '';
@@ -86,19 +81,16 @@ export class MatchEventsManagerComponent {
     });
   });
 
-  /** 'league' when the currently selected/edited match was played in league mode, else 'single'. */
   currentMatchMode = computed<'single' | 'league'>(() =>
     this.currentMatch()?.mode === 'league' ? 'league' : 'single'
   );
 
-  // Auto-selects the first match; user can override via the dropdown
   selectedMatchId = linkedSignal(() => this.matches()[0]?.id ?? '');
 
   selectedMatchLabel = computed(() =>
     this.matchOptions().find(o => o.id === this.selectedMatchId())?.label ?? ''
   );
 
-  // ── Events: live Firestore stream, re-runs when group or selected match changes
   private eventsResource = rxResource({
     params: () => ({
       groupId: this.playersService.selectedGroup()?.id,
@@ -122,7 +114,6 @@ export class MatchEventsManagerComponent {
     this.events().filter((event: MatchEventRecord) => isScoringEvent(event))
   );
 
-  // --- Draft Mode State ---
   isEditingMatch = signal(false);
   localMatch = signal<MatchRecord | null>(null);
 
@@ -146,7 +137,6 @@ export class MatchEventsManagerComponent {
   draftMatchForm = form(this.draftMatchModel);
   localEvents = signal<MatchEventRecord[]>([]);
 
-  /** Returns the current match record (either from Firestore or the local draft). */
   currentMatch = computed(() => {
     if (this.isEditingMatch()) return this.localMatch();
     const id = this.selectedMatchId();
@@ -158,12 +148,10 @@ export class MatchEventsManagerComponent {
     if (match?.winner) teams.add(match.winner);
     if (match?.loser) teams.add(match.loser);
 
-    // If we don't have 2 teams from the record, fallback to playing teams
     if (teams.size < 2) {
       this.playingTeamKeys().forEach((team) => teams.add(team));
     }
 
-    // If still not 2 teams, try extracting from events
     if (teams.size < 2) {
       this.goalEvents().forEach((event) => {
         if (event.teamKey) teams.add(event.teamKey);
@@ -173,27 +161,20 @@ export class MatchEventsManagerComponent {
     return Array.from(teams).slice(0, 2);
   }
 
-  /** Teams available for selection in the current draft. */
 
-
-  /** Teams available for selection in the current draft. */
   localMatchTeams = computed(() => {
     const uniqueTeams = new Set<string>();
 
-    // Add explicitly assigned match teams from draft
     const draftMatch = this.localMatch();
     if (draftMatch?.winner) uniqueTeams.add(draftMatch.winner);
     if (draftMatch?.loser) uniqueTeams.add(draftMatch.loser);
 
-    // Safety fallback: Always preserve the original match teams
     const originalMatch = this.matches().find((match) => match.id === this.selectedMatchId());
     if (originalMatch?.winner) uniqueTeams.add(originalMatch.winner);
     if (originalMatch?.loser) uniqueTeams.add(originalMatch.loser);
 
-    // Fallback to currently active playing teams from GameComponent
     this.playingTeamKeys().forEach(team => uniqueTeams.add(team));
 
-    // ALWAYS include any team that has a recorded goal event!
     this.goalEvents().forEach((event) => {
       if (event.teamKey) uniqueTeams.add(event.teamKey);
     });
@@ -201,7 +182,6 @@ export class MatchEventsManagerComponent {
     return Array.from(uniqueTeams).sort();
   });
 
-  /** Validation: ensure goal tallies match the winner/loser/draw status. */
   isTallyConsistent = computed(() => {
     const match = this.currentMatch();
     if (!match || match.status !== 'completed') return true;
@@ -211,7 +191,6 @@ export class MatchEventsManagerComponent {
 
     const events = this.goalEvents();
 
-    // Consistency check: If *any* goal belongs to a team NOT participating in this match, block save.
     const teamsWithGoals = new Set(events.filter(event => event.teamKey).map(event => event.teamKey!));
     for (const team of Array.from(teamsWithGoals)) {
       if (!teams.includes(team)) return false;
@@ -258,7 +237,6 @@ export class MatchEventsManagerComponent {
     pattern(fields.time, /^\d{1,3}:[0-5]\d$/);
   });
 
-  // --- Add forgotten own goal ---
   ownGoalModel = linkedSignal<{ playerId: string; time: string }>(() => {
     this.selectedMatchId();
     return { playerId: '', time: '00:00' };
@@ -269,9 +247,6 @@ export class MatchEventsManagerComponent {
     pattern(fields.time, /^\d{1,3}:[0-5]\d$/);
   });
 
-  /** An own goal always benefits the opponent - derive it from the conceding player's team, no need to ask.
-   *  Uses getMatchTeams (the match's actual winner/loser), not localMatchTeams, which also mixes in
-   *  whatever teams are currently selected on the live game screen (e.g. an 'allPlayers' placeholder). */
   ownGoalBeneficiaryTeam = computed(() => {
     const player = this.rosterPlayers().find((p) => p.id === this.ownGoalModel().playerId);
     if (!player?.team) return '';
@@ -289,7 +264,6 @@ export class MatchEventsManagerComponent {
       if (match.status === 'completed' && match.winner && match.loser) {
         allowedTeams = [match.winner, match.loser];
       } else {
-        // For live, abandon, or incomplete draft status, use playing teams
         allowedTeams = this.playingTeamKeys();
       }
     }
@@ -306,7 +280,6 @@ export class MatchEventsManagerComponent {
 
   activePlayerNames = computed(() => this.rosterPlayers().map((player) => player.name));
 
-  /** Format event time for display: timerMs → MM:SS, legacy timerDisplay, or minute fallback. */
   formatEventTime(event: MatchEventRecord): string {
     const timerMs = event.payload?.['timerMs'] as number | undefined;
     if (timerMs != null) return formatElapsedMsAsMmSs(timerMs);
@@ -369,7 +342,6 @@ export class MatchEventsManagerComponent {
     this.localEvents.update((list: MatchEventRecord[]) => [...list, newEvent]);
 
     this.eventModel.set({ playerId: '', time: '00:00' });
-    // this.popupsService.addSuccessPopOut('Goal event added');
   }
 
   addForgottenOwnGoalEvent() {
@@ -463,8 +435,6 @@ export class MatchEventsManagerComponent {
     this.localEvents.update((list: MatchEventRecord[]) => list.filter((e) => e !== event));
   }
 
-  // --- Draft Control Methods ---
-
   startEditingMatch() {
     const match = this.currentMatch();
     if (!match) return;
@@ -508,10 +478,8 @@ export class MatchEventsManagerComponent {
     const updatedMatch = { ...newMatch, ...this.draftMatchModel() };
     const identifiedTeams = this.getMatchTeams(updatedMatch);
 
-    // Ensure roster IDs are up-to-date with current teams (e.g. if a player was added to a team after the game ended)
     const playerArray = this.playersService.flattenPlayers(true, true);
 
-    // Identify winners/losers rosters (or just Team A / Team B in a draw)
     const winningTeam = updatedMatch.winner || identifiedTeams[0];
     const losingTeam = updatedMatch.loser || identifiedTeams[1];
 
@@ -554,18 +522,16 @@ export class MatchEventsManagerComponent {
     if (!current) return;
     const updated = { ...current, ...patch };
 
-    // Explicit associative swap logic for winner/loser
     if (patch.winner !== undefined && patch.winner === current.loser) {
       updated.loser = current.winner;
     } else if (patch.loser !== undefined && patch.loser === current.winner) {
       updated.winner = current.loser;
     } else if (patch.winner && patch.winner === updated.loser) {
-      updated.loser = ''; // prevent same team duplicating
+      updated.loser = '';
     } else if (patch.loser && patch.loser === updated.winner) {
-      updated.winner = ''; // prevent same team duplicating
+      updated.winner = '';
     }
 
-    // Auto-update rosters if teams changed
     const playerArray = this.playersService.flattenPlayers(true, true);
     if (updated.winner) {
       updated.winnerPlayerIds = playerArray.filter((player) => player.team === updated.winner).map((player) => player.id);

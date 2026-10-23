@@ -2,16 +2,6 @@ import { Player } from '../players/models/player.model';
 
 type TeamsMap = { [key: string]: { players: Player[] } };
 
-/**
- * Game-screen view transform: a game board only shows the first
- * `visibleTeamCount` team slots. Any player sitting in a slot beyond that (e.g.
- * `teamD` when the admin picked 3 teams for the night) is shown in the shared
- * `allPlayers` pool instead of vanishing into a hidden team.
- *
- * Pure - returns a shallow-cloned map with fresh `players` arrays; the input is
- * not mutated. Team-slot order follows the object's own key order (the skeleton:
- * teamA, teamB, teamC, teamD).
- */
 export function collapseExtraTeams(teams: TeamsMap, visibleTeamCount: number): TeamsMap {
   if (!teams) return teams;
 
@@ -37,7 +27,6 @@ export function collapseExtraTeams(teams: TeamsMap, visibleTeamCount: number): T
     }
   }
 
-  // Groups that never stored an `allPlayers` slot still need one for the pool.
   if (!result['allPlayers']) {
     result['allPlayers'] = { players: hiddenPlayers };
   }

@@ -11,6 +11,7 @@ import {isScoringEvent} from '../match-event-manager/utils/scoring.util';
 import {RevealApiService, RevealTeam, RevealSnapshot, PositionedPlayer, Position} from '../reveal/reveal-api.service';
 import {formatTeamLabel} from '../utils/team-label.util';
 import {PopupsService} from 'ui';
+import {createMutation} from '../shared/optimistic/run-optimistic';
 
 @Injectable()
 export class GameService {
@@ -25,17 +26,29 @@ export class GameService {
 
   computedStats = computed(() => this.computedStatsService.statsMap())
 
-  async revealTeams() {
+  readonly reveal = createMutation({
+    run: async (groupId: string) => {
+      const [teamsSaved] = await Promise.all([
+        this.playersService.savePlayers.run(undefined, true),
+        this.revealApi.saveSnapshot(groupId, this.buildSnapshot()),
+      ]);
+      if (!teamsSaved) return;
+
+      // The copied link is a convenience: a denied clipboard permission must not block opening the reveal.
+      const revealUrl = `${window.location.origin}/reveal?groupId=${groupId}`;
+      await navigator.clipboard.writeText(revealUrl).then(
+        () => this.popupsService.addSuccessPopOut('Link copied to clipboard!'),
+        () => {},
+      );
+      this.router.navigate(['/reveal'], { queryParams: { groupId } });
+    },
+    onError: () => this.popupsService.addErrorPopOut("Couldn't save the team selection, please try again."),
+  });
+
+  revealTeams() {
     const groupId = this.playersService.selectedGroup()?.id;
     if (!groupId) return;
-    await Promise.all([
-      this.playersService.savePlayers(undefined, true),
-      this.revealApi.saveSnapshot(groupId, this.buildSnapshot()),
-    ]);
-    const revealUrl = `${window.location.origin}/reveal?groupId=${groupId}`;
-    await navigator.clipboard.writeText(revealUrl);
-    this.popupsService.addSuccessPopOut('Link copied to clipboard!');
-    this.router.navigate(['/reveal'], { queryParams: { groupId } });
+    void this.reveal.run(groupId);
   }
 
   async endGame(teams: any, slot = 1) {
@@ -86,7 +99,6 @@ export class GameService {
 
     await this.matchEventsService.endGameAndPersist(gameDetails, slot);
 
-    // Only tear down shared state once no game (single or league slot) is still live.
     if (!this.matchEventsService.hasAnyLiveMatch()) {
       try {
         await this.playersService.setFantasyMetaIsActive(false);

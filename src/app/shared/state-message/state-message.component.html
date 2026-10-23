@@ -1,0 +1,7 @@
+<p class="state-heading">{{ resolvedHeading() }}</p>
+@if (resolvedDetail()) {
+  <p class="state-detail">{{ resolvedDetail() }}</p>
+}
+@if (resolvedActionLabel()) {
+  <button type="button" class="active-btn" (click)="actionClicked.emit()">{{ resolvedActionLabel() }}</button>
+}

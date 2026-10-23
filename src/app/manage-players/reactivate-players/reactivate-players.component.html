@@ -12,7 +12,9 @@
                      (optionSelected)="reactivatePlayersService.onChangePlayer($event)"/>
 
   @if(reactivatePlayersService.selectedPlayer()) {
-    <button class="active-btn submit-btn" (click)="reactivatePlayersService.reactivatePlayer()">Reactivate</button>
+    <button class="active-btn submit-btn"
+            [disabled]="reactivatePlayersService.isReactivating()" [class.is-pending]="reactivatePlayersService.isReactivating()"
+            (click)="reactivatePlayersService.reactivatePlayer()">Reactivate</button>
   }
 } @else {
   <p>There are no inactive players</p>

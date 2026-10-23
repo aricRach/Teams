@@ -1,7 +1,7 @@
 import {Component, inject, input, linkedSignal, signal} from '@angular/core';
+import {FormLayoutComponent} from '../../shared/layouts/form-layout/form-layout.component';
 import {RatePlayersService} from './rate-players.service';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import { JsonPipe } from '@angular/common';
 import {PopupsService} from 'ui';
 
 @Component({
@@ -9,7 +9,7 @@ import {PopupsService} from 'ui';
   imports: [
     ReactiveFormsModule,
     FormsModule,
-    JsonPipe
+    FormLayoutComponent
   ],
   providers: [RatePlayersService],
   templateUrl: './rate-players.component.html',
@@ -18,7 +18,7 @@ import {PopupsService} from 'ui';
 })
 export class RatePlayersComponent {
 
-  private ratePlayersService = inject(RatePlayersService);
+  ratePlayersService = inject(RatePlayersService);
   popupsService = inject(PopupsService);
   groupId = input<string>('');
   allPlayers = input<any>();
@@ -61,6 +61,6 @@ export class RatePlayersComponent {
         };
       }
     });
-    this.ratePlayersService.submitRatings(this.groupId(), finalRatings).then(() => this.isSubmitted.set(true));
+    this.ratePlayersService.submitRatings(this.groupId(), finalRatings).then(done => this.isSubmitted.set(done));
   }
 }

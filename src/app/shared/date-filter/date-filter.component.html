@@ -1,0 +1,6 @@
+<label class="date-filter-label" [for]="selectId">{{ label() }}</label>
+<select class="date-filter-select" [id]="selectId" (change)="onSelectionChange($event)">
+  @for (date of dates(); track date) {
+    <option [value]="date" [selected]="date === selectedDate()">{{ date }}</option>
+  }
+</select>

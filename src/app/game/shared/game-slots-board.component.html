@@ -1,13 +1,13 @@
 @if (teamCount() === 4) {
-<div class="mode-toggle-row">
-  <div class="mode-toggle" [class.locked]="!canToggleMatchCount()">
+<div class="segmented-row">
+  <div class="segmented" [class.locked]="!canToggleMatchCount()">
     <button type="button" [class.active]="matchCount() === 1" [disabled]="!canToggleMatchCount()"
       (click)="matchCountChange.emit(1)">Single</button>
     <button type="button" [class.active]="matchCount() === 2" [disabled]="!canToggleMatchCount()"
       (click)="matchCountChange.emit(2)">Multiple</button>
   </div>
   @if (!canToggleMatchCount()) {
-  <span class="lock-hint">End the running game to switch</span>
+  <span class="segmented-hint">End the running game to switch</span>
   }
 </div>
 }

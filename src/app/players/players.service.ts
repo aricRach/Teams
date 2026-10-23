@@ -8,6 +8,7 @@ import {skeleton} from './consts/teams-skeleton';
 import {MembersService} from '../admin/services/members.service';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
 import {TEAM_ALIAS_MAX_LENGTH} from '../utils/team-label.util';
+import {createMutation, runOptimistic} from '../shared/optimistic/run-optimistic';
 
 @Injectable({
   providedIn: 'root'
@@ -21,11 +22,7 @@ export class PlayersService {
   // @ts-ignore
   selectedGroup = signal<null | any>(null);
   numberOfTeams = signal<number>(2);
-  // Per-slot display nicknames for the selected group, e.g. { teamA: 'Rockets' }.
-  // Keyed by the team slot key - the key is the identity and never changes.
   teamAliases = signal<Record<string, string>>({});
-  // Per-slot display color for the selected group, e.g. { teamA: '#e6194b' }.
-  // Keyed by the team slot key. At most one team may hold a given color at a time.
   teamColors = signal<Record<string, string>>({});
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
@@ -33,6 +30,8 @@ export class PlayersService {
   private teams = signal<{[key: string]: { players: Player[] }}>(structuredClone(skeleton));
   private inActivePlayers = signal<null | Player[]>(null);
   allPlayersLabel = 'allPlayers';
+
+  readonly isLoadingPlayers = signal(false);
 
    computedTeams = computed(() =>  JSON.parse(JSON.stringify(this.teams()))) // use only in drag-drop-component.
 
@@ -58,20 +57,29 @@ export class PlayersService {
     }));
   }
 
+  loadGroupPlayers(): void {
+    this.isLoadingPlayers.set(true);
+    this.spinnerService.setIsLoading(true);
+    this.getPlayersFromDB().pipe(finalize(() => {
+      this.isLoadingPlayers.set(false);
+      this.spinnerService.setIsLoading(false);
+    })).subscribe({
+      error: () => this.popoutService.addErrorPopOut('Could not load the players, please refresh the page.'),
+    });
+  }
+
   getSpecificGroupPlayers(groupId: string) {
      this.spinnerService.setIsLoading(true);
      return this.playersApiService.getAllPlayers(groupId)
        .pipe(finalize(() => this.spinnerService.setIsLoading(false)));
   }
 
-  savePlayers(specificTeams?: any, silent = false) {
-    this.spinnerService.setIsLoading(true);
-    return this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, true, specificTeams)).then(
-      () => { if (!silent) this.popoutService.addSuccessPopOut('Data was saved successfully.'); },
-    ).catch(() => this.popoutService.addSuccessPopOut('Cant save try to save locally meantime.'),).finally(
-      () =>  this.spinnerService.setIsLoading(false)
-    );
-  }
+  readonly savePlayers = createMutation<[specificTeams?: any, silent?: boolean], unknown>({
+    run: (specificTeams?: any) =>
+      this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, true, specificTeams)),
+    onSuccess: (_, _specificTeams, silent) => { if (!silent) this.popoutService.addSuccessPopOut('Data was saved successfully.'); },
+    onError: () => this.popoutService.addErrorPopOut('Cant save try to save locally meantime.'),
+  });
 
   flattenPlayers(showOnlyActive = true, includeGuests = true, specificTeams?: any): Player[] {
     const playersArray: Player[] = [];
@@ -122,13 +130,10 @@ export class PlayersService {
        )
     }
 
-  async updatePlayerDetails(player: Player, editedPlayer: Player): Promise<void> {
-    this.spinnerService.setIsLoading(true);
-
-    try {
+  readonly updatePlayerDetails = createMutation({
+    run: async (player: Player, editedPlayer: Player) => {
       await this.playersApiService.updatePlayerDetails(this.selectedGroup().id, editedPlayer, player);
       this.updatePlayerSignal(editedPlayer);
-      this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`);
 
       if(player.email && editedPlayer.email && player.email !== editedPlayer.email) {
         await this.membersService.replaceEmail(this.selectedGroup().id, player.email, editedPlayer.email);
@@ -137,41 +142,33 @@ export class PlayersService {
       } else if(!editedPlayer.email && player.email) {
         await this.membersService.removeMember(this.selectedGroup().id, player.email)
       }
-    }  catch (error: any) {
-      if (error instanceof DuplicatePlayerError) {
-        this.popoutService.addErrorPopOut(error.message);
+    },
+    onSuccess: (_, _player, editedPlayer) => this.popoutService.addSuccessPopOut(`${editedPlayer.name} updated successfully.`),
+    onError: (error, player) => this.popoutService.addErrorPopOut(error instanceof DuplicatePlayerError
+      ? error.message
+      : `Failed to update ${player.name}. Please try again later.`),
+  });
+
+  readonly submitRatings = createMutation({
+    run: (groupId: string, ratingData: Record<string, { name: string; rating: number}>) =>
+      this.playersApiService.submitRatings(ratingData, groupId),
+    onSuccess: () => this.popoutService.addSuccessPopOut(`rating were successfully updated.`),
+    onError: () => this.popoutService.addErrorPopOut(`cant save please try later`),
+  });
+
+  /** Not optimistic: two writes (player, then member email), and a rollback after only the second fails would be wrong. */
+  readonly setPlayerActiveStatus = createMutation({
+    run: async (player: Player, isActive: boolean) => {
+      await this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.id, isActive);
+      if(isActive) {
+        await this.switchPlayerToActive(player);
       } else {
-        this.popoutService.addErrorPopOut(`Failed to add ${player.name}. Please try again later.`);
+        await this.switchPlayerToInactive(player);
       }
-    }
-    finally {
-      this.spinnerService.setIsLoading(false);
-    }
-  }
-
-  async submitRatings(groupId: string, ratingData: Record<string, { name: string; rating: number}>) {
-   this.spinnerService.setIsLoading(true);
-   return this.playersApiService.submitRatings(ratingData, groupId).then(() => {
-     this.popoutService.addSuccessPopOut(`rating were successfully updated.`);
-   }).catch(() => this.popoutService.addErrorPopOut(`cant save please try later`))
-     .finally(() => this.spinnerService.setIsLoading(false));
-  }
-
-  async setPlayerActiveStatus(player: Player, isActive: boolean) {
-    this.spinnerService.setIsLoading(true)
-   return this.playersApiService.setPlayerActiveStatus(this.selectedGroup().id, player.id, isActive).then(async () => {
-     this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`);
-     if(isActive) {
-       await this.switchPlayerToActive(player);
-     }
-     if(!isActive) {
-       await this.switchPlayerToInactive(player)
-      }
-   }).catch(() => {
-     this.popoutService.addErrorPopOut(`please try again later`);
-   })
-     .finally(() => this.spinnerService.setIsLoading(false));
-  }
+    },
+    onSuccess: (_, player, isActive) => this.popoutService.addSuccessPopOut(`${player.name} moved to ${isActive ? 'active' : 'inactive'}`),
+    onError: () => this.popoutService.addErrorPopOut(`please try again later`),
+  });
 
   getTeams(): any {
    return structuredClone(this.teams())
@@ -184,24 +181,14 @@ export class PlayersService {
    })
   }
 
-  removeDraftSession(sessionId: string) {
-     this.spinnerService.setIsLoading(true);
-     return this.playersApiService.removeDraftSession(this.selectedGroup().id, sessionId).then(() => {
-       this.popoutService.addSuccessPopOut('Draft session deleted successfully')
-     })
-       .catch(() => {
-         this.popoutService.addErrorPopOut('Something went wrong, please try again later')
-       })
-       .finally(() => {
-         this.spinnerService.setIsLoading(false);
-       });
-  }
+  readonly removeDraftSession = createMutation({
+    run: (sessionId: string) => this.playersApiService.removeDraftSession(this.selectedGroup().id, sessionId),
+    onSuccess: () => this.popoutService.addSuccessPopOut('Draft session deleted successfully'),
+    onError: () => this.popoutService.addErrorPopOut('Something went wrong, please try again later'),
+  });
 
   async setFantasyMetaIsActive(isActive: boolean) {
-    this.spinnerService.setIsLoading(true);
-      return await this.playersApiService.setFantasyMetaIsActive(this.selectedGroup().id, isActive).finally(() => {
-        this.spinnerService.setIsLoading(false);
-      });
+    return this.playersApiService.setFantasyMetaIsActive(this.selectedGroup().id, isActive);
   }
 
   updatePlayerSignal(player: Player) {
@@ -256,25 +243,30 @@ export class PlayersService {
     const groupId = this.selectedGroup()?.id;
     if (!groupId) return;
     const trimmedAlias = alias.trim().slice(0, TEAM_ALIAS_MAX_LENGTH);
-    this.spinnerService.setIsLoading(true);
-    try {
-      await this.playersApiService.updateTeamAlias(groupId, teamKey, trimmedAlias);
-      this.teamAliases.update((aliases) => {
-        const next = {...aliases};
-        if (trimmedAlias) {
-          next[teamKey] = trimmedAlias;
-        } else {
-          delete next[teamKey];
-        }
-        return next;
-      });
-      this.selectedGroup.update((group: any) => ({...group, teamAliases: {...this.teamAliases()}}));
-      this.popoutService.addSuccessPopOut('Team name updated.');
-    } catch {
-      this.popoutService.addErrorPopOut('Could not update team name, please try again later.');
-    } finally {
-      this.spinnerService.setIsLoading(false);
-    }
+    const previousAliases = this.teamAliases();
+    const previousGroup = this.selectedGroup();
+    await runOptimistic({
+      apply: () => this.applyTeamAlias(teamKey, trimmedAlias),
+      rollback: () => {
+        this.teamAliases.set(previousAliases);
+        this.selectedGroup.set(previousGroup);
+      },
+      commit: () => this.playersApiService.updateTeamAlias(groupId, teamKey, trimmedAlias),
+      onError: () => this.popoutService.addErrorPopOut('Could not update team name, so it was changed back.'),
+    });
+  }
+
+  private applyTeamAlias(teamKey: string, alias: string): void {
+    this.teamAliases.update((aliases) => {
+      const next = {...aliases};
+      if (alias) {
+        next[teamKey] = alias;
+      } else {
+        delete next[teamKey];
+      }
+      return next;
+    });
+    this.selectedGroup.update((group: any) => ({...group, teamAliases: {...this.teamAliases()}}));
   }
 
   async setTeamColor(teamKey: string, color: string): Promise<void> {
@@ -287,25 +279,30 @@ export class PlayersService {
         return;
       }
     }
-    this.spinnerService.setIsLoading(true);
-    try {
-      await this.playersApiService.updateTeamColor(groupId, teamKey, color);
-      this.teamColors.update((colors) => {
-        const next = {...colors};
-        if (color) {
-          next[teamKey] = color;
-        } else {
-          delete next[teamKey];
-        }
-        return next;
-      });
-      this.selectedGroup.update((group: any) => ({...group, teamColors: {...this.teamColors()}}));
-      this.popoutService.addSuccessPopOut('Team color updated.');
-    } catch {
-      this.popoutService.addErrorPopOut('Could not update team color, please try again later.');
-    } finally {
-      this.spinnerService.setIsLoading(false);
-    }
+    const previousColors = this.teamColors();
+    const previousGroup = this.selectedGroup();
+    await runOptimistic({
+      apply: () => this.applyTeamColor(teamKey, color),
+      rollback: () => {
+        this.teamColors.set(previousColors);
+        this.selectedGroup.set(previousGroup);
+      },
+      commit: () => this.playersApiService.updateTeamColor(groupId, teamKey, color),
+      onError: () => this.popoutService.addErrorPopOut('Could not update team color, so it was changed back.'),
+    });
+  }
+
+  private applyTeamColor(teamKey: string, color: string): void {
+    this.teamColors.update((colors) => {
+      const next = {...colors};
+      if (color) {
+        next[teamKey] = color;
+      } else {
+        delete next[teamKey];
+      }
+      return next;
+    });
+    this.selectedGroup.update((group: any) => ({...group, teamColors: {...this.teamColors()}}));
   }
 
   setNumberOfTeams(numberOfTeams: number) {

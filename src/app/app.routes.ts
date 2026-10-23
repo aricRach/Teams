@@ -1,18 +1,13 @@
 import { Routes } from '@angular/router';
-import {StatisticsComponent} from './statistics/statistics/statistics.component';
 import {GameComponent} from './game/game.component';
 import {MainPageComponent} from './main-page/main-page.component';
 import {SelectGroupComponent} from './select-group/select-group.component';
-import {getGroupPlayersResolver} from './resolvers/get-group-players.resolver';
+import {selectedGroupGuard} from './guards/selected-group.guard';
 import {SignInComponent} from './user/sign-in/sign-in.component';
 import {getUserGroupsResolver} from './resolvers/get-user-groups.resolver';
 import {groupAdminGuard} from './guards/group-admin.guard';
 import {authRoutesGuard} from './guards/auth-routes.guard';
 import {EditPlayerComponent} from './manage-players/edit-player/edit-player.component';
-import {TeamOfTheWeekComponent} from './team-of-the-week/team-of-the-week.component';
-import {PlayersStatisticsTableComponent} from './players-statistics-table/players-statistics-table.component';
-import {MatchesComponent} from './match-event-manager/matches/matches.component';
-import {MatchesTimelineComponent} from './match-event-manager/matches-timeline/matches-timeline.component';
 import {MatchEventsManagerComponent} from './match-event-manager/match-events-manager/match-events-manager.component';
 import {TeamDraftComponent} from './team-draft/team-draft.component';
 import {CreateDraftSessionComponent} from './create-draft-session/create-draft-session.component';
@@ -57,9 +52,7 @@ export const routes: Routes = [
   {
     path: 'home',
     component: MainPageComponent,
-    resolve: {
-      allPlayers: getGroupPlayersResolver
-    },
+    canActivate: [selectedGroupGuard],
     children: [
       {
         path: '',
@@ -76,7 +69,7 @@ export const routes: Routes = [
       },
       {
         path: 'statistics',
-        component: StatisticsComponent,
+        loadComponent: () => import('./statistics/statistics/statistics.component').then(m => m.StatisticsComponent),
         data: { breadcrumb: 'Statistics' },
         children: [
           {
@@ -86,12 +79,12 @@ export const routes: Routes = [
           },
           {
             path: 'table',
-            component: PlayersStatisticsTableComponent,
+            loadComponent: () => import('./players-statistics-table/players-statistics-table.component').then(m => m.PlayersStatisticsTableComponent),
             data: { breadcrumb: 'Table' },
           },
           {
             path: 'team-of-the-week',
-            component: TeamOfTheWeekComponent,
+            loadComponent: () => import('./team-of-the-week/team-of-the-week.component').then(m => m.TeamOfTheWeekComponent),
             data: { breadcrumb: 'TOTW' },
           },
           {
@@ -104,7 +97,7 @@ export const routes: Routes = [
       },
       {
         path: 'matches',
-        component: MatchesComponent,
+        loadComponent: () => import('./match-event-manager/matches/matches.component').then(m => m.MatchesComponent),
         data: { breadcrumb: 'Matches' },
         children: [
           {
@@ -114,7 +107,7 @@ export const routes: Routes = [
           },
           {
             path: 'timeline',
-            component: MatchesTimelineComponent,
+            loadComponent: () => import('./match-event-manager/matches-timeline/matches-timeline.component').then(m => m.MatchesTimelineComponent),
             data: { breadcrumb: 'Timeline' },
           },
           {

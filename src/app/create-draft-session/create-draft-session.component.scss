@@ -1,17 +1,3 @@
-:host {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  max-width: 680px;
-  margin: 0 auto;
-}
-
-header {
-  display: flex;
-  justify-content: center;
-}
-
 section {
   display: flex;
   justify-content: center;
@@ -65,8 +51,10 @@ section {
   margin-bottom: 15px;
 }
 
-.set-teams-after-draft {
-  margin-top: 20px;
+
+label:has(input[type='checkbox']),
+input[type='checkbox'] {
+  cursor: pointer;
 }
 
 .team-draft-link {

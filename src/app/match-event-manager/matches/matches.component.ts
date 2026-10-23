@@ -1,12 +1,12 @@
 import {Component, inject} from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { InnerTabsComponent, InnerTab } from '../../shared/inner-tabs/inner-tabs.component';
+import {RouterOutlet} from '@angular/router';
+import {SectionLayoutComponent} from '../../shared/layouts/section-layout/section-layout.component';
 import {MatchesService} from '../services/matches.service';
 
 @Component({
   selector: 'app-matches',
   standalone: true,
-  imports: [RouterOutlet, InnerTabsComponent],
+  imports: [SectionLayoutComponent, RouterOutlet],
   templateUrl: './matches.component.html',
   styleUrl: './matches.component.scss',
 })

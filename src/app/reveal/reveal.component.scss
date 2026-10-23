@@ -16,7 +16,6 @@
   color: #fff;
 }
 
-// ─── Loading ─────────────────────────────────────────────────
 .loading-screen {
   display: flex;
   flex-direction: column;
@@ -64,7 +63,6 @@
   }
 }
 
-// ─── Team Reveal ─────────────────────────────────────────────
 .team-reveal-screen {
   width: 100%;
   max-width: 420px;
@@ -214,7 +212,6 @@
   }
 }
 
-// ─── All Teams ───────────────────────────────────────────────
 .all-teams-screen {
   width: 100%;
   max-width: 480px;
@@ -313,7 +310,6 @@
   padding: 2px 0 2px 6px;
 }
 
-// ─── Keyframes ───────────────────────────────────────────────
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }

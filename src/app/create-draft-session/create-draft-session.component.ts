@@ -1,7 +1,7 @@
 import {Component, computed, DestroyRef, inject, input, linkedSignal, OnDestroy} from '@angular/core';
+import {FormLayoutComponent} from '../shared/layouts/form-layout/form-layout.component';
 import {CreateDraftSessionService, TeamDraftSession} from './services/create-draft-session.service';
 import {FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {RangePipe} from '../pipes/range.pipe';
 import {skip, startWith, Subject, takeUntil} from 'rxjs';
 
 import {Player} from "../players/models/player.model";
@@ -12,7 +12,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-create-draft-session',
-  imports: [FormsModule, RangePipe, ReactiveFormsModule, RouterModule, MatTooltipModule],
+  imports: [FormsModule, ReactiveFormsModule, RouterModule, MatTooltipModule, FormLayoutComponent],
   providers: [CreateDraftSessionService],
   templateUrl: './create-draft-session.component.html',
   styleUrl: './create-draft-session.component.scss'

@@ -1,6 +1,7 @@
 import {Component, computed, inject} from '@angular/core';
 import {TeamOfTheWeekService} from './services/team-of-the-week.service';
 import {MatTooltip} from '@angular/material/tooltip';
+import {PitchLayoutComponent} from '../shared/layouts/pitch-layout/pitch-layout.component';
 
 interface PlayerPerformance {
   position: 'striker' | 'midfielder' | 'defender';
@@ -13,7 +14,7 @@ interface PlayerPerformance {
 
 @Component({
   selector: 'app-team-of-the-week',
-  imports: [MatTooltip],
+  imports: [MatTooltip, PitchLayoutComponent],
   templateUrl: './team-of-the-week.component.html',
   standalone: true,
   styleUrl: './team-of-the-week.component.scss',
@@ -22,6 +23,7 @@ interface PlayerPerformance {
 export class TeamOfTheWeekComponent {
 
   teamOfTheWeekService = inject(TeamOfTheWeekService);
+
 
   // Define custom position order
   positionOrder = {

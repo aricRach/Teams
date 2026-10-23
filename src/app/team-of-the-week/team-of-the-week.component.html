@@ -1,14 +1,20 @@
-@if(teamOfTheWeekService.shouldShowReGenerate()) {
-  <div class="re-generate">
+<app-pitch-layout
+  [loading]="!teamOfTheWeekService.statisticService.noDateSelected() && teamOfTheWeekService.totwResource.isLoading()"
+  [error]="!teamOfTheWeekService.statisticService.noDateSelected() && !!teamOfTheWeekService.totwResource.error()"
+  errorHeading="Couldn't load team of the week"
+  (retry)="teamOfTheWeekService.totwResource.reload()"
+  [empty]="teamOfTheWeekService.statisticService.noDateSelected()"
+  emptyHeading="You must select a date before.">
+  @if(teamOfTheWeekService.shouldShowReGenerate()) {
     <button
+      layout-toolbar
       class="active-btn action-btn"
-      [disabled]="!!teamOfTheWeekService.reGenerateDisabledReason()"
+      [disabled]="!!teamOfTheWeekService.reGenerateDisabledReason() || teamOfTheWeekService.regenerate.pending()"
+      [class.is-pending]="teamOfTheWeekService.regenerate.pending()"
       [matTooltip]="teamOfTheWeekService.reGenerateDisabledReason() ?? ''"
       (click)="teamOfTheWeekService.reGenerateTeamOfTheWeek()">regenerate</button>
-  </div>
-}
+  }
 
-@if(teamOfTheWeekService.statisticService.getSelectedDate() !== teamOfTheWeekService.statisticService.selectAllLabel()) {
   <div class="soccer-field">
     <div class="position-row forwards">
       @for (player of totwByPosition().striker; track player) {
@@ -68,10 +74,4 @@
       }
     </div>
   </div>
-} @else {
-  <div class="center">
-    <h5>You must select a date before.</h5>
-  </div>
-}
-
-
+</app-pitch-layout>

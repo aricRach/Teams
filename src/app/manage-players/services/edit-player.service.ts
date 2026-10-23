@@ -15,11 +15,13 @@ export class EditPlayerService {
   controls = computed<FormField[]>(() => this.buildEditPlayerDetailsFields());
   shouldDisabledFields = computed(() => !this.managePlayersService.selectedPlayer())
   selectedPlayer = computed(() => this.managePlayersService.selectedPlayer());
+  isSavingDetails = this.playersService.updatePlayerDetails.pending;
+  isDeleting = this.playersService.setPlayerActiveStatus.pending;
 
   editPlayer(playerDetails: FormGroup<any>) {
     const details = playerDetails.getRawValue();
     details.rating = Number(details.rating);
-    this.playersService.updatePlayerDetails(this.managePlayersService.selectedPlayer(), {...this.managePlayersService.selectedPlayer(), ...details}).then()
+    void this.playersService.updatePlayerDetails.run(this.managePlayersService.selectedPlayer(), {...this.managePlayersService.selectedPlayer(), ...details});
   }
 
   private buildEditPlayerDetailsFields() {
@@ -81,7 +83,7 @@ export class EditPlayerService {
       description: `Are you sure you want to delete ${this.selectedPlayer()?.name}?`,
     }).afterClosed().subscribe((result) => {
       if(result) {
-        this.playersService.setPlayerActiveStatus(this.selectedPlayer()!, false).then(() => this.managePlayersService.removeSelectedPlayer())
+        this.playersService.setPlayerActiveStatus.run(this.selectedPlayer()!, false).then(done => { if (done) this.managePlayersService.removeSelectedPlayer(); });
       }
     });
   }

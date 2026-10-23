@@ -24,13 +24,6 @@ export interface SlotViewModel {
   scorers: PanelScorer[];
 }
 
-/**
- * Shared orchestration for a game mode that runs its matches in parallel "slots"
- * on the same board (single mode: 2 independent matches; league mode: 2 matches
- * feeding one session's standings). Concrete subclasses fix `slots`/`teamCount`
- * via the constructor and may override `startMatchOptions` to tag match docs
- * differently (league adds `mode`/`sessionId`).
- */
 @Injectable()
 export abstract class ParallelSlotsGameService implements OnDestroy {
   protected playersService = inject(PlayersService);
@@ -42,19 +35,11 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   protected gameService = inject(GameService);
   protected popups = inject(PopupsService);
 
-  /** The number of teams chosen on the group-selection screen, snapshotted when
-   *  this service is created - also restored to the board on destroy. */
   protected readonly selectedTeamCount: number;
-  /** One live-events resource per slot, built once `slots` is known. */
   private readonly slotEventsBySlot: Map<number, ResourceRef<MatchEventRecord[] | undefined>>;
 
-  /** How many teams the board shows. A signal (not a fixed value) so a mode can
-   *  vary it at runtime. */
   abstract readonly teamCount: Signal<number>;
 
-  /** How many of `slots` are selectable/shown right now - 1 (just the first
-   *  slot, classic single-match UI) or 2 (both slots, G1/G2 selector). The
-   *  slot(s) beyond that stay wired up underneath but hidden. */
   readonly matchCount: WritableSignal<1 | 2>;
 
   protected constructor(readonly slots: readonly number[], defaultMatchCount: 1 | 2 = 2) {
@@ -71,9 +56,7 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
             : of([] as MatchEventRecord[])
       })
     ]));
-    // Deferred to an effect (not called eagerly here) because `teamCount` is
-    // implemented by the subclass and may read the subclass's own signals,
-    // which aren't initialized until after this base constructor returns.
+    // An effect, because `teamCount` may read subclass signals that don't exist yet in this constructor.
     effect(() => {
       this.playersService.setNumberOfTeams(this.teamCount());
     });
@@ -83,7 +66,6 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     this.playersService.setNumberOfTeams(this.selectedTeamCount);
   }
 
-  /** Manual board move-lock, toggled via the lock button. Live-match teams are locked separately via `lockedTeamKeys`. */
   readonly isMovePlayersLocked = signal(false);
 
   readonly lockIcon = computed(() =>
@@ -94,7 +76,6 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     this.isMovePlayersLocked.set(!this.isMovePlayersLocked());
   }
 
-  /** teamKey -> slot. Absent = on the bench. */
   readonly assignments = signal<Record<string, number>>({});
   readonly activeSlot: WritableSignal<number> = signal(0);
 
@@ -114,7 +95,6 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
       .map(([teamKey]) => teamKey)
   );
 
-  /** Live view of the board's teams, the stats overlay and the ratings toggle. */
   readonly teams = computed(() =>
     collapseExtraTeams(this.playersService.getTeams(), this.teamCount())
   );
@@ -126,7 +106,6 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
 
   protected readonly groupId = computed(() => this.playersService.selectedGroup()?.id ?? null);
 
-  /** Per-slot view-model the shared board component renders - one entry per panel. */
   readonly slotViewModels = computed<SlotViewModel[]>(() =>
     this.slots.map(slot => ({
       slot,
@@ -138,12 +117,10 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     }))
   );
 
-  /** Only these slots are selectable/rendered right now. */
   readonly activeSlots = computed<readonly number[]>(() =>
     this.matchCount() === 2 ? this.slots : [this.slots[0]]
   );
 
-  /** `slotViewModels` filtered down to the currently active slot(s) - what the board actually renders. */
   readonly visibleSlotViewModels = computed(() =>
     this.slotViewModels().filter(vm => this.activeSlots().includes(vm.slot))
   );
@@ -153,8 +130,6 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   setMatchCount(count: 1 | 2): void {
     if (count === this.matchCount() || !this.canToggleMatchCount()) return;
     if (count === 1) {
-      // Narrowing back to one slot - drop picks on the slot(s) being hidden so
-      // they don't silently resurface (still assigned) if Multiple is picked again later.
       const next = { ...this.assignments() };
       for (const [teamKey, slot] of Object.entries(next)) {
         if (slot !== this.slots[0]) delete next[teamKey];
@@ -202,7 +177,6 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     void this.matchEvents.recordPlayerGoalFromTimer(goal.player, goal.teamKey, elapsedMs, slot);
   }
 
-  /** `concede.teamKey` is the conceding player's own team; the goal is credited to the other team in the slot. */
   recordOwnGoal(concede: { player: Player; teamKey: string }, elapsedMs: number): void {
     const slot = this.assignments()[concede.teamKey];
     if (!slot) return;
@@ -241,7 +215,6 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
     return false;
   }
 
-  /** Options passed to `MatchEventsManagerService.onTimerStartedForMatch` when slot `slot` starts. Override to tag the match doc (e.g. league adds `mode`/`sessionId`). */
   protected startMatchOptions(slot: number): StartMatchOptions {
     return { slot, teamKeys: this.slotTeams(slot) };
   }

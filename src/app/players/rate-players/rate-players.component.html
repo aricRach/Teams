@@ -1,9 +1,8 @@
 @if(isSubmitted()) {
   <h1 class="center">Thank you</h1>
 } @else {
-  <div class="container">
-    <h2>Rate Players</h2>
-    <form [formGroup]="ratings()" (ngSubmit)="submitRatings()">
+  <app-form-layout heading="Rate Players">
+    <form id="rate-players-form" [formGroup]="ratings()" (ngSubmit)="submitRatings()">
       @for(player of allPlayers(); track player.id) {
         <div class="player">
           <span>{{ player.name }}</span>
@@ -16,15 +15,16 @@
           </select>
         </div>
       }
-
-      <button
-        type="submit"
-        class="submit-btn"
-        [disabled]="ratings().invalid">
-        Submit Ratings
-      </button>
-
     </form>
-  </div>
 
+    <button
+      form-actions
+      form="rate-players-form"
+      type="submit"
+      class="active-btn submit-btn"
+      [disabled]="ratePlayersService.isSubmittingRatings() || ratings().invalid"
+      [class.is-pending]="ratePlayersService.isSubmittingRatings()">
+      Submit Ratings
+    </button>
+  </app-form-layout>
 }

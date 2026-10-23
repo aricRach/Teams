@@ -20,7 +20,8 @@
         [actions]="[]"></app-grid>
     </section>
     <div class="center">
-      <button class="active-btn submit-btn" (click)="communityRatingsService.updateCommunityRatings()">Submit</button>
+      <button class="active-btn submit-btn" [disabled]="communityRatingsService.saveRatings.pending()" [class.is-pending]="communityRatingsService.saveRatings.pending()"
+              (click)="communityRatingsService.updateCommunityRatings()">Submit</button>
     </div>
   } @else {
 
@@ -31,7 +32,8 @@
   @if(communityRatingsService.dataRows().length > 0) {
     <footer>
     <section>
-      <button (click)="communityRatingsService.deleteRatings()" class="alert-btn active-btn">Delete current community ratings</button>
+      <button (click)="communityRatingsService.deleteRatings()" class="alert-btn active-btn"
+              [disabled]="communityRatingsService.deleteAllRatings.pending()" [class.is-pending]="communityRatingsService.deleteAllRatings.pending()">Delete current community ratings</button>
     </section>
   </footer>
   }

@@ -1,4 +1,5 @@
 import {Component, computed, inject, input, OnDestroy, OnInit, signal, ViewChild} from '@angular/core';
+import {BoardLayoutComponent} from '../shared/layouts/board-layout/board-layout.component';
 import {TeamDraftService} from './services/team-draft.service';
 
 import {Subscription} from 'rxjs';
@@ -9,7 +10,7 @@ import {ChatComponent, ChatMessage} from 'ui';
 
 @Component({
   selector: 'app-team-draft',
-  imports: [RouterModule, FormsModule, ChatComponent ],
+  imports: [RouterModule, FormsModule, ChatComponent, BoardLayoutComponent],
   templateUrl: './team-draft.component.html',
   styleUrl: './team-draft.component.scss'
 })
