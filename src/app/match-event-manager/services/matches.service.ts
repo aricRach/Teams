@@ -25,7 +25,7 @@ export class MatchesService {
     ...(
       this.playersService.isAdmin() ? [{
       link: 'manage-events',
-      title: 'Manage Events',
+      title: 'Manage events',
       tooltip: '',
       isDisabled: false,
       show: true

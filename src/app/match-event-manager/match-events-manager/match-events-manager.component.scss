@@ -1,17 +1,3 @@
-:host {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  max-width: 680px;
-}
-
-.events-manager {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
 .controls,
 .add-row {
   display: flex;
@@ -177,16 +163,8 @@
   gap: 12px;
 }
 
-.draft-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
-  justify-content: center;
-
-  button {
-    flex: 1 1 140px;
-  }
+.draft-action {
+  flex: 1 1 140px;
 }
 
 .warning-box {

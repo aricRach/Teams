@@ -4,11 +4,11 @@
       <div [matTooltip]="tab.tooltip">
       <a class="active-btn link-btn statistic-link" [class.disabled]="tab.isDisabled"
          routerLinkActive="active"
-         [routerLink]="tab.link">{{tab.title}}</a>
+         [routerLink]="tab.link" [queryParams]="tab.queryParams">{{tab.title}}</a>
       </div>
     }
     @else {
-      <a routerLinkActive="active" class="active-btn link-btn statistic-link" [routerLink]="tab.link">{{tab.title}}</a>
+      <a routerLinkActive="active" class="active-btn link-btn statistic-link" [routerLink]="tab.link" [queryParams]="tab.queryParams">{{tab.title}}</a>
     }
   }
 </section>

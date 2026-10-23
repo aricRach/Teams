@@ -1,76 +1,76 @@
-<h2>Register New Players</h2>
-<div class="table-container">
-
-<form [formGroup]="registerPlayersService.form()" (ngSubmit)="registerPlayersService.submit()">
-  <table>
-    <thead>
-    <tr>
-      @for(column of registerPlayersService.columns(); track column.name) {
-        <th [class.required]="column.isRequired">{{column.name}}</th>
-      }
-    </tr>
-    </thead>
-
-    <tbody formArrayName="players">
-      @for (player of registerPlayersService.players().controls; track player) {
-        <tr [formGroupName]="$index">
-          <td class="name">
-            <input
-              type="text"
-              formControlName="name"
-              placeholder="Enter name"
-              [maxlength]="playerNameMaxLength"
-              [class.invalid]="player.get('name')?.invalid && player.get('name')?.touched"
-            />
-            @if (player.get('name')?.invalid && player.get('name')?.touched) {
-              <div class="input-error">
-                @if (player.get('name')?.hasError('required')) { Name is required }
-                @if (player.get('name')?.hasError('maxlength')) { Max 12 characters }
-              </div>
-            }
-          </td>
-
-          <td class="rating">
-            <input
-              type="number"
-              formControlName="rating"
-              placeholder="1-10"
-              [class.invalid]="player.get('rating')?.invalid && player.get('rating')?.touched"
-            />
-            @if (player.get('rating')?.invalid && player.get('rating')?.touched) {
-              <div class="input-error">
-                @if (player.get('rating')?.hasError('required')) { Rating is required }
-                @if (player.get('rating')?.hasError('min') || player.get('rating')?.hasError('max')) { Rating must be between 1 and 10 }
-              </div>
-            }
-          </td>
-
-          <td class="email">
-            <input type="email" formControlName="email" placeholder="email" />
-          </td>
-
-          <td class="guest">
-            <input type="checkbox" formControlName="isGuest" />
-          </td>
-
-          <td class="delete-row">
-            <button
-              type="button"
-              (click)="registerPlayersService.removeRow($index)"
-              [disabled]="registerPlayersService.players().length === 1"
-              title="Delete row"
-            >
-              <img width="20px" height="20px" alt='trash' src="assets/icons/trash.svg">
-            </button>
-          </td>
+<app-form-layout heading="Register New Players">
+  <div class="table-container">
+    <form id="register-players-form" [formGroup]="registerPlayersService.form()" (ngSubmit)="registerPlayersService.submit()">
+      <table>
+        <thead>
+        <tr>
+          @for(column of registerPlayersService.columns(); track column.name) {
+            <th [class.required]="column.isRequired">{{column.name}}</th>
+          }
         </tr>
-      }
-    </tbody>
-  </table>
+        </thead>
 
-  <div class="actions">
-    <button class="active-btn submit-btn" type="submit" [disabled]="registerPlayersService.form().invalid">Submit</button>
-    <button class="active-btn action-btn" type="button" (click)="registerPlayersService.addRow()">Add Row</button>
+        <tbody formArrayName="players">
+          @for (player of registerPlayersService.players().controls; track player) {
+            <tr [formGroupName]="$index">
+              <td class="name">
+                <input
+                  type="text"
+                  formControlName="name"
+                  placeholder="Enter name"
+                  [maxlength]="playerNameMaxLength"
+                  [class.invalid]="player.get('name')?.invalid && player.get('name')?.touched"
+                />
+                @if (player.get('name')?.invalid && player.get('name')?.touched) {
+                  <div class="input-error">
+                    @if (player.get('name')?.hasError('required')) { Name is required }
+                    @if (player.get('name')?.hasError('maxlength')) { Max 12 characters }
+                  </div>
+                }
+              </td>
+
+              <td class="rating">
+                <input
+                  type="number"
+                  formControlName="rating"
+                  placeholder="1-10"
+                  [class.invalid]="player.get('rating')?.invalid && player.get('rating')?.touched"
+                />
+                @if (player.get('rating')?.invalid && player.get('rating')?.touched) {
+                  <div class="input-error">
+                    @if (player.get('rating')?.hasError('required')) { Rating is required }
+                    @if (player.get('rating')?.hasError('min') || player.get('rating')?.hasError('max')) { Rating must be between 1 and 10 }
+                  </div>
+                }
+              </td>
+
+              <td class="email">
+                <input type="email" formControlName="email" placeholder="email" />
+              </td>
+
+              <td class="guest">
+                <input type="checkbox" formControlName="isGuest" />
+              </td>
+
+              <td class="delete-row">
+                <button
+                  type="button"
+                  (click)="registerPlayersService.removeRow($index)"
+                  [disabled]="registerPlayersService.players().length === 1"
+                  title="Delete row"
+                >
+                  <img width="20px" height="20px" alt='trash' src="assets/icons/trash.svg">
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </form>
   </div>
-</form>
-</div>
+
+  <button form-actions form="register-players-form" class="active-btn submit-btn" type="submit"
+          [disabled]="registerPlayersService.form().invalid || registerPlayersService.registerPlayers.pending()"
+          [class.is-pending]="registerPlayersService.registerPlayers.pending()">Submit</button>
+  <button form-actions class="active-btn action-btn" type="button" (click)="registerPlayersService.addRow()">Add Row</button>
+</app-form-layout>

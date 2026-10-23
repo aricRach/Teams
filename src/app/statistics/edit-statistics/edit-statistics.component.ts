@@ -1,11 +1,12 @@
 import {Component, inject} from '@angular/core';
+import {BoardLayoutComponent} from '../../shared/layouts/board-layout/board-layout.component';
 import {EditStatisticsService} from '../services/edit-statistics.service';
-import {JsonPipe, KeyValuePipe} from '@angular/common';
 import {PlayersDragDropTableComponent} from '../../players/players-drag-drop-table/players-drag-drop-table.component';
+import {StateMessageComponent} from '../../shared/state-message/state-message.component';
 
 @Component({
   selector: 'app-edit-statistics',
-  imports: [KeyValuePipe, JsonPipe, PlayersDragDropTableComponent],
+  imports: [PlayersDragDropTableComponent, BoardLayoutComponent, StateMessageComponent],
   providers: [EditStatisticsService],
   templateUrl: './edit-statistics.component.html',
   styleUrl: './edit-statistics.component.scss'
@@ -13,5 +14,6 @@ import {PlayersDragDropTableComponent} from '../../players/players-drag-drop-tab
 export class EditStatisticsComponent {
 
   editStatisticsService = inject(EditStatisticsService);
+
 
 }

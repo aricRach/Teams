@@ -1,13 +1,16 @@
-
- <app-generic-form
+<app-form-layout heading="Edit player details">
+  <app-generic-form
+    [class.form-is-pending]="editPlayerService.isSavingDetails()"
     [formFields]=editPlayerService.controls()
-    [title]="'Edit player details'"
     [additionalTemplate]="deleteBtn"
     (formSubmit)="editPlayerService.editPlayer($event)">
   </app-generic-form>
+</app-form-layout>
 
- <ng-template #deleteBtn>
-   @if(editPlayerService.selectedPlayer()) {
-     <button type=button class="delete-btn active-btn alert-btn" (click)="editPlayerService.deletePlayer()">Delete Player</button>
-   }
- </ng-template>
+<ng-template #deleteBtn>
+  @if(editPlayerService.selectedPlayer()) {
+    <button type=button class="delete-btn active-btn alert-btn"
+            [disabled]="editPlayerService.isDeleting()" [class.is-pending]="editPlayerService.isDeleting()"
+            (click)="editPlayerService.deletePlayer()">Delete Player</button>
+  }
+</ng-template>

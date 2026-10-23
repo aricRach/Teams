@@ -1,0 +1,26 @@
+@use '../layouts';
+
+:host {
+  @include layouts.frame;
+  padding-bottom: 0;
+}
+
+.section-layout-title {
+  @include layouts.title;
+  margin-top: 0;
+}
+
+.section-layout-intro:empty {
+  display: none;
+}
+
+app-inner-tabs {
+  display: flex;
+  justify-content: center;
+}
+
+.section-layout-toolbar {
+  @include layouts.toolbar;
+  margin-top: 10px;
+  margin-bottom: 0;
+}

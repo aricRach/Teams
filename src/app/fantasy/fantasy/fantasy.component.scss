@@ -1,17 +1,9 @@
 :host {
   display: block;
-  padding: 40px 0;
 }
 
-ul {
+.rules ul {
   display: flex;
   justify-content: center;
   gap: 35px;
-}
-
-.statistic-links {
-  margin-bottom: 10px;
-  .statistic-link {
-    width: 145px;
-  }
 }

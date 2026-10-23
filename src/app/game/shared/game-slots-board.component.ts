@@ -4,10 +4,6 @@ import { GameSlotPanelComponent } from './game-slot-panel.component';
 import { SlotViewModel } from './parallel-slots-game.service';
 import { Player, Statistics } from '../../players/models/player.model';
 
-/**
- * Presentational: the panels row + the drag-drop board for a parallel-slots game
- * mode (single or league). No injected services - all state in, all actions out.
- */
 @Component({
   selector: 'app-game-slots-board',
   standalone: true,
@@ -18,7 +14,6 @@ import { Player, Statistics } from '../../players/models/player.model';
 export class GameSlotsBoardComponent {
   slotViewModels = input.required<SlotViewModel[]>();
   availableSlots = input<readonly number[]>([]);
-  /** 1 = one match (slot 1 only), 2 = two parallel matches. Drives the Single/Multiple toggle. */
   matchCount = input<1 | 2>(2);
   canToggleMatchCount = input(true);
   aliases = input<Record<string, string>>({});
@@ -44,9 +39,6 @@ export class GameSlotsBoardComponent {
   renameTeam = output<{ teamKey: string; alias: string }>();
   changeTeamColor = output<{ teamKey: string; color: string }>();
 
-  /** The panels render inside this component's own template, so the smart
-   *  container reaches a slot's stopwatch through here (view queries don't
-   *  pierce into a child component's template). */
   private readonly panels = viewChildren(GameSlotPanelComponent);
 
   stopwatchForSlot(slot: number) {

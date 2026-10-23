@@ -4,7 +4,7 @@ import {PlayersService} from '../../players/players.service';
 import {Player} from '../../players/models/player.model';
 import {ManagePlayersService} from './manage-players.service';
 import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
-import {averagePerformance, calculatePerformance} from '../../statistics/utils/performance.util';
+import {averagePerformance, calculatePerformance, PERFORMANCE_DESCRIPTION} from '../../statistics/utils/performance.util';
 import {AutoCompleteOption} from 'ui';
 
 export enum ViewMode{
@@ -16,6 +16,8 @@ export class PlayerProgressChartService {
   managePlayersService = inject(ManagePlayersService);
   playersService = inject(PlayersService);
   private computedStatsService = inject(ComputedStatisticsService);
+
+  readonly performanceDescription = PERFORMANCE_DESCRIPTION;
   statToShow = signal<'goals' | 'wins' | 'performance'>('goals');
   lineChartOptions = computed((): ChartOptions<'line'> => {
     return {

@@ -25,14 +25,11 @@ export interface MatchRecord {
   createdAt?: any;
   updatedAt?: any;
   createdBy: string;
-  // League mode - all optional, absent means a classic single match.
   mode?: 'single' | 'league';
   sessionId?: string;
   slot?: number;
   round?: number;
   teamKeys?: string[];
-  /** Copy of the group's teamAliases map at the moment this match was created,
-   *  so historical views render the name a team had when it was played. */
   teamAliasSnapshot?: Record<string, string>;
 }
 

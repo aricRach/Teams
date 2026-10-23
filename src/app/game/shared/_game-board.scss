@@ -1,0 +1,68 @@
+@mixin games-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin: 1rem auto;
+  max-width: 780px;
+}
+
+@mixin slot-panel {
+  flex: 1 1 320px;
+  min-width: 280px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  padding: 1rem;
+  background: #fafafa;
+}
+
+@mixin teams-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 25px;
+
+  @media (max-width: 640px) {
+    gap: 8px;
+  }
+}
+
+@mixin team-column {
+  width: 400px;
+  max-width: 100%;
+  margin: 0 0 25px;
+  display: inline-block;
+  vertical-align: top;
+
+  @media (max-width: 640px) {
+    width: calc(50% - 4px);
+    margin-bottom: 8px;
+  }
+}
+
+@mixin team-list {
+  border: solid 1px var(--border);
+  min-height: 60px;
+  background: var(--surface);
+  border-radius: 4px;
+  overflow: hidden;
+  display: block;
+}
+
+@mixin player-row {
+  padding: 20px 10px;
+  border-bottom: solid 1px var(--border);
+  color: rgba(0, 0, 0, 0.87);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: var(--surface);
+  font-size: 14px;
+
+  &:last-child {
+    border: none;
+  }
+}

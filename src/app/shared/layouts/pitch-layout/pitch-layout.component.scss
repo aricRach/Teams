@@ -1,0 +1,9 @@
+@use '../layouts';
+
+:host {
+  @include layouts.frame;
+}
+
+.pitch-layout-toolbar {
+  @include layouts.toolbar;
+}

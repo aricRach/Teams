@@ -8,18 +8,12 @@ export type { StandingsRow } from '../league-standings/standings.util';
 
 export const LEAGUE_SLOTS = [1, 2] as const;
 
-/**
- * League state is in-memory only. A live league match doc is still tagged with
- * `slot` / `sessionId` / `teamKeys` (used by the standings table), but there is
- * no refresh-restore: reloading the page mid-game abandons the on-screen state.
- */
 @Injectable()
 export class LeagueGameService extends ParallelSlotsGameService {
   constructor() {
     super(LEAGUE_SLOTS, 1);
   }
 
-  // Always the number of teams chosen on the group-selection screen.
   readonly teamCount = computed(() => this.selectedTeamCount);
 
   readonly sessionId = signal<string | null>(null);
@@ -35,7 +29,6 @@ export class LeagueGameService extends ParallelSlotsGameService {
     return computeStandings(matches);
   });
 
-  /** Close the current session locally so the next Start opens a fresh one. */
   finishSession(): void {
     this.sessionId.set(null);
     this.assignments.set({});

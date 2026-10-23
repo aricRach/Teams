@@ -1,22 +1,14 @@
-<div class="center">
-  <h1>Fantasy</h1>
-</div>
-<ul>
-  <li>goal = 3</li>
-  <li>win  = 2</li>
-</ul>
-<ul>
-  <li>conceded < 5 = 3</li>
-  <li>captain = X2</li>
-</ul>
-<div class="center gap-10 statistic-links">
-  @if(canDraft()) {
-    <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="draft" [queryParams]="{reload: reloadParam()}">Draft</a>
-  }
-  <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="analytics" [queryParams]="{reload: reloadParam()}">Leaderboard</a>
-  @if(fantasyService.isAdmin()) {
-    <a routerLinkActive="active" class="active-btn link-btn statistic-link" routerLink="manage-fantasy-meta" [queryParams]="{reload: reloadParam()}">Manage fantasy</a>
-  }
-</div>
+<app-section-layout heading="Fantasy" [tabs]="tabs()">
+  <div section-intro class="rules">
+    <ul>
+      <li>goal = 3</li>
+      <li>win  = 2</li>
+    </ul>
+    <ul>
+      <li>conceded < 5 = 3</li>
+      <li>captain = X2</li>
+    </ul>
+  </div>
 
-<router-outlet></router-outlet>
+  <router-outlet />
+</app-section-layout>

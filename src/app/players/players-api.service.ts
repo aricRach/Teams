@@ -74,19 +74,11 @@ export class PlayersApiService {
     return true;
   }
 
-  /**
-   * Sets (or clears, when alias is empty) the display nickname for one team slot
-   * on the group document. The slot key itself is untouched - it stays the team's id.
-   */
   async updateTeamAlias(groupId: string, teamKey: string, alias: string) {
     const groupDocRef = doc(this.firestore, `groups/${groupId}`);
     return updateDoc(groupDocRef, { [`teamAliases.${teamKey}`]: alias || deleteField() });
   }
 
-  /**
-   * Sets (or clears, when color is empty) the display color for one team slot
-   * on the group document. The slot key itself is untouched - it stays the team's id.
-   */
   async updateTeamColor(groupId: string, teamKey: string, color: string) {
     const groupDocRef = doc(this.firestore, `groups/${groupId}`);
     return updateDoc(groupDocRef, { [`teamColors.${teamKey}`]: color || deleteField() });
@@ -163,19 +155,6 @@ export class PlayersApiService {
 
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   }
-
-  // Dead code — stats are computed from match events; the statistics subcollection is no longer written.
-  // async deleteDayStatistics(groupId: string, dateToDelete: string) {
-  //   const playersRef = collection(this.firestore, `groups/${groupId}/players`);
-  //   const playersSnap = await getDocs(playersRef);
-  //   const batch = writeBatch(this.firestore);
-  //   for (const playerDoc of playersSnap.docs) {
-  //     const playerId = playerDoc.id;
-  //     const statRef = doc(this.firestore, `groups/${groupId}/players/${playerId}/statistics/${dateToDelete}`);
-  //     batch.delete(statRef);
-  //   }
-  //   await batch.commit();
-  // }
 
   async removeDraftSession(groupId: string, sessionId: string) {
     const sessionRef = doc(this.firestore, `groups/${groupId}/teamDraftSessions/${sessionId}`);

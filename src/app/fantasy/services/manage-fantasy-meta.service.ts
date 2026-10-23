@@ -3,7 +3,7 @@ import {DynamicComponentsTypes, genericValidators, PopupsService, subInputType} 
 import {FormGroup} from '@angular/forms';
 import {ManageFantasyMetaApiService} from './manage-fantasy-meta-api.service';
 import {PlayersService} from '../../players/players.service';
-import {SpinnerService} from '../../spinner.service';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 import {Router} from '@angular/router';
 
 @Injectable()
@@ -12,10 +12,19 @@ export class ManageFantasyMetaService {
   manageFantasyMetaApiService = inject(ManageFantasyMetaApiService);
   playersService = inject(PlayersService);
   popupsService = inject(PopupsService);
-  spinnerService = inject(SpinnerService);
   router = inject(Router);
 
   groupId = computed(() => this.playersService.selectedGroup().id);
+  readonly saveMeta = createMutation({
+    run: (numberOfPicks: number, nextDate: string) =>
+      this.manageFantasyMetaApiService.setFantasyMeta(this.groupId(), {numberOfPicks, nextDate}),
+    onSuccess: (_, _numberOfPicks, nextDate) => {
+      this.popupsService.addSuccessPopOut(`Fantasy draft settings for ${nextDate} was saved successfully`);
+      this.router.navigate(['/home/fantasy'], {queryParams: { reload: Date.now() }});
+    },
+    onError: (_, _numberOfPicks, nextDate) =>
+      this.popupsService.addErrorPopOut(`Cant save Fantasy draft settings for ${nextDate}, please try again later`),
+  });
   fantasyMetaFields = signal(
     [{
       alias: 'number of picks',
@@ -42,16 +51,6 @@ export class ManageFantasyMetaService {
       month: "2-digit",
       year: "numeric",
     }).format(meta.value.nextDate).replaceAll('/', '-');
-    this.spinnerService.setIsLoading(true);
-    this.manageFantasyMetaApiService.setFantasyMeta(this.groupId(), {numberOfPicks, nextDate}).then(() => {
-      this.popupsService.addSuccessPopOut(`Fantasy draft settings for ${nextDate} was saved successfully`);
-      this.router.navigate(['/home/fantasy'], {queryParams: { reload: Date.now() }}); // trigger resolver of meta again.
-    })
-      .catch(() => {
-        this.popupsService.addErrorPopOut(`Cant save Fantasy draft settings for ${nextDate}, please try again later`);
-      })
-      .finally(() => {
-        this.spinnerService.setIsLoading(false);
-      })
+    void this.saveMeta.run(numberOfPicks, nextDate);
   }
 }

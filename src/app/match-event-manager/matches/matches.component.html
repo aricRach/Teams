@@ -1,2 +1,3 @@
-<app-inner-tabs [tabs]="matchesService.innerTabs()"></app-inner-tabs>
-<router-outlet></router-outlet>
+<app-section-layout [tabs]="matchesService.innerTabs()">
+  <router-outlet />
+</app-section-layout>

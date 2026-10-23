@@ -1,5 +1,6 @@
 <p class="center">Create/Edit the fantasy settings for the next game</p>
 <app-generic-form
+  [class.form-is-pending]="manageFantasyMetaService.saveMeta.pending()"
   [formFields]=manageFantasyMetaService.fantasyMetaFields()
   [title]="'Set fantasy meta'"
   (formSubmit)="manageFantasyMetaService.submitFantasyMetaData($event)">

@@ -1,0 +1,24 @@
+@use '../layouts';
+
+:host {
+  @include layouts.frame;
+  max-width: var(--layout-form);
+  margin-inline: auto;
+}
+
+.form-layout-title {
+  @include layouts.title;
+}
+
+.form-layout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+
+  &:empty {
+    display: none;
+  }
+}

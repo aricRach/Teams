@@ -5,7 +5,9 @@ import {PlayersService} from '../players.service';
 export class RatePlayersService {
   private playersService = inject(PlayersService);
 
+  readonly isSubmittingRatings = this.playersService.submitRatings.pending;
+
   submitRatings(groupId: string, ratings: Record<string, {name: string; rating: number}>) {
-    return this.playersService.submitRatings(groupId, ratings);
+    return this.playersService.submitRatings.run(groupId, ratings);
   }
 }

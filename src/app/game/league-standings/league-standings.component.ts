@@ -16,8 +16,6 @@ export class LeagueStandingsComponent {
   aliases = input<Record<string, string>>({});
   colors = input<Record<string, string>>({});
 
-  /** Slot letter and nickname shown on separate lines so a long nickname
-   *  truncates instead of forcing the table to scroll on small screens. */
   teamLetter(teamKey: string): string {
     return defaultTeamLetter(teamKey);
   }

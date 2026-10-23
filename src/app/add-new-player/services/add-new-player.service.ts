@@ -2,7 +2,7 @@ import {computed, inject, Injectable} from '@angular/core';
 import {Player, PLAYER_NAME_MAX_LENGTH} from '../../players/models/player.model';
 import {FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
 import {PlayersService} from '../../players/players.service';
-import {SpinnerService} from '../../spinner.service';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 import {PopupsService} from 'ui';
 import {AddNewPlayerApiService} from './add-new-player-api.service';
 import {MembersService} from '../../admin/services/members.service';
@@ -17,7 +17,6 @@ export class AddNewPlayerService {
   private fb = inject(FormBuilder);
   private playersService = inject(PlayersService);
   private membersService = inject(MembersService);
-  private spinnerService = inject(SpinnerService);
   private popoutService = inject(PopupsService);
   private addNewPlayerApiService = inject(AddNewPlayerApiService);
 
@@ -32,38 +31,32 @@ export class AddNewPlayerService {
     });
   }
 
-  async addNewPlayer(): Promise<void> {
-    const {name, rating, email, isGuest} = this.playerForm.value;
-    if (!name?.trim() || !rating) return;
-    const normalizedPlayerName = name.trim().toLowerCase();
-      await this.saveNewPlayer({
-        name: normalizedPlayerName,
-        rating,
-        email,
-        isActive: true,
-        isGuest,
-        statistics: {}
-      } as Player);
-  }
-
-  private async saveNewPlayer(newPlayer: Player) {
-    try {
-      this.spinnerService.setIsLoading(true);
+  readonly addPlayer = createMutation({
+    run: async (newPlayer: Player) => {
       const playerDoc = await this.addNewPlayerApiService.addPlayerToGroup(this.groupId(), newPlayer);
-      this.popoutService.addSuccessPopOut(`${newPlayer.name} successfully added.`);
       const teams = this.playersService.getTeams();
       teams.allPlayers.players.push(playerDoc);
       this.playersService.setTeams(teams);
       this.playerForm.reset();
       await this.membersService.addMember(this.groupId(), newPlayer.email);
-    } catch (error: any) {
-      if (error instanceof DuplicatePlayerError) {
-        this.popoutService.addErrorPopOut(error.message);
-      } else {
-        this.popoutService.addErrorPopOut(`Failed to add ${newPlayer.name}. Please try again later.`);
-      }
-    } finally {
-      this.spinnerService.setIsLoading(false);
-    }
+    },
+    onSuccess: (_, newPlayer) => this.popoutService.addSuccessPopOut(`${newPlayer.name} successfully added.`),
+    onError: (error, newPlayer) => this.popoutService.addErrorPopOut(error instanceof DuplicatePlayerError
+      ? error.message
+      : `Failed to add ${newPlayer.name}. Please try again later.`),
+  });
+
+  async addNewPlayer(): Promise<void> {
+    const {name, rating, email, isGuest} = this.playerForm.value;
+    if (!name?.trim() || !rating) return;
+    const normalizedPlayerName = name.trim().toLowerCase();
+    await this.addPlayer.run({
+      name: normalizedPlayerName,
+      rating,
+      email,
+      isActive: true,
+      isGuest,
+      statistics: {}
+    } as Player);
   }
 }

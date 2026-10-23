@@ -1,0 +1,7 @@
+<header class="layout-header">
+  <div class="layout-header-start"><ng-content select="[board-start]" /></div>
+  <div class="layout-header-center">@if (heading()) {<h1 class="layout-header-title">{{ heading() }}</h1>}<ng-content select="[board-center]" /></div>
+  <div class="layout-header-end"><ng-content select="[board-end]" /></div>
+</header>
+
+<ng-content />

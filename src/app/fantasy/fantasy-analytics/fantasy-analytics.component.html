@@ -1,16 +1,19 @@
-<div class="center gap">
-  <select (change)="fantasyAnalyticsService.setSelectedDate($event)">
-    @for(date of fantasyAnalyticsService.allUniqueDates(); track date) {
-      <option [value]="date">{{date}}</option>
-    }
-  </select>
-</div>
+<app-data-layout
+  [empty]="fantasyAnalyticsService.dataRows().length === 0"
+  emptyHeading="No fantasy picks yet"
+  emptyDetail="Points show up here once players have made their picks.">
+  <app-date-filter
+    layout-toolbar
+    [dates]="fantasyAnalyticsService.allUniqueDates()"
+    [selectedDate]="fantasyAnalyticsService.selectedDate()"
+    (dateSelected)="fantasyAnalyticsService.setSelectedDate($event)" />
 
-<app-grid
-  [dataRows]="fantasyAnalyticsService.dataRows()"
-  [columns]="fantasyAnalyticsService.columns()"
-  [config]="fantasyAnalyticsService.config()"
-  [showPaginator]="false"
-  [actions]="[]"
-  [changeToListInSmallScreens]="false"
-/>
+  <app-grid
+    [dataRows]="fantasyAnalyticsService.dataRows()"
+    [columns]="fantasyAnalyticsService.columns()"
+    [config]="fantasyAnalyticsService.config()"
+    [showPaginator]="false"
+    [actions]="[]"
+    [changeToListInSmallScreens]="false"
+  />
+</app-data-layout>

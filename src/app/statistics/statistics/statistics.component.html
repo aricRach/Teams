@@ -1,14 +1,16 @@
-<app-inner-tabs [tabs]="statisticsService.innerTabs()"></app-inner-tabs>
-<section>
-  <span>Select Date</span>
-  <select (change)="statisticsService.setSelectedDate($event)">
-    @for(date of statisticsService.allUniqueDates(); track date) {
-      <option [value]="date">{{date}}</option>
-    }
-  </select>
-</section>
+<app-section-layout [tabs]="statisticsService.innerTabs()">
+  <app-date-filter
+    section-toolbar
+    [dates]="statisticsService.allUniqueDates()"
+    [selectedDate]="statisticsService.getSelectedDate()"
+    (dateSelected)="statisticsService.setSelectedDate($event)" />
 
+  @if (statisticsService.isTableTabActive()) {
+    <label section-toolbar>
+      show guests
+      <input type="checkbox" [checked]="statisticsService.showGuests()" (change)="statisticsService.setShowGuests($event)">
+    </label>
+  }
 
-
-<router-outlet></router-outlet>
-
+  <router-outlet />
+</app-section-layout>

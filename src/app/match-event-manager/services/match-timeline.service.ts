@@ -25,10 +25,8 @@ export class MatchTimelineService {
   playersService = inject(PlayersService);
   private matchEventsApi = inject(MatchEventsApiService);
 
-  // ── Derived group id ────────────────────────────────────────────────────────
   groupId = computed(() => this.playersService.selectedGroup()?.id);
 
-  // ── Player ID → Name lookup ─────────────────────────────────────────────────
   private playerNameMap = computed<Map<string, string>>(() => {
     const map = new Map<string, string>();
     this.playersService.flattenPlayers(false, true).forEach((p) => {
@@ -37,7 +35,6 @@ export class MatchTimelineService {
     return map;
   });
 
-  // ── 5. Structure Match Panels Data ──────────────────────────────────────────
   matchPanelsData = computed<MatchPanelData[]>(() => {
     const matches = [...this.matchesForSelectedDate()].sort(
       (a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
@@ -98,7 +95,6 @@ export class MatchTimelineService {
   selectedDate = signal<string>('');
 
   constructor() {
-    // Auto-select the first available date
     effect(() => {
       const dates = this.availableDates();
       if (dates.length > 0 && !this.selectedDate()) {
@@ -106,7 +102,6 @@ export class MatchTimelineService {
       }
     });
   }
-  // ── 1. Load Match Headers ───────────────────────────────────────────────────
   matchesResource = rxResource({
     params: () => ({ groupId: this.groupId() }),
     stream: ({ params }) => {
@@ -115,7 +110,6 @@ export class MatchTimelineService {
     },
   });
 
-  // ── 2. Extract Available Dates ──────────────────────────────────────────────
   availableDates = computed<string[]>(() => {
     const dates = new Set<string>();
     this.completedMatches().forEach((match: MatchRecord) => {
@@ -126,7 +120,6 @@ export class MatchTimelineService {
     return Array.from(dates);
   });
 
-  // ── 3. Current Selected Matches ─────────────────────────────────────────────
   matchesForSelectedDate = computed(() => {
     const date = this.selectedDate();
     if (!date) return [];
@@ -142,7 +135,6 @@ export class MatchTimelineService {
     );
   });
 
-  // ── 4. Load Events for Selected Matches ────────────────────────────────────
   eventsResource = rxResource({
     params: () => ({
       groupId: this.groupId(),
@@ -171,8 +163,21 @@ export class MatchTimelineService {
   });
 
 
-  onDateChange(event: Event) {
-    this.selectedDate.set((event.target as HTMLSelectElement).value);
+  isLoading = computed(() =>
+    (this.matchesResource.isLoading() && !this.matchesResource.hasValue()) || this.eventsResource.isLoading()
+  );
+
+  hasError = computed(() => !!this.matchesResource.error() || !!this.eventsResource.error());
+
+  hasNoMatches = computed(() => this.matchPanelsData().length === 0);
+
+  reload(): void {
+    this.matchesResource.reload();
+    this.eventsResource.reload();
+  }
+
+  onDateChange(date: string) {
+    this.selectedDate.set(date);
   }
 
 }

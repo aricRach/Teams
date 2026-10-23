@@ -48,6 +48,18 @@ export class AllMatchDataService {
     }
   });
 
+  readonly isInitialLoading = computed(() =>
+    (this.matchesResource.isLoading() && !this.matchesResource.hasValue()) ||
+    (this.eventsResource.isLoading() && !this.eventsResource.hasValue())
+  );
+
+  readonly hasError = computed(() => !!this.matchesResource.error() || !!this.eventsResource.error());
+
+  reload(): void {
+    this.matchesResource.reload();
+    this.eventsResource.reload();
+  }
+
   matchesWithEvents = computed<{match: MatchRecord; events: MatchEventRecord[]}[]>(() =>
     this.eventsResource.value() ?? []
   );

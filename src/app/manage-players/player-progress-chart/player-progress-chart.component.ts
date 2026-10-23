@@ -3,10 +3,12 @@ import {BaseChartDirective, provideCharts, withDefaultRegisterables} from 'ng2-c
 import {PlayerProgressChartService} from '../services/player-progress-chart.service';
 import {FormsModule} from '@angular/forms';
 import {AutoCompleteComponent} from 'ui';
+import {DataLayoutComponent} from '../../shared/layouts/data-layout/data-layout.component';
+import {MatTooltip} from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-player-progress-chart',
-  imports: [BaseChartDirective, FormsModule, AutoCompleteComponent],
+  imports: [BaseChartDirective, FormsModule, AutoCompleteComponent, DataLayoutComponent, MatTooltip],
   providers: [PlayerProgressChartService,
   provideCharts(withDefaultRegisterables())],
   templateUrl: './player-progress-chart.component.html',

@@ -4,7 +4,7 @@ import {FantasyApiService, FantasyMeta} from './fantasy-api.service';
 import {Auth} from '@angular/fire/auth';
 import {Player} from '../../players/models/player.model';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {SpinnerService} from '../../spinner.service';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 import {PopupsService} from 'ui';
 import {Router} from '@angular/router';
 
@@ -13,13 +13,19 @@ export class FantasyDraftService {
 
   playersService = inject(PlayersService);
   fantasyApiService = inject(FantasyApiService);
-  spinnerService = inject(SpinnerService);
   popupsService = inject(PopupsService);
   router = inject(Router);
   private auth = inject(Auth);
   isDraftDirty = signal(false);
+  readonly saveDraft = createMutation({
+    run: (groupId: string, nextDate: string, userId: string, playerIds: string[], captain: string, userName: string) =>
+      this.fantasyApiService.saveFantasyDraft(groupId, nextDate, userId, playerIds, captain, userName),
+    onSuccess: () => this.popupsService.addSuccessPopOut('fantasy draft saved successfully.'),
+    onError: () => this.popupsService.addErrorPopOut('can\'t save fantasy draft please try again later.'),
+  });
 
   draftMetaData = signal<FantasyMeta>({} as FantasyMeta);
+  heading = computed(() => `Pick Your Fantasy Team - ${this.draftMetaData().nextDate ?? ''}`);
   captain = signal('');
   allPlayers = computed(() => this.playersService.flattenPlayers(true, false))
 
@@ -93,15 +99,7 @@ export class FantasyDraftService {
       this.popupsService.addErrorPopOut('Please select a captain');
       return;
     }
-    try {
-      this.spinnerService.setIsLoading(true);
-      await this.fantasyApiService.saveFantasyDraft(groupId, this.draftMetaData().nextDate, userId as string, playerIds, this.captain(), userName);
-      this.spinnerService.setIsLoading(false);
-      this.popupsService.addSuccessPopOut('fantasy draft saved successfully.');
-    } catch (e) {
-      this.spinnerService.setIsLoading(false);
-      this.popupsService.addErrorPopOut('can\'t save fantasy draft please try again later.');
-    }
+    await this.saveDraft.run(groupId, this.draftMetaData().nextDate, userId as string, playerIds, this.captain(), userName);
   }
 
   setCaptain(captainId: string) {

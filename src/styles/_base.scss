@@ -1,0 +1,84 @@
+html, body { height: 90vh; }
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: var(--font-body);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+main { margin-bottom: 1rem; }
+footer { margin-top: 1rem; }
+
+::-webkit-scrollbar { height: 6px; }
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.active {
+  background-color: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hidden { display: none; }
+.hide { display: none; }
+.in-row { display: flex; }
+.mrg { margin: 5px; }
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.space-between {
+  display: flex;
+  justify-content: space-between;
+}
+.gap { gap: 5px; }
+.gap-10 { gap: 10px; }
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.guest-badge {
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: var(--radius-card);
+  background: #eee;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.mat-mdc-tooltip {
+  background: rgba(97, 97, 97, 0.9) !important;
+  color: white;
+  font-size: 14px;
+}
+.mdc-tooltip--multiline .mat-mdc-tooltip-surface {
+  text-align: center !important;
+}
+// matTooltipClass="tooltip-lines": one line per "\n" in the text, left aligned (for lists like a formula).
+.tooltip-lines .mat-mdc-tooltip-surface {
+  white-space: pre-line;
+  text-align: left !important;
+}

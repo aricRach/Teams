@@ -22,5 +22,6 @@
     <input formControlName="isGuest" type="checkbox">
     Guest
   </label>
-  <button [disabled]="addNewPlayerService.playerForm.invalid" [class.disabled]="addNewPlayerService.playerForm.invalid" class="active-btn submit-btn" type="submit">Add Player</button>
+  <button [disabled]="addNewPlayerService.playerForm.invalid || addNewPlayerService.addPlayer.pending()" [class.disabled]="addNewPlayerService.playerForm.invalid"
+          [class.is-pending]="addNewPlayerService.addPlayer.pending()" class="active-btn submit-btn" type="submit">Add Player</button>
 </form>

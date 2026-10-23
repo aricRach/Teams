@@ -38,8 +38,11 @@ export class PlayersStatisticsTableService {
     },
   ])
 
-  showGuests = signal(true);
-  private players = computed(() => this.playersService.flattenPlayers(true, this.showGuests()));
+  private players = computed(() => this.playersService.flattenPlayers(true, this.statisticsService.showGuests()));
+
+  isLoading = this.statisticsService.isLoading;
+  hasError = this.statisticsService.hasError;
+  isEmpty = computed(() => this.dataRows().length === 0);
 
   dataRows = computed(() => {
     const date = this.statisticsService.getSelectedDate();

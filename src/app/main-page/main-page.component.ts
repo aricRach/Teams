@@ -3,18 +3,17 @@ import {HeaderComponent} from '../header/header.component';
 import {RouterOutlet} from '@angular/router';
 import {BreadcrumbsService} from '../shared/breadcrumbs/breadcrumbs.service';
 import {BreadcrumbsComponent} from 'ui';
-import {AsyncPipe} from '@angular/common';
 import {Subscription} from 'rxjs';
 import {PlayersService} from '../players/players.service';
 import {MenuAction} from 'ui';
+import {AdminControlService} from '../user/admin-control.service';
 
 @Component({
   selector: 'app-main-page',
   imports: [
     HeaderComponent,
     RouterOutlet,
-    BreadcrumbsComponent,
-    AsyncPipe
+    BreadcrumbsComponent
   ],
   templateUrl: './main-page.component.html',
   standalone: true,
@@ -23,6 +22,7 @@ import {MenuAction} from 'ui';
 export class MainPageComponent implements OnInit, OnDestroy {
   breadcrumbsService = inject(BreadcrumbsService);
   private playersService = inject(PlayersService);
+  private adminControlService = inject(AdminControlService);
   breadcrumbs = signal([]);
 
   subscription = new Subscription();
@@ -82,6 +82,9 @@ export class MainPageComponent implements OnInit, OnDestroy {
   ]);
 
   ngOnInit() {
+    this.adminControlService.cleanAdminControlState();
+    this.playersService.loadGroupPlayers();
+
     this.subscription.add(this.breadcrumbsService.getBreadcrumbs().subscribe((a) => {
       this.breadcrumbs.set(a as any);
     }))

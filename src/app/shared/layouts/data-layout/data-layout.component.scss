@@ -1,0 +1,15 @@
+@use '../layouts';
+
+:host {
+  @include layouts.frame;
+  max-width: var(--layout-data);
+  margin-inline: auto;
+}
+
+.data-layout-title {
+  @include layouts.title;
+}
+
+.data-layout-toolbar {
+  @include layouts.toolbar;
+}

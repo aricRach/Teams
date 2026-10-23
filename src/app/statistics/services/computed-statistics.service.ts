@@ -7,6 +7,13 @@ import {compareDates, formatDateToString} from '../../utils/date-utils';
 export class ComputedStatisticsService {
   private allMatchData = inject(AllMatchDataService);
 
+  readonly isLoading = this.allMatchData.isInitialLoading;
+  readonly hasError = this.allMatchData.hasError;
+
+  reload(): void {
+    this.allMatchData.reload();
+  }
+
   readonly statsMap = computed<Map<string, Map<string, Statistics>>>(() => {
     const matchData = this.allMatchData.matchesWithEvents();
     const result = new Map<string, Map<string, Statistics>>();
@@ -45,7 +52,6 @@ export class ComputedStatisticsService {
         }
       }
 
-      // Scorers not in any roster still count as having played (preserves existing edge-case logic)
       for (const goal of activeGoals) {
         if (goal.playerId) {
           const stats = this.getOrInitStats(result, goal.playerId, dateKey);

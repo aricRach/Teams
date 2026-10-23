@@ -1,4 +1,5 @@
 import {Component, inject, OnInit} from '@angular/core';
+import {BoardLayoutComponent} from '../../shared/layouts/board-layout/board-layout.component';
 import {FantasyDraftService} from '../services/fantasy-draft.service';
 import {PlayersService} from '../../players/players.service';
 
@@ -8,7 +9,7 @@ import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-fantasy-draft',
-  imports: [DragDropModule],
+  imports: [DragDropModule, BoardLayoutComponent],
   providers: [FantasyDraftService],
   templateUrl: './fantasy-draft.component.html',
   styleUrl: './fantasy-draft.component.scss'
@@ -18,6 +19,7 @@ export class FantasyDraftComponent implements OnInit{
   fantasyDraftService = inject(FantasyDraftService);
   playersService = inject(PlayersService);
   private route = inject(ActivatedRoute);
+
 
   async ngOnInit() {
     const meta = this.route.parent?.snapshot.data['fantasyMeta'];

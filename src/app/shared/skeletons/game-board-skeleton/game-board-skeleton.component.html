@@ -1,0 +1,28 @@
+<div class="segmented-row">
+  <span class="skeleton skeleton-toggle"></span>
+</div>
+
+<div class="in-row center gap">
+  <span class="skeleton skeleton-heading"></span>
+  <span class="skeleton skeleton-button"></span>
+</div>
+
+<div class="games-row">
+  <div class="panel">
+    <span class="skeleton skeleton-panel-title"></span>
+    <span class="skeleton skeleton-score"></span>
+  </div>
+</div>
+
+<div class="teams">
+  @for (team of teams(); track $index) {
+    <div class="team">
+      <span class="skeleton skeleton-team-name"></span>
+      <div class="list">
+        @for (row of playerRows; track $index) {
+          <div class="box"><span class="skeleton skeleton-player"></span></div>
+        }
+      </div>
+    </div>
+  }
+</div>

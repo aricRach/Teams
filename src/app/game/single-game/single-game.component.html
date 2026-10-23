@@ -1,6 +1,6 @@
 <div class="in-row center gap">
   <h1>Teams</h1>
-  <button class="action-btn" (click)="single.revealTeams()">Save Team Selection</button>
+  <button class="active-btn action-btn" [disabled]="single.isRevealingTeams()" [class.is-pending]="single.isRevealingTeams()" (click)="single.revealTeams()">Save Team Selection</button>
 </div>
 
 <button class="button-icon" (click)="single.toggleMovePlayersLock()">

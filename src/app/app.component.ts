@@ -1,12 +1,12 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {SpinnerService} from './spinner.service';
-import {PopupsComponent, SpinnerComponent} from 'ui';
-import {CommonModule} from '@angular/common';
+import {PopupsComponent} from 'ui';
+import {TopProgressComponent} from './shared/top-progress/top-progress.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SpinnerComponent, PopupsComponent, CommonModule],
+  imports: [RouterOutlet, PopupsComponent, TopProgressComponent],
   standalone: true,
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'

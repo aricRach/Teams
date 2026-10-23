@@ -3,7 +3,7 @@ import {StatisticsService} from './statistics.service';
 import {PlayersService} from '../../players/players.service';
 import {ModalsService, PopupsService} from 'ui';
 import {Player, Statistics, TeamsOptions} from '../../players/models/player.model';
-import {SpinnerService} from '../../spinner.service';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 import {Auth} from '@angular/fire/auth';
 import {AllMatchDataService} from '../../match-event-manager/services/all-match-data.service';
 import {formatDateToString} from '../../utils/date-utils';
@@ -13,7 +13,6 @@ import {ComputedStatisticsService} from './computed-statistics.service';
 export class EditStatisticsService {
 
   statisticsService = inject(StatisticsService);
-  spinnerService = inject(SpinnerService);
   playersService = inject(PlayersService);
   modalsService = inject(ModalsService);
   popupsService = inject(PopupsService);
@@ -23,6 +22,15 @@ export class EditStatisticsService {
   computedStatsService = inject(ComputedStatisticsService);
 
   teams = linkedSignal(() => this.playersService.getTeams())
+  readonly voidDay = createMutation({
+    run: (groupId: string, matchIds: string[], _date: string) =>
+      this.matchEventsApiService.updateMatches(groupId, matchIds, {status: 'voided'}),
+    onSuccess: (_, _groupId, _matchIds, date) => {
+      this.statisticsService.refreshTable();
+      this.popupsService.addSuccessPopOut(`Statistics for ${date} have been voided.`);
+    },
+    onError: () => this.popupsService.addErrorPopOut('Failed to void statistics. Please try again.'),
+  });
 
   async deleteDayStatistics(): Promise<void> {
     const selectedDate = this.statisticsService.getSelectedDate();
@@ -42,16 +50,7 @@ export class EditStatisticsService {
         return;
       }
 
-      this.spinnerService.setIsLoading(true);
-      try {
-        await this.matchEventsApiService.updateMatches(groupId, matchIdsOnDate, {status: 'voided'});
-        this.statisticsService.refreshTable();
-        this.popupsService.addSuccessPopOut(`Statistics for ${selectedDate} have been voided.`);
-      } catch {
-        this.popupsService.addErrorPopOut('Failed to void statistics. Please try again.');
-      } finally {
-        this.spinnerService.setIsLoading(false);
-      }
+      await this.voidDay.run(groupId, matchIdsOnDate, selectedDate);
     });
   }
 
@@ -67,21 +66,17 @@ export class EditStatisticsService {
         const groupId = this.playersService.selectedGroup().id;
         const createdBy = this.auth.currentUser?.email || '';
 
-        this.spinnerService.setIsLoading(true);
-        try {
-          const matchId = await this.allMatchDataService.getOrCreateCorrectionMatch(groupId, selectedDate, createdBy);
-          await this.matchEventsApiService.addEvents(groupId, matchId,
-            editTeamEvent.players.map(player => ({
-              type: 'stat_correction' as const,
-              source: 'manual' as const,
-              createdBy,
-              payload: {playerId: player.id, delta: {[statKey]: editTeamEvent.number}, dateKey: selectedDate}
-            }))
-          );
-          this.popupsService.addSuccessPopOut(`${editTeamEvent.team} was updated successfully.`);
-        } finally {
-          this.spinnerService.setIsLoading(false);
-        }
+        // No pending state: the stats are a live stream and Firestore applies its own writes locally at once.
+        const matchId = await this.allMatchDataService.getOrCreateCorrectionMatch(groupId, selectedDate, createdBy);
+        await this.matchEventsApiService.addEvents(groupId, matchId,
+          editTeamEvent.players.map(player => ({
+            type: 'stat_correction' as const,
+            source: 'manual' as const,
+            createdBy,
+            payload: {playerId: player.id, delta: {[statKey]: editTeamEvent.number}, dateKey: selectedDate}
+          }))
+        );
+        this.popupsService.addSuccessPopOut(`${editTeamEvent.team} was updated successfully.`);
       }
     });
   }

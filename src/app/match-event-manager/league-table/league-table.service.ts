@@ -26,6 +26,11 @@ export class LeagueTableService {
 
   readonly selectedDate = signal<string>('');
 
+  readonly isLoading = this.allMatchData.isInitialLoading;
+  readonly hasError = this.allMatchData.hasError;
+
+  readonly hasNoLeagueGames = computed(() => this.availableDates().length === 0);
+
   private dayMatches = computed<MatchRecord[]>(() => {
     const date = this.selectedDate();
     if (!date) return [];
@@ -36,9 +41,7 @@ export class LeagueTableService {
 
   readonly rows = computed(() => computeStandings(this.dayMatches()));
 
-  /** Aliases as they were when the selected date's matches were played, not today's live aliases,
-   *  so a later rename doesn't repaint history. Today is the exception: it reads the live alias
-   *  directly, since there's no later match left to snapshot a same-day rename into. */
+  /** Aliases as they were when the date's matches were played, so a later rename doesn't change history. Today uses the live aliases. */
   readonly dateAliases = computed<Record<string, string>>(() => {
     if (compareDateWithToday(this.selectedDate()) === 0) {
       return this.playersService.teamAliases();
@@ -58,7 +61,6 @@ export class LeagueTableService {
     return result;
   });
 
-  /** colors for the most recent day with games, so an older day's table renders without color.*/
   readonly dateColors = computed<Record<string, string>>(() => {
     const [latestDate] = this.availableDates();
     return this.selectedDate() === latestDate ? this.playersService.teamColors() : {};
@@ -73,7 +75,11 @@ export class LeagueTableService {
     });
   }
 
-  onDateChange(event: Event): void {
-    this.selectedDate.set((event.target as HTMLSelectElement).value);
+  reload(): void {
+    this.allMatchData.reload();
+  }
+
+  onDateChange(date: string): void {
+    this.selectedDate.set(date);
   }
 }

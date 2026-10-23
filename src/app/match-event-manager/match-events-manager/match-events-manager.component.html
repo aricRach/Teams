@@ -1,6 +1,4 @@
-<div class="events-manager">
-  <h3>Match Events</h3>
-
+<app-form-layout heading="Match Events">
   <div class="controls">
     <label for="matchSelect">Match</label>
     <select id="matchSelect" [value]="selectedMatchId()" (change)="onSelectMatch($any($event.target).value)">
@@ -175,12 +173,12 @@
   } @else {
   <div class="empty">No matches found yet. Complete a game to create one.</div>
   }
-</div>
 
-@if(isEditingMatch()) {
-<div class="draft-actions">
-  <button class="primary" [disabled]="!isTallyConsistent() || draftMatchModel().status === 'live'"
-    (click)="saveEditingMatch()">Save All Changes</button>
-  <button (click)="cancelEditingMatch()">Back</button>
-</div>
-}
+  @if(isEditingMatch()) {
+    <ng-container ngProjectAs="[form-actions]">
+      <button class="primary draft-action" [disabled]="!isTallyConsistent() || draftMatchModel().status === 'live'"
+        (click)="saveEditingMatch()">Save All Changes</button>
+      <button class="draft-action" (click)="cancelEditingMatch()">Back</button>
+    </ng-container>
+  }
+</app-form-layout>

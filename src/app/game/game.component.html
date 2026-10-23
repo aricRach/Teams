@@ -1,49 +1,48 @@
-<div class="game-toolbar">
-  <div class="toolbar-left gap">
-    @if(adminControlService.getAdminControl().showSaveButtons) {
-    <button (click)="load()">Load local data</button>
-    <button (click)="save()">Save local data</button>
-    <button (click)="saveGlobal()">Save Global</button>
-    }
-  </div>
-
-  <div class="toolbar-center">
-    @if(adminControlService.isAdminModeEnabled()) {
-    <button class="action-btn active-btn" (click)="adminControlService.cleanAdminControlState()">Revert admin mode</button>
-    }
-  </div>
-
-  <div class="toolbar-right">
-    <button class="button-icon audit-trail-button" (click)="isAuditTrailModalVisible.set(true)">
-      <img alt="audit trail" src="assets/icons/audit-trail.svg" height="30" width="30">
-    </button>
-  </div>
-</div>
-
-@if(playersService.isGroupOwner()) {
-<app-capture-media></app-capture-media>
-}
-
-<div class="mode-toggle-row">
-  <div class="mode-toggle" [class.locked]="toggleDisabled()">
-    <button type="button" [class.active]="mode() === 'single'" [disabled]="toggleDisabled()"
-      (click)="setMode('single')">Quick</button>
-    <button type="button" [class.active]="mode() === 'league'" [disabled]="toggleDisabled()"
-      (click)="setMode('league')">League</button>
-  </div>
-  @if (toggleDisabled()) {
-  <span class="lock-hint">End the running game to switch mode</span>
+<app-game-layout [loading]="playersService.isLoadingPlayers()" [teamCount]="playersService.numberOfTeams()">
+  @if(adminControlService.getAdminControl().showSaveButtons) {
+    <ng-container ngProjectAs="[board-start]">
+      <button (click)="load()">Load local data</button>
+      <button (click)="save()">Save local data</button>
+      <button [disabled]="playersService.savePlayers.pending()" [class.is-pending]="playersService.savePlayers.pending()" (click)="saveGlobal()">Save Global</button>
+    </ng-container>
   }
-</div>
 
-@if (mode() === 'single') {
-<app-single-game />
-} @else {
-<app-league-game />
-}
+  @if(adminControlService.isAdminModeEnabled()) {
+    <button board-center class="action-btn active-btn" (click)="adminControlService.cleanAdminControlState()">Revert admin mode</button>
+  }
+
+  <button board-end class="button-icon audit-trail-button" (click)="isAuditTrailModalVisible.set(true)">
+    <img alt="audit trail" src="assets/icons/audit-trail.svg" height="30" width="30">
+  </button>
+
+  <!-- The games read the teams when created, and projected content is created even while hidden, so wait here too. -->
+  @if (!playersService.isLoadingPlayers()) {
+    @if(playersService.isGroupOwner()) {
+      <app-capture-media></app-capture-media>
+    }
+
+    <div class="segmented-row">
+      <div class="segmented" [class.locked]="toggleDisabled()">
+        <button type="button" [class.active]="mode() === 'single'" [disabled]="toggleDisabled()"
+          (click)="setMode('single')">Quick</button>
+        <button type="button" [class.active]="mode() === 'league'" [disabled]="toggleDisabled()"
+          (click)="setMode('league')">League</button>
+      </div>
+      @if (toggleDisabled()) {
+        <span class="segmented-hint">End the running game to switch mode</span>
+      }
+    </div>
+
+    @if (mode() === 'single') {
+      <app-single-game />
+    } @else {
+      <app-league-game />
+    }
+  }
+</app-game-layout>
 
 @if(isAuditTrailModalVisible()) {
-<app-modal [showSubmitButton]="false" (close)="isAuditTrailModalVisible.set(false)">
-  <app-audit-trail></app-audit-trail>
-</app-modal>
+  <app-modal [showSubmitButton]="false" (close)="isAuditTrailModalVisible.set(false)">
+    <app-audit-trail></app-audit-trail>
+  </app-modal>
 }

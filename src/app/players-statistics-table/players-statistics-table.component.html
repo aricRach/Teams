@@ -1,16 +1,18 @@
-<div class="center">
-  <label>
-    show guests
-    <input type="checkbox" [checked]="playersStatisticsTableService.showGuests()" (change)="playersStatisticsTableService.showGuests.set($any($event.target).checked)">
-  </label>
-</div>
-
-<div class="stats-grid">
-  <app-grid
-    [changeToListInSmallScreens]="false"
-    [showPaginator]="false"
-    [config]="playersStatisticsTableService.config()"
-    [columns]="playersStatisticsTableService.columns()"
-    [dataRows]="playersStatisticsTableService.dataRows()"
-    [actions]="playersStatisticsTableService.actions()"/>
-</div>
+<app-data-layout
+  [loading]="playersStatisticsTableService.isLoading()"
+  [error]="playersStatisticsTableService.hasError()"
+  errorHeading="Couldn't load stats"
+  [empty]="playersStatisticsTableService.isEmpty()"
+  emptyHeading="No stats yet"
+  emptyDetail="Stats appear after the first completed match."
+  (retry)="playersStatisticsTableService.statisticsService.reloadStatistics()">
+  <div class="stats-grid">
+    <app-grid
+      [changeToListInSmallScreens]="false"
+      [showPaginator]="false"
+      [config]="playersStatisticsTableService.config()"
+      [columns]="playersStatisticsTableService.columns()"
+      [dataRows]="playersStatisticsTableService.dataRows()"
+      [actions]="playersStatisticsTableService.actions()"/>
+  </div>
+</app-data-layout>

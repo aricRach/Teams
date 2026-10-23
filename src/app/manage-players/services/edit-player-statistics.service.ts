@@ -9,7 +9,7 @@ import {ComputedStatisticsService} from '../../statistics/services/computed-stat
 import {AllMatchDataService} from '../../match-event-manager/services/all-match-data.service';
 import {MatchEventsApiService} from '../../match-event-manager/services/match-events-api.service';
 import {Statistics} from '../../players/models/player.model';
-import {SpinnerService} from '../../spinner.service';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 
 @Injectable()
 export class EditPlayerStatisticsService {
@@ -21,7 +21,20 @@ export class EditPlayerStatisticsService {
   private allMatchDataService = inject(AllMatchDataService);
   private matchEventsApiService = inject(MatchEventsApiService);
   private popupsService = inject(PopupsService);
-  private spinnerService = inject(SpinnerService);
+  readonly saveCorrection = createMutation({
+    run: async ({groupId, dateKey, playerId, delta}: {groupId: string; dateKey: string; playerId: string; delta: Partial<Statistics>}) => {
+      const createdBy = this.auth.currentUser?.email || '';
+      const matchId = await this.allMatchDataService.getOrCreateCorrectionMatch(groupId, dateKey, createdBy);
+      await this.matchEventsApiService.addEvent(groupId, matchId, {
+        type: 'stat_correction',
+        source: 'manual',
+        createdBy,
+        payload: {playerId, delta, dateKey}
+      });
+    },
+    onSuccess: () => this.popupsService.addSuccessPopOut('Statistic updated successfully'),
+    onError: () => this.popupsService.addErrorPopOut('Cant save - please try again later'),
+  });
 
   lastDayPlayedStatistics = computed(() => {
     return this.managePlayersService.selectedPlayer() ? this.getLastDayStatistics(this.managePlayersService.selectedPlayer()) : null;
@@ -73,24 +86,7 @@ export class EditPlayerStatisticsService {
 
     if (Object.keys(delta).length === 0) return;
 
-    const createdBy = this.auth.currentUser?.email || '';
-    const matchId = await this.allMatchDataService.getOrCreateCorrectionMatch(groupId, lastDay.date, createdBy);
-
-    this.spinnerService.setIsLoading(true);
-    try {
-      await this.matchEventsApiService.addEvent(groupId, matchId, {
-        type: 'stat_correction',
-        source: 'manual',
-        createdBy,
-        payload: {playerId: player.id, delta, dateKey: lastDay.date}
-      });
-      this.popupsService.addSuccessPopOut('Statistic updated successfully');
-    } catch (e) {
-      this.popupsService.addErrorPopOut('Cant save - please try again later');
-    } finally {
-      this.spinnerService.setIsLoading(false);
-    }
-
+    await this.saveCorrection.run({groupId, dateKey: lastDay.date, playerId: player.id, delta});
   }
 
   private buildEditGameStatsFields() {

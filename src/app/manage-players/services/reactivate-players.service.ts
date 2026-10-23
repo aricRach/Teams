@@ -9,6 +9,7 @@ export class ReactivatePlayersService {
   modalsService = inject(ModalsService);
 
   selectedPlayer = signal<any>(null)
+  isReactivating = this.playersService.setPlayerActiveStatus.pending;
 
   allPlayersArray = signal<any>(null);
 
@@ -36,7 +37,8 @@ export class ReactivatePlayersService {
       description: `By reactivate <b>${this.selectedPlayer()?.name}</b>, he will be available again, his statistics will be shown and if he has a valid email he will get access for the application`,
     }).afterClosed().subscribe((result) => {
       if (result) {
-        this.playersService.setPlayerActiveStatus(this.selectedPlayer(), true).then(() => {
+        this.playersService.setPlayerActiveStatus.run(this.selectedPlayer(), true).then(done => {
+          if (!done) return;
           this.allPlayersArray.update((allPlayers: Player[]) => {
             return [...allPlayers].filter((p: Player) => p.id !== this.selectedPlayer().id);
           });

@@ -5,6 +5,7 @@ import {StatisticsService} from '../../statistics/services/statistics.service';
 import {ModalsService, PopupsService} from 'ui';
 import {SpinnerService} from '../../spinner.service';
 import {shuffleArray} from '../../utils/array-utils';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
 
 
@@ -30,6 +31,12 @@ export class TeamOfTheWeekService {
   spinnerService = inject(SpinnerService);
   modalsService = inject(ModalsService);
   private computedStatsService = inject(ComputedStatisticsService);
+  readonly regenerate = createMutation({
+    run: (date: string, players: any[], teamSize: number) =>
+      this.teamOfTheWeekApiService.generateAiTotw(date, players, teamSize, true),
+    onSuccess: (data) => this.totwData.set(data),
+    onError: () => this.popupsService.addErrorPopOut("Couldn't regenerate the team of the week, please try again."),
+  });
 
   totwResource = resource({
     params: () => ({
@@ -39,7 +46,8 @@ export class TeamOfTheWeekService {
       this.getTeamOfTheWeek(params.date)
   });
 
-  totwData = linkedSignal(() => this.totwResource.value());
+  // value() throws while the resource is in an error state, so only read it when there is one.
+  totwData = linkedSignal(() => this.totwResource.hasValue() ? this.totwResource.value() : undefined);
 
   shouldShowReGenerate = computed(() => this.playersService.isAdmin() && this.statisticService.getSelectedDate() !== this.statisticService.selectAllLabel())
 
@@ -92,15 +100,8 @@ export class TeamOfTheWeekService {
     }).afterClosed().subscribe((confirm) => {
       if(confirm) {
         const date = this.statisticService.getSelectedDate();
-        this.spinnerService.setIsLoading(true);
         const weekStates = this.calculateWeekStates(date);
-        this.teamOfTheWeekApiService.generateAiTotw(date, shuffleArray(weekStates.players), weekStates.teamSize, true).then(data => {
-          this.totwData.set(data)
-        }).catch((e) => {
-          console.error(e)
-        }).finally(() => {
-          this.spinnerService.setIsLoading(false)
-        });
+        void this.regenerate.run(date, shuffleArray(weekStates.players), weekStates.teamSize);
       }
     })
 

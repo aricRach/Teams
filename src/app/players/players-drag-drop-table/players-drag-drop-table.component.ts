@@ -30,17 +30,10 @@ export class PlayersDragDropTableComponent {
   clonedTeams = input<any>();
   enableShowRatings = input(false);
   enableMakeBalancedTeams = input(true);
-  // Per-slot display nicknames, e.g. { teamA: 'Rockets' }. Purely for display - the parent owns the data.
   aliases = input<Record<string, string>>({});
-  // When true, a pencil is shown on each team header to edit its nickname. The parent decides
-  // (e.g. gates it on admin) and handles the actual write via the `renameTeam` output.
   canRenameTeams = input(false);
   renameTeam = output<{teamKey: string, alias: string}>();
-  // Per-slot display color, e.g. { teamA: '#e6194b' }. Purely for display - the parent owns the data.
   colors = input<Record<string, string>>({});
-  // A color swatch is always shown on each team header to pick its color - this component
-  // only ever renders behind an admin-only route, so there's no separate gate like
-  // `canRenameTeams` here. The parent handles the actual write via this output.
   changeTeamColor = output<{teamKey: string, color: string}>();
   numberOfTeams = input<number>(Infinity);
   playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
@@ -48,14 +41,10 @@ export class PlayersDragDropTableComponent {
   showStatisticsInput = input(false);
   showStatistics = linkedSignal(() => this.showStatisticsInput())
 
-  // Parallel-slots modes (single, league): which slots a team can be assigned to.
-  // One slot -> a plain "playing" checkbox; more than one -> a G1 / G2 / – selector.
   availableSlots = input<readonly number[]>([]);
   teamSlots = input<Record<string, number>>({});
   teamSlotChange = output<Record<string, number>>();
-  // teamKey -> the live matchId of the game that team is playing (null when its game isn't live).
   matchIdByTeam = input<Record<string, string | null>>({});
-  // Teams whose game has started - their drop list is frozen even though the rest of the board isn't.
   lockedTeamKeys = input<string[]>([]);
 
   private liveMatchKey = computed(() =>
@@ -65,14 +54,12 @@ export class PlayersDragDropTableComponent {
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent);
   makeBalancedTeamsModalVisible = signal(false);
 
-  // ── Team nickname editing ──────────────────────────────────────────────────
   renamingTeamKey = signal<string | null>(null);
   teamAliasModel = signal({ alias: '' });
   teamAliasForm = form(this.teamAliasModel, (fields) => {
     maxLength(fields.alias, TEAM_ALIAS_MAX_LENGTH);
   });
 
-  // Resets to an empty map whenever the live match(es) change (new game starts or game ends)
   liveSessionGoals = linkedSignal<Map<string, number>>(() => {
     this.currentMatchId();
     this.liveMatchKey();
@@ -99,20 +86,15 @@ export class PlayersDragDropTableComponent {
   totalRatings = linkedSignal(() => this.setTotalRatingToAllTeams());
 
   recordGoalEvent = output<{player: Player, teamKey: string}>();
-  // teamKey = the conceding player's own team; the parent credits the goal to the opponent.
   recordOwnGoalEvent = output<{player: Player, teamKey: string}>();
   removePlayer = output<{team: string, index: number}>();
 
-  // Two-tap guard for the "Own Goal" action in the mini modal (mirrors the +/set flow).
   ownGoalArmed = signal(false);
 
   readonly teamKeys = computed(() =>
     Object.keys(this.clonedTeams() ?? {}).filter(key => key !== 'allPlayers').slice(0, this.numberOfTeams()) as TeamsOptions[]
   );
 
-  // A locked team (globally locked, or its game is live) must not be a drop target for
-  // anyone else - only its own (disabled) list should reference it, so it neither
-  // accepts a drop nor can be dragged out of.
   readonly unlockedTeamKeys = computed(() =>
     this.teamKeys().filter(key => !this.isTeamLocked(key))
   );
@@ -151,7 +133,6 @@ export class PlayersDragDropTableComponent {
     return !!this.isLocked() || this.lockedTeamKeys().includes(teamKey);
   }
 
-  /** Whether double-clicking a player in this team should open the goal modal. */
   isGoalTaggingEnabled(teamKey: string): boolean {
     return !!this.matchIdByTeam()[teamKey];
   }

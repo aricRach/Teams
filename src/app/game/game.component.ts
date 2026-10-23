@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import {GameLayoutComponent} from '../shared/layouts/game-layout/game-layout.component';
 import { PlayersService } from '../players/players.service';
 import { MatchEventsManagerService } from '../match-event-manager/services/match-events-manager.service';
 import { AdminControlService } from '../user/admin-control.service';
@@ -13,7 +14,7 @@ type GameMode = 'single' | 'league';
 
 @Component({
   selector: 'app-game',
-  imports: [SingleGameComponent, LeagueGameComponent, CaptureMediaComponent, ModalComponent, AuditTrailComponent],
+  imports: [SingleGameComponent, LeagueGameComponent, CaptureMediaComponent, ModalComponent, AuditTrailComponent, GameLayoutComponent],
   templateUrl: './game.component.html',
   standalone: true,
   providers: [GameService],
@@ -26,10 +27,8 @@ export class GameComponent {
 
   private storageKey = computed(() => `gameMode-${this.playersService.selectedGroup()?.id ?? 'default'}`);
 
-  // A live game outranks the stored preference (e.g. navigating back to a running league).
   mode = signal<GameMode>(this.matchEventsService.liveMode() ?? this.readStoredMode());
 
-  /** A live game (single match or league slot) locks the mode toggle. */
   toggleDisabled = computed(() => this.matchEventsService.liveMode() !== null);
 
   protected isAuditTrailModalVisible = signal(false);
@@ -57,7 +56,7 @@ export class GameComponent {
   }
 
   saveGlobal(): void {
-    this.playersService.savePlayers();
+    void this.playersService.savePlayers.run();
   }
 
   private readStoredMode(): GameMode {
