@@ -28,6 +28,8 @@ export class GameSlotPanelComponent {
   colors = input<Record<string, string>>({});
   showTimer = input(true);
   label = input('Game');
+  /** True when only one game can be played, so teams are picked with a single Play toggle instead of G1/G2 buttons. */
+  singleSlot = input(false);
   mode = input<'single' | 'league' | null>(null);
   squad = input<Record<string, string[]>>({});
 
