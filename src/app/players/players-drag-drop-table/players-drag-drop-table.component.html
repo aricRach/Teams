@@ -39,12 +39,12 @@
         </div>
         }
         @if (availableSlots().length === 1) {
-        <label class="playing-checkbox">
-          <input type="checkbox"
-            [checked]="teamSlots()[teamKey] === availableSlots()[0]"
+        @let isPlaying = teamSlots()[teamKey] === availableSlots()[0];
+        <div class="slot-selector">
+          <button type="button" class="play-toggle" [class.active]="isPlaying" [attr.aria-pressed]="isPlaying"
             [disabled]="isSlotButtonDisabled(teamKey, availableSlots()[0])"
-            (change)="setTeamSlot(teamKey, teamSlots()[teamKey] === availableSlots()[0] ? null : availableSlots()[0])">
-        </label>
+            (click)="setTeamSlot(teamKey, isPlaying ? null : availableSlots()[0])">{{ isPlaying ? '✓ Playing' : 'Play' }}</button>
+        </div>
         } @else if (availableSlots().length > 1) {
         <div class="slot-selector">
           @for (slot of availableSlots(); track slot) {

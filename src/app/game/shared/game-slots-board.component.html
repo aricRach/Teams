@@ -16,7 +16,7 @@
   @for (vm of slotViewModels(); track vm.slot) {
   <app-game-slot-panel [slot]="vm.slot" [teamKeys]="vm.teamKeys" [ready]="vm.ready"
     [live]="vm.live" [score]="vm.score" [scorers]="vm.scorers"
-    [aliases]="aliases()" [colors]="colors()"
+    [aliases]="aliases()" [colors]="colors()" [singleSlot]="availableSlots().length === 1"
     (start)="start.emit(vm.slot)" (reset)="reset.emit(vm.slot)" (end)="end.emit(vm.slot)" />
   }
 </div>
