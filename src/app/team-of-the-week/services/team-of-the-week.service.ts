@@ -49,6 +49,10 @@ export class TeamOfTheWeekService {
   // value() throws while the resource is in an error state, so only read it when there is one.
   totwData = linkedSignal(() => this.totwResource.hasValue() ? this.totwResource.value() : undefined);
 
+  // A date is selected but no admin has generated a team for it yet.
+  totwNotGenerated = computed(() =>
+    !this.statisticService.noDateSelected() && this.totwResource.hasValue() && this.totwResource.value() === null);
+
   shouldShowReGenerate = computed(() => this.playersService.isAdmin() && this.statisticService.getSelectedDate() !== this.statisticService.selectAllLabel())
 
   reGenerateDisabledReason = computed<string | null>(() => {

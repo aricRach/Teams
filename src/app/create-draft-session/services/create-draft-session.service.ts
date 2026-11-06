@@ -146,7 +146,7 @@ export class CreateDraftSessionService {
     if (!await this.removeSession(sessionData.id)) return;
     this.popoutService.addSuccessPopOut('New teams were set successfully');
     this.navigationService.unlockNavigation();
-    this.router.navigate(['home', 'game']);
+    this.router.navigate([this.playersService.groupUrl('game')]);
   }
 
   setTeamsAfterDraft(teamCount: number, draftTeams: { [key: string]: { id: string, name: string }[] }): void {

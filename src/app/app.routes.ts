@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import {GameComponent} from './game/game.component';
 import {MainPageComponent} from './main-page/main-page.component';
 import {SelectGroupComponent} from './select-group/select-group.component';
-import {selectedGroupGuard} from './guards/selected-group.guard';
+import {lastGroupRedirectGuard, selectedGroupGuard} from './guards/selected-group.guard';
 import {SignInComponent} from './user/sign-in/sign-in.component';
 import {getUserGroupsResolver} from './resolvers/get-user-groups.resolver';
 import {groupAdminGuard} from './guards/group-admin.guard';
@@ -18,6 +18,7 @@ import {inactivePlayersResolver} from './manage-players/resolvers/inactive-playe
 import {getSpecificGroupPlayersResolver} from './resolvers/get-specific-group-players.resolver';
 import {groupOwnerGuard} from './guards/group-owner.guard';
 import {superAdminGuard} from './guards/super-admin.guard';
+import {groupMemberGuard} from './guards/group-member.guard';
 export const routes: Routes = [
   {
     path: '',
@@ -38,7 +39,15 @@ export const routes: Routes = [
     canActivate: [authRoutesGuard, superAdminGuard]
   },
   {
+    // Plain /home -> last used group, or the group picker.
     path: 'home',
+    pathMatch: 'full',
+    canActivate: [lastGroupRedirectGuard],
+    children: [],
+  },
+  {
+    // The group id is always in the URL, so every page link is shareable.
+    path: 'home/:groupId',
     component: MainPageComponent,
     canActivate: [selectedGroupGuard],
     children: [
@@ -46,6 +55,7 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         component: GameComponent,
+        canActivate: [groupAdminGuard],
         canDeactivate: [exitFormGuard]
       },
       {
@@ -214,6 +224,7 @@ export const routes: Routes = [
           {
             path: 'draft',
             loadComponent: () => import('./fantasy/fantasy-draft/fantasy-draft.component').then(m => m.FantasyDraftComponent),
+            canActivate: [groupMemberGuard],
             canDeactivate: [exitFantasyDraftGuard]
           },
           {
@@ -251,6 +262,10 @@ export const routes: Routes = [
     path: 'team-draft/:groupId/:sessionId',
     loadComponent: () => import('./team-draft/team-draft.component').then(m => m.TeamDraftComponent),
     canActivate: [authRoutesGuard]
+  },
+  {
+    path: 'group-not-found',
+    loadComponent: () => import('./group-not-found/group-not-found.component').then(m => m.GroupNotFoundComponent),
   },
   {
     path: 'reveal',

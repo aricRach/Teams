@@ -7,6 +7,9 @@ import {map} from 'rxjs';
 import {compareDateWithToday} from '../../utils/date-utils';
 import {SectionLayoutComponent} from '../../shared/layouts/section-layout/section-layout.component';
 import {InnerTab} from '../../shared/inner-tabs/inner-tabs.component';
+import {PlayersService} from '../../players/players.service';
+import {Auth} from '@angular/fire/auth';
+import {PopupsService} from 'ui';
 
 @Component({
   selector: 'app-fantasy',
@@ -21,7 +24,23 @@ export class FantasyComponent {
   fantasyMeta = input<FantasyMeta>();
   route = inject(ActivatedRoute);
 
+  private playersService = inject(PlayersService);
+  private auth = inject(Auth);
+  private popupsService = inject(PopupsService);
+
+  /** Signed-in viewer from a shared link who isn't a member yet. */
+  isViewer = computed(() => !this.playersService.isMember());
+  userEmail = this.auth.currentUser?.email ?? '';
+
+  copyEmail() {
+    navigator.clipboard.writeText(this.userEmail).then(
+      () => this.popupsService.addSuccessPopOut('Email copied to clipboard!'),
+      () => this.popupsService.addErrorPopOut("Couldn't copy the email."),
+    );
+  }
+
   canDraft = computed(() => {
+    if (!this.playersService.isMember()) return false; // viewers from a shared link are read-only
     const isDraftActive = this.fantasyMeta()?.isActive;
     return isDraftActive && compareDateWithToday(this.fantasyMeta()?.nextDate) >= 0
   })

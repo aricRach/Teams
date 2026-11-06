@@ -14,7 +14,7 @@ import {
   writeBatch
 } from '@angular/fire/firestore';
 import {Auth} from '@angular/fire/auth';
-import {Observable} from 'rxjs';
+import {from, map, Observable} from 'rxjs';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
 import {Player} from './models/player.model';
 
@@ -84,6 +84,12 @@ export class PlayersApiService {
     return updateDoc(groupDocRef, { [`teamColors.${teamKey}`]: color || deleteField() });
   }
 
+  /** Any signed-in user may fetch a group by id (rules: get = signedIn, list = members only). */
+  async getGroupById(groupId: string): Promise<any | null> {
+    const snapshot = await getDoc(doc(this.firestore, `groups/${groupId}`));
+    return snapshot.exists() ? {id: snapshot.id, ...snapshot.data()} : null;
+  }
+
   getUserCreatedGroups(): Observable<any[]> {
     const user = this.auth.currentUser;
     if (!user) {
@@ -93,7 +99,9 @@ export class PlayersApiService {
 
     const groupsCollection = collection(this.firestore, 'groups');
     const q = query(groupsCollection, or( where("createdBy", "==", user.email), where("admins", "array-contains", user.email), where("members", "array-contains", user.email) ))
-    return collectionData(q, { idField: "id" });
+    // getDocs (not collectionData): a listener's first emission can come from the local cache,
+    // which may hold only the group opened via getGroupById, so take(1) would miss the rest.
+    return from(getDocs(q)).pipe(map(snapshot => snapshot.docs.map(d => ({id: d.id, ...d.data()}))));
   }
 
   async updatePlayerDetails(groupId: string, updatedPlayer: Player, player: Player) {

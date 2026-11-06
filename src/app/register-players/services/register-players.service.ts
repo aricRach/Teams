@@ -36,7 +36,7 @@ export class RegisterPlayersService {
     },
     onSuccess: () => {
       this.navigationService.unlockNavigation();
-      this.router.navigate(['home', 'game']);
+      this.router.navigate([this.playersService.groupUrl('game')]);
     },
     onError: (error) => this.popoutService.addErrorPopOut(error instanceof DuplicatePlayerError
       ? error.message

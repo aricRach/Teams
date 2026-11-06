@@ -75,7 +75,7 @@ export class StatisticsService {
 
   refreshTable() {
     this.selectedDate.set(this.selectAllLabel());
-    this.router.navigate(['home', 'statistics', 'table']);
+    this.router.navigate([this.playersService.groupUrl('statistics', 'table')]);
   }
 
   isAdmin() {

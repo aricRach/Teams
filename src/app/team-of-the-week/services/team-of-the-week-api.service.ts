@@ -40,6 +40,12 @@ export class TeamOfTheWeekApiService {
         return snapshotData;
       }
 
+      // Only admins generate (they're the only ones allowed to save it). Others see the saved
+      // team even if it's marked for update, or null = "not generated yet".
+      if (!this.playersService.isAdmin()) {
+        return snapshotData['explanation'] ? snapshotData : null;
+      }
+
       if (totalTries >= TOTW_MAX_TOTAL_GENERATES) {
         throw new Error('LIMIT_TOTAL');
       }

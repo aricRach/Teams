@@ -27,12 +27,12 @@ export class CommunityRatingsService {
   private popupsService = inject(PopupsService);
   readonly saveRatings = createMutation({
     run: () => this.communityRatingsApiService.setCommunityRatings(this.playersService.selectedGroup().id, this.ratings()),
-    onSuccess: () => this.router.navigate(['/home/players']),
+    onSuccess: () => this.router.navigate([this.playersService.groupUrl('players')]),
     onError: () => this.popupsService.addErrorPopOut("Couldn't update the ratings, please try again."),
   });
   readonly deleteAllRatings = createMutation({
     run: () => this.communityRatingsApiService.deleteAllRatings(this.playersService.selectedGroup().id),
-    onSuccess: () => this.router.navigate(['/home/players']),
+    onSuccess: () => this.router.navigate([this.playersService.groupUrl('players')]),
     onError: () => this.popupsService.addErrorPopOut("Couldn't delete the ratings, please try again."),
   });
 

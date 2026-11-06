@@ -1,4 +1,4 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, inject, input, output} from '@angular/core';
 import {ModalsService, NavigationBarComponent} from 'ui'
 import {UserService} from '../user/user.service';
 import {FormsModule} from '@angular/forms';
@@ -19,6 +19,8 @@ export class HeaderComponent {
   title = input<string>('TeamsRach');
   navItems = input<any[]>([]);
   isAdmin = input<boolean>(false);
+  showShare = input<boolean>(false);
+  share = output<void>();
 
   openAdminControl() {
     const dialogRef = this.modalsService.openComponentModal(AdminControlComponent, {
