@@ -38,7 +38,7 @@ export class UserService {
     const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
     if(this.auth.currentUser) {
       this.user.set(this.auth.currentUser);
-      this.router.navigate([redirectTo]).then(() => {
+      this.router.navigateByUrl(redirectTo).then(() => {
         localStorage.removeItem('redirectTo');
         // @ts-ignore
         this.popoutService.addSuccessPopOut(`welcome ${this.auth.currentUser.displayName}`)
@@ -48,7 +48,7 @@ export class UserService {
       signInWithPopup(this.auth, this.provider)
         .then((result) => {
           this.user.set(result.user);
-          this.router.navigate([redirectTo]).then(() => {
+          this.router.navigateByUrl(redirectTo).then(() => {
             localStorage.removeItem('redirectTo');
             this.spinnerService.setIsLoading(false)
           });

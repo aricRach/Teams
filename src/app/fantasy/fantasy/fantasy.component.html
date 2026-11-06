@@ -10,5 +10,15 @@
     </ul>
   </div>
 
+  @if (isViewer()) {
+    <div class="viewer-notice">
+      <p>
+        You're viewing this group from a shared link. To join fantasy, ask a group admin
+        to add <strong>{{ userEmail }}</strong> to your player.
+      </p>
+      <button class="active-btn action-btn" (click)="copyEmail()">Copy email</button>
+    </div>
+  }
+
   <router-outlet />
 </app-section-layout>

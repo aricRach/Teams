@@ -8,5 +8,6 @@ export const signInPageGuard: CanActivateFn = (route, state) => {
   if (!auth.currentUser) return true;
   const redirectTo = localStorage.getItem('redirectTo') || '/select-group';
   localStorage.removeItem('redirectTo');
-  return router.createUrlTree([redirectTo]);
+  // parseUrl keeps query params intact (createUrlTree([url]) would encode the '?').
+  return router.parseUrl(redirectTo);
 };

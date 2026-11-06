@@ -1,3 +1,4 @@
-<app-header [title]="headerTitle()" [navItems]="headerNavItems()" [isAdmin]="headerIsAdmin()"></app-header>
+<app-header [title]="headerTitle()" [navItems]="headerNavItems()" [isAdmin]="headerIsAdmin()"
+            [showShare]="canShare()" (share)="shareLink()"></app-header>
 <lib-breadcrumbs [breadcrumbs]="breadcrumbs()"></lib-breadcrumbs>
 <router-outlet></router-outlet>

@@ -40,7 +40,8 @@ export class SelectGroupComponent {
     const email = this.currentUserEmail;
     if (email) {
       this.playersService.setNumberOfTeams(this.numberOfTeams);;
-      const route = this.selectedGroup.admins.includes(email) ? ['home', 'game'] : ['home', 'statistics'];
+      const page = this.selectedGroup.admins.includes(email) ? 'game' : 'statistics';
+      const route = ['/home', this.selectedGroup.id, page];
       this.router.navigate(route);
     }
   }

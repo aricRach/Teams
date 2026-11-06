@@ -8,6 +8,6 @@ export const groupAdminGuard: CanActivateFn = (route, state) => {
   if(playersService.isAdmin() && !!playersService.selectedGroup()) {
     return true;
   }
-  router.navigate(['/']);
-  return false;
+  // Non-admins (incl. viewers from a shared link) land on the default read-only page.
+  return router.createUrlTree(playersService.selectedGroup() ? [playersService.groupUrl('statistics')] : ['/']);
 };

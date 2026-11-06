@@ -1,8 +1,15 @@
 <div class="in-row space-between">
   <app-navigation-bar [redirectBrandLink]="'/select-group'" [showMenuInSmallScreens]="true" [navItems]="navItems()" [title]="title()"></app-navigation-bar>
-  @if(isAdmin()) {
-    <button class="button-icon" (click)="openAdminControl()">
-      <img width="38" height="38" src="assets/icons/admin.svg" alt="admin">
-    </button>
-  }
+  <div class="in-row">
+    @if(showShare()) {
+      <button class="button-icon" (click)="share.emit()" title="Share link" aria-label="Share link">
+        <img width="30" height="30" src="assets/icons/share.svg" alt="share">
+      </button>
+    }
+    @if(isAdmin()) {
+      <button class="button-icon" (click)="openAdminControl()">
+        <img width="38" height="38" src="assets/icons/admin.svg" alt="admin">
+      </button>
+    }
+  </div>
 </div>

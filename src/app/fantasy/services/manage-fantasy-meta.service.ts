@@ -20,7 +20,7 @@ export class ManageFantasyMetaService {
       this.manageFantasyMetaApiService.setFantasyMeta(this.groupId(), {numberOfPicks, nextDate}),
     onSuccess: (_, _numberOfPicks, nextDate) => {
       this.popupsService.addSuccessPopOut(`Fantasy draft settings for ${nextDate} was saved successfully`);
-      this.router.navigate(['/home/fantasy'], {queryParams: { reload: Date.now() }});
+      this.router.navigate([this.playersService.groupUrl('fantasy')], {queryParams: { reload: Date.now() }});
     },
     onError: (_, _numberOfPicks, nextDate) =>
       this.popupsService.addErrorPopOut(`Cant save Fantasy draft settings for ${nextDate}, please try again later`),

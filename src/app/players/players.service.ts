@@ -10,6 +10,8 @@ import {DuplicatePlayerError} from './errors/duplicate-player-error';
 import {TEAM_ALIAS_MAX_LENGTH} from '../utils/team-label.util';
 import {createMutation, runOptimistic} from '../shared/optimistic/run-optimistic';
 
+export const LAST_GROUP_ID_KEY = 'lastGroupId';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -27,6 +29,8 @@ export class PlayersService {
   userGroups = signal<null | any[]>(null);
   isAdmin = signal(false);
   isGroupOwner = signal(false);
+  /** False for a signed-in viewer who opened a shared /home/<groupId> link without being a member. */
+  isMember = signal(false);
   private teams = signal<{[key: string]: { players: Player[] }}>(structuredClone(skeleton));
   private inActivePlayers = signal<null | Player[]>(null);
   allPlayersLabel = 'allPlayers';
@@ -231,10 +235,23 @@ export class PlayersService {
     })
   }
 
-  selectGroup(selectedGroup: {admins: string[]; id: string, createdBy?: string, teamAliases?: Record<string, string>, teamColors?: Record<string, string>}, email: string) {
+  /** URL inside the selected group, e.g. groupUrl('statistics') -> '/home/<groupId>/statistics'. */
+  groupUrl(...segments: string[]): string {
+    return ['/home', this.selectedGroup()?.id, ...segments].join('/');
+  }
+
+  selectGroup(selectedGroup: {admins: string[]; members?: string[]; id: string, createdBy?: string, teamAliases?: Record<string, string>, teamColors?: Record<string, string>}, email: string) {
     this.selectedGroup.set(selectedGroup);
     this.isAdmin.set(selectedGroup.admins.includes(email));
     this.isGroupOwner.set(selectedGroup.createdBy === email)
+    this.isMember.set(
+      selectedGroup.admins.includes(email) ||
+      (selectedGroup.members ?? []).includes(email) ||
+      selectedGroup.createdBy === email
+    );
+    try {
+      localStorage.setItem(LAST_GROUP_ID_KEY, selectedGroup.id);
+    } catch {}
     this.teamAliases.set(selectedGroup.teamAliases ?? {});
     this.teamColors.set(selectedGroup.teamColors ?? {});
   }

@@ -3,8 +3,8 @@
   [error]="!teamOfTheWeekService.statisticService.noDateSelected() && !!teamOfTheWeekService.totwResource.error()"
   errorHeading="Couldn't load team of the week"
   (retry)="teamOfTheWeekService.totwResource.reload()"
-  [empty]="teamOfTheWeekService.statisticService.noDateSelected()"
-  emptyHeading="You must select a date before.">
+  [empty]="teamOfTheWeekService.statisticService.noDateSelected() || teamOfTheWeekService.totwNotGenerated()"
+  [emptyHeading]="teamOfTheWeekService.totwNotGenerated() ? 'Team of the week not generated yet.' : 'You must select a date before.'">
   @if(teamOfTheWeekService.shouldShowReGenerate()) {
     <button
       layout-toolbar

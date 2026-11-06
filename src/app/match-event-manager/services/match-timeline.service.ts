@@ -1,6 +1,7 @@
 import {computed, effect, inject, Injectable, signal} from '@angular/core';
 import {MatchEventRecord, MatchRecord} from '../models/match-event.model';
 import {PlayersService} from '../../players/players.service';
+import {PlayersApiService} from '../../players/players-api.service';
 import {MatchEventsApiService} from './match-events-api.service';
 import {rxResource} from '@angular/core/rxjs-interop';
 import {forkJoin, map, of, take} from 'rxjs';
@@ -24,12 +25,23 @@ export class MatchTimelineService {
 
   playersService = inject(PlayersService);
   private matchEventsApi = inject(MatchEventsApiService);
+  private playersApiService = inject(PlayersApiService);
 
   groupId = computed(() => this.playersService.selectedGroup()?.id);
 
+  // Old matches can include players who were deactivated since; load them so their names still show.
+  private inactivePlayersResource = rxResource({
+    params: () => ({ groupId: this.groupId() }),
+    stream: ({ params }) => {
+      if (!params.groupId) return of([]);
+      return this.playersApiService.getPlayers(params.groupId, false).pipe(take(1));
+    },
+  });
+
   private playerNameMap = computed<Map<string, string>>(() => {
     const map = new Map<string, string>();
-    this.playersService.flattenPlayers(false, true).forEach((p) => {
+    const inactivePlayers = this.inactivePlayersResource.hasValue() ? this.inactivePlayersResource.value() : [];
+    [...inactivePlayers, ...this.playersService.flattenPlayers(false, true)].forEach((p) => {
       if (p.id) map.set(p.id, p.name);
     });
     return map;
