@@ -22,6 +22,7 @@ export class PlayersLandingPageComponent {
       { alias: 'Add Players', link: this.playersService.groupUrl('players/register-players'), type: NavigationItemType.LINK },
       { alias: 'Players Hub', link: this.playersService.groupUrl('players/manage-players/player-progress'), type: NavigationItemType.LINK },
       { alias: 'Reactivate Players', link: this.playersService.groupUrl('players/reactivate-players'), type: NavigationItemType.LINK },
+      { alias: 'Manage Group', link: this.playersService.groupUrl('manage-group'), type: NavigationItemType.LINK },
       { alias: 'Community Ratings', link: this.playersService.groupUrl('players/community-ratings'), disabled: !this.showRating(),
         tooltip: this.showRating() ? '' : 'In order to see this page enable show protected pages in admin control', type: NavigationItemType.LINK },
     ])

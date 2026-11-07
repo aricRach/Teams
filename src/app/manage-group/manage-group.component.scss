@@ -1,0 +1,20 @@
+.hint {
+  margin: 0 0 4px;
+  font-size: 0.85rem;
+  color: #666;
+
+  &.warning {
+    color: #b9770e;
+  }
+}
+
+.link-btn {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #2980b9;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  cursor: pointer;
+}

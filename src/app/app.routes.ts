@@ -244,6 +244,12 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'manage-group',
+        loadComponent: () => import('./manage-group/manage-group.component').then(m => m.ManageGroupComponent),
+        canActivate: [groupAdminGuard],
+        data: { breadcrumb: 'Manage Group' },
+      },
+      {
         path: 'gallery',
         loadComponent: () => import('./gallery/gallery.component').then(m => m.GalleryComponent),
         canActivate: [groupOwnerGuard]

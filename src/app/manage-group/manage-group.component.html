@@ -1,0 +1,61 @@
+<app-form-layout heading="Manage Group">
+  <div class="field">
+    <label>Admins</label>
+    <div class="chip-input">
+      <input
+        type="email"
+        placeholder="Enter email"
+        [value]="manageGroupService.adminEmailInput()"
+        (input)="manageGroupService.adminEmailInput.set($any($event.target).value)"
+        (keydown.enter)="manageGroupService.addAdmin()"
+      />
+      <button type="button" class="add-btn" (click)="manageGroupService.addAdmin()"
+        [disabled]="!manageGroupService.isValidEmail(manageGroupService.adminEmailInput())">+</button>
+    </div>
+    <div class="chips">
+      @for (email of manageGroupService.admins(); track email) {
+        <span class="chip">
+          {{ email }}
+          @if (manageGroupService.canRemoveAdmin(email)) {
+            <button type="button" (click)="manageGroupService.removeAdmin(email)">×</button>
+          }
+        </span>
+      }
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Members</label>
+    <p class="hint">
+      To add a member, give the player an email in
+      <a [routerLink]="manageGroupService.addPlayersUrl()">Add Players</a> or
+      <a [routerLink]="manageGroupService.playersHubUrl()">Players Hub → Edit Player</a>,
+      so the member is linked to a player.
+    </p>
+    @if (manageGroupService.showMemberInput()) {
+      <p class="hint warning">This member won't be linked to any player.</p>
+      <div class="chip-input">
+        <input
+          type="email"
+          placeholder="Enter email"
+          [value]="manageGroupService.memberEmailInput()"
+          (input)="manageGroupService.memberEmailInput.set($any($event.target).value)"
+          (keydown.enter)="manageGroupService.addMember()"
+        />
+        <button type="button" class="add-btn" (click)="manageGroupService.addMember()"
+          [disabled]="!manageGroupService.isValidEmail(manageGroupService.memberEmailInput())">+</button>
+      </div>
+      <button type="button" class="link-btn" (click)="manageGroupService.cancelAddMember()">Cancel</button>
+    } @else {
+      <button type="button" class="link-btn" (click)="manageGroupService.showMemberInput.set(true)">Add a member without a player anyway</button>
+    }
+    <div class="chips">
+      @for (email of manageGroupService.members(); track email) {
+        <span class="chip">
+          {{ email }}
+          <button type="button" (click)="manageGroupService.removeMember(email)">×</button>
+        </span>
+      }
+    </div>
+  </div>
+</app-form-layout>
