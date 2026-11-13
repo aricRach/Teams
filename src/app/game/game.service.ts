@@ -1,4 +1,4 @@
-import {computed, inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {firstValueFrom} from 'rxjs';
 import {Router} from '@angular/router';
 import {Player, Statistics} from '../players/models/player.model';
@@ -13,6 +13,8 @@ import {formatTeamLabel} from '../utils/team-label.util';
 import {PopupsService} from 'ui';
 import {createMutation} from '../shared/optimistic/run-optimistic';
 
+export type GameMode = 'single' | 'league';
+
 @Injectable()
 export class GameService {
 
@@ -25,6 +27,25 @@ export class GameService {
   private router = inject(Router);
 
   computedStats = computed(() => this.computedStatsService.statsMap())
+
+  // A running match keeps its own mode; otherwise always start in League.
+  readonly mode = signal<GameMode>(this.matchEventsService.liveMode() ?? 'league');
+  readonly teamCountOptions = [2, 3, 4];
+  // The game page's team count. The game services and the layout read it from here.
+  readonly teamCount = this.playersService.numberOfTeams;
+
+  // While a match is running, neither the mode nor the number of teams can change.
+  readonly isSetupLocked = computed(() => this.matchEventsService.liveMode() !== null);
+
+  setMode(mode: GameMode): void {
+    if (this.isSetupLocked()) return;
+    this.mode.set(mode);
+  }
+
+  setTeamCount(count: number): void {
+    if (this.isSetupLocked()) return;
+    this.playersService.setNumberOfTeams(count);
+  }
 
   readonly reveal = createMutation({
     run: async (groupId: string) => {

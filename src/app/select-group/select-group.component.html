@@ -4,7 +4,7 @@
   <header><h3>Select group</h3></header>
 
   <section class="gap in-row">
-<select [(ngModel)]="selectedGroup" (ngModelChange)="groupChangedSubmitted.set(false)">
+<select [(ngModel)]="selectedGroup">
   @for(group of groups(); track group.name; let i=$index) {
     <option [ngValue]="group">
       {{ group.name }}
@@ -12,33 +12,10 @@
   }
 </select>
     @if(selectedGroup) {
-      <button class="active-btn action-btn" (click)="setSelectedGroup()">Set</button>
+      <button class="active-btn action-btn" (click)="submit()">Continue</button>
     }
 
   </section>
-
-  @if(isAdmin() && groupChangedSubmitted()) {
-    <section class="in-row gap-10">
-      <label>
-        Number of teams:
-      </label>
-      <select class="select-number-of-teams" [(ngModel)]="numberOfTeams">
-        <option [ngValue]="2">
-          2
-        </option>
-        <option [ngValue]="3">
-          3
-        </option>
-        <option [ngValue]="4">
-          4
-        </option>
-      </select>
-    </section>
-  }
-
-  @if(selectedGroup && groupChangedSubmitted()) {
-    <button class="active-btn action-btn" (click)="submit()">Continue</button>
-  }
 </div>
 
 

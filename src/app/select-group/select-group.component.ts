@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, signal} from '@angular/core';
+import {Component, inject, input} from '@angular/core';
 import {PlayersService} from '../players/players.service';
 import {FormsModule} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
@@ -18,28 +18,17 @@ export class SelectGroupComponent {
   playersService = inject(PlayersService);
   router = inject(Router);
   private auth = inject(Auth);
-  isAdmin = computed(() => this.playersService.isAdmin());
   isSuperAdmin = this.auth.currentUser?.email === environment.superAdminEmail;
-  groupChangedSubmitted = signal(false);
   selectedGroup!: {admins: string[], id: string, createdBy: string};
-  numberOfTeams = 3;
 
   private get currentUserEmail(): string | null {
     return this.auth.currentUser?.email ?? null;
   }
 
-  setSelectedGroup() {
-    const email = this.currentUserEmail;
-    if (email) {
-      this.groupChangedSubmitted.set(true);
-      this.playersService.selectGroup(this.selectedGroup, email);
-    }
-  }
-
   submit() {
     const email = this.currentUserEmail;
     if (email) {
-      this.playersService.setNumberOfTeams(this.numberOfTeams);;
+      this.playersService.selectGroup(this.selectedGroup, email);
       const page = this.selectedGroup.admins.includes(email) ? 'game' : 'statistics';
       const route = ['/home', this.selectedGroup.id, page];
       this.router.navigate(route);

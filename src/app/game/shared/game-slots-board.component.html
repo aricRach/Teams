@@ -4,7 +4,7 @@
     <button type="button" [class.active]="matchCount() === 1" [disabled]="!canToggleMatchCount()"
       (click)="matchCountChange.emit(1)">Single</button>
     <button type="button" [class.active]="matchCount() === 2" [disabled]="!canToggleMatchCount()"
-      (click)="matchCountChange.emit(2)">Multiple</button>
+      (click)="matchCountChange.emit(2)">Parallel</button>
   </div>
   @if (!canToggleMatchCount()) {
   <span class="segmented-hint">End the running game to switch</span>

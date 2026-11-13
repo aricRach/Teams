@@ -1,4 +1,4 @@
-<app-game-layout [loading]="playersService.isLoadingPlayers()" [teamCount]="playersService.numberOfTeams()">
+<app-game-layout [loading]="playersService.isLoadingPlayers()" [teamCount]="gameService.teamCount()">
   @if(adminControlService.getAdminControl().showSaveButtons) {
     <ng-container ngProjectAs="[board-start]">
       <button (click)="load()">Load local data</button>
@@ -16,28 +16,38 @@
   </button>
 
   <!-- The games read the teams when created, and projected content is created even while hidden, so wait here too. -->
-  @if (!playersService.isLoadingPlayers()) {
-    @if(playersService.isGroupOwner()) {
-      <app-capture-media></app-capture-media>
-    }
+  @if (!playersService.isLoadingPlayers() && playersService.isGroupOwner()) {
+    <app-capture-media></app-capture-media>
+  }
 
-    <div class="segmented-row">
-      <div class="segmented" [class.locked]="toggleDisabled()">
-        <button type="button" [class.active]="mode() === 'single'" [disabled]="toggleDisabled()"
-          (click)="setMode('single')">Quick</button>
-        <button type="button" [class.active]="mode() === 'league'" [disabled]="toggleDisabled()"
-          (click)="setMode('league')">League</button>
-      </div>
-      @if (toggleDisabled()) {
-        <span class="segmented-hint">End the running game to switch mode</span>
-      }
+  <!-- The layout hides its content while loading, so this row doesn't need the loading check. -->
+  <div class="segmented-row">
+    <div class="segmented" [class.locked]="gameService.isSetupLocked()">
+      <button type="button" [class.active]="gameService.mode() === 'single'" [disabled]="gameService.isSetupLocked()"
+        (click)="gameService.setMode('single')">Quick</button>
+      <button type="button" [class.active]="gameService.mode() === 'league'" [disabled]="gameService.isSetupLocked()"
+        (click)="gameService.setMode('league')">League</button>
     </div>
-
-    @if (mode() === 'single') {
-      <app-single-game />
-    } @else {
-      <app-league-game />
+    <div class="team-count-picker">
+      <span>Teams</span>
+      <div class="segmented" [class.locked]="gameService.isSetupLocked()">
+        @for (count of gameService.teamCountOptions; track count) {
+          <button type="button" [class.active]="gameService.teamCount() === count" [disabled]="gameService.isSetupLocked()"
+            (click)="gameService.setTeamCount(count)">{{ count }}</button>
+        }
+      </div>
+    </div>
+    @if (gameService.isSetupLocked()) {
+      <span class="segmented-hint">End the running game to switch mode or number of teams</span>
     }
+  </div>
+
+  @if (playersService.isLoadingPlayers()) {
+    <!-- waiting for players -->
+  } @else if (gameService.mode() === 'single') {
+    <app-single-game />
+  } @else {
+    <app-league-game />
   }
 </app-game-layout>
 

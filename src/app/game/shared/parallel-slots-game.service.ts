@@ -1,4 +1,4 @@
-import { computed, effect, inject, Injectable, OnDestroy, ResourceRef, Signal, signal, WritableSignal } from '@angular/core';
+import { computed, effect, inject, Injectable, ResourceRef, signal, untracked, WritableSignal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { PopupsService } from 'ui';
@@ -12,7 +12,7 @@ import { GameService } from '../game.service';
 import { Player } from '../../players/models/player.model';
 import { MatchEventRecord } from '../../match-event-manager/models/match-event.model';
 import { PanelScorer } from './game-slot-panel.component';
-import { collapseExtraTeams } from '../../utils/collapse-extra-teams.util';
+import { collapseExtraTeams, restoreHiddenTeams } from '../../utils/collapse-extra-teams.util';
 import { computeGoalTally, isScoringEvent } from '../../match-event-manager/utils/scoring.util';
 
 export interface SlotViewModel {
@@ -25,7 +25,7 @@ export interface SlotViewModel {
 }
 
 @Injectable()
-export abstract class ParallelSlotsGameService implements OnDestroy {
+export abstract class ParallelSlotsGameService {
   protected playersService = inject(PlayersService);
   protected adminControl = inject(AdminControlService);
   protected matchEvents = inject(MatchEventsManagerService);
@@ -35,15 +35,13 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   protected gameService = inject(GameService);
   protected popups = inject(PopupsService);
 
-  protected readonly selectedTeamCount: number;
   private readonly slotEventsBySlot: Map<number, ResourceRef<MatchEventRecord[] | undefined>>;
 
-  abstract readonly teamCount: Signal<number>;
+  readonly teamCount = this.gameService.teamCount;
 
   readonly matchCount: WritableSignal<1 | 2>;
 
   protected constructor(readonly slots: readonly number[], defaultMatchCount: 1 | 2 = 2) {
-    this.selectedTeamCount = this.playersService.numberOfTeams();
     this.matchCount = signal(defaultMatchCount);
     this.activeSlot.set(this.slots[0]);
     this.slotEventsBySlot = new Map(this.slots.map(slot => [
@@ -56,14 +54,31 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
             : of([] as MatchEventRecord[])
       })
     ]));
-    // An effect, because `teamCount` may read subclass signals that don't exist yet in this constructor.
     effect(() => {
-      this.playersService.setNumberOfTeams(this.teamCount());
+      const teamCount = this.teamCount();
+      untracked(() => this.adjustToTeamCount(teamCount));
     });
   }
 
-  ngOnDestroy(): void {
-    this.playersService.setNumberOfTeams(this.selectedTeamCount);
+  // Hidden teams can't play, and two parallel matches need 4 teams, so fall back to one match.
+  // A running match is never touched.
+  private adjustToTeamCount(teamCount: number): void {
+    this.unpickEmptyTeams();
+    if (teamCount !== 4 && !this.anySlotLive()) {
+      this.switchToSingleMatch();
+    }
+  }
+
+  // Takes teams with no players out of their game. Hidden teams show up empty in `teams()`,
+  // so this covers them too. Teams in a live game are always kept.
+  private unpickEmptyTeams(): void {
+    const teams = this.teams();
+    const locked = this.lockedTeamKeys();
+    const next: Record<string, number> = {};
+    for (const [teamKey, slot] of Object.entries(this.assignments())) {
+      if (locked.includes(teamKey) || teams[teamKey]?.players?.length > 0) next[teamKey] = slot;
+    }
+    this.assignments.set(next);
   }
 
   readonly isMovePlayersLocked = signal(false);
@@ -130,13 +145,20 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   setMatchCount(count: 1 | 2): void {
     if (count === this.matchCount() || !this.canToggleMatchCount()) return;
     if (count === 1) {
-      const next = { ...this.assignments() };
-      for (const [teamKey, slot] of Object.entries(next)) {
-        if (slot !== this.slots[0]) delete next[teamKey];
-      }
-      this.assignments.set(next);
+      this.switchToSingleMatch();
+    } else {
+      this.matchCount.set(2);
     }
-    this.matchCount.set(count);
+  }
+
+  // Only the first game is shown in single mode, so free the teams picked for the other game.
+  private switchToSingleMatch(): void {
+    const next = { ...this.assignments() };
+    for (const [teamKey, slot] of Object.entries(next)) {
+      if (slot !== this.slots[0]) delete next[teamKey];
+    }
+    this.assignments.set(next);
+    this.matchCount.set(1);
   }
 
   private eventsForSlot(slot: number): MatchEventRecord[] {
@@ -160,7 +182,9 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   }
 
   updateTeams(teams: any): void {
-    this.playersService.setTeams(teams);
+    // The board shows hidden teams' players as unassigned, so put them back in their teams before saving.
+    this.playersService.setTeams(restoreHiddenTeams(teams, this.playersService.getTeams(), this.teamCount()));
+    this.unpickEmptyTeams();
   }
 
   renameTeam(teamKey: string, alias: string): void {
@@ -192,7 +216,9 @@ export abstract class ParallelSlotsGameService implements OnDestroy {
   }
 
   slotReady(slot: number): boolean {
-    return this.slotTeams(slot).length === 2;
+    const teamKeys = this.slotTeams(slot);
+    const teams = this.teams();
+    return teamKeys.length === 2 && teamKeys.every(key => teams[key]?.players?.length > 0);
   }
 
   slotLive(slot: number): boolean {

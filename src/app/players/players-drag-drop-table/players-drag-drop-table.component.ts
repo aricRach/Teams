@@ -114,7 +114,9 @@ export class PlayersDragDropTableComponent {
 
   isSlotButtonDisabled(teamKey: string, slot: number): boolean {
     if (this.isTeamLocked(teamKey)) return true;
-    return this.teamSlots()[teamKey] !== slot && this.slotTeamCount(slot, teamKey) >= 2;
+    if (this.teamSlots()[teamKey] === slot) return false;
+    const isEmpty = !this.clonedTeams()?.[teamKey]?.players?.length;
+    return isEmpty || this.slotTeamCount(slot, teamKey) >= 2;
   }
 
   setTeamSlot(teamKey: string, slot: number | null) {

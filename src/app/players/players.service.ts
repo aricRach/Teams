@@ -129,6 +129,7 @@ export class PlayersService {
               }
             }
             this.teams.set(teams);
+            this.numberOfTeams.set(this.countUsedTeams(teams));
           }
         })
        )
@@ -324,6 +325,18 @@ export class PlayersService {
 
   setNumberOfTeams(numberOfTeams: number) {
     this.numberOfTeams.set(numberOfTeams);
+  }
+
+  /** Teams up to the last one that has players (at least 2), so a shared link shows the teams as they are. */
+  private countUsedTeams(teams: {[key: string]: { players: Player[] }}): number {
+    const teamKeys = Object.keys(teams).filter(key => key !== this.allPlayersLabel);
+    let lastUsed = 0;
+    teamKeys.forEach((key, index) => {
+      if (teams[key].players.length > 0) {
+        lastUsed = index + 1;
+      }
+    });
+    return Math.max(2, lastUsed);
   }
 
   private async switchPlayerToActive(player: Player) {

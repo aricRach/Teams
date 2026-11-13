@@ -5,3 +5,13 @@ app-capture-media {
   margin-bottom: 1rem;
 }
 
+
+.team-count-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  font-weight: bold;
+
+  .segmented > button { padding: 0.35rem 0.9rem; }
+}

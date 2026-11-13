@@ -14,7 +14,7 @@
   </div>
 
   @if (showTimer()) {
-  <app-stopwatch [disabled]="!ready()" [disabledTooltip]="'Assign 2 teams to this game'"
+  <app-stopwatch [disabled]="!ready()" [disabledTooltip]="'Assign 2 teams with players to this game'"
     (timeStartEvent)="start.emit()" (timeResetEvent)="reset.emit()" (timeEndEvent)="end.emit()" />
   }
 

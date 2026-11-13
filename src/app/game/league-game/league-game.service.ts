@@ -14,8 +14,6 @@ export class LeagueGameService extends ParallelSlotsGameService {
     super(LEAGUE_SLOTS, 1);
   }
 
-  readonly teamCount = computed(() => this.selectedTeamCount);
-
   readonly sessionId = signal<string | null>(null);
 
   readonly canFinishSession = computed(() => !!this.sessionId() && !this.anySlotLive());

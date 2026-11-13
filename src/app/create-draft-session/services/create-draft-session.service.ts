@@ -187,8 +187,9 @@ export class CreateDraftSessionService {
     // Step 4: Update remaining players in allPlayers
     newTeams['allPlayers'].players = Array.from(playerMap.values());
 
-    // Step 5: Save or emit the updated teams
+    // Step 5: Save or emit the updated teams, and show as many teams as were drafted
     this.playersService.setTeams(newTeams);
+    this.playersService.setNumberOfTeams(teamCount);
     void this.playersService.savePlayers.run();
   }
 

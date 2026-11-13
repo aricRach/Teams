@@ -32,3 +32,31 @@ export function collapseExtraTeams(teams: TeamsMap, visibleTeamCount: number): T
   }
   return result;
 }
+
+/**
+ * Undoes `collapseExtraTeams` after the collapsed view was edited: hidden teams get their players back,
+ * except the ones that were dragged from the unassigned list into a visible team.
+ */
+export function restoreHiddenTeams(boardTeams: TeamsMap, savedTeams: TeamsMap, visibleTeamCount: number): TeamsMap {
+  const teamKeys = Object.keys(savedTeams).filter((key) => key !== 'allPlayers');
+  const hiddenTeamKeys = teamKeys.slice(Math.max(0, visibleTeamCount));
+  if (hiddenTeamKeys.length === 0) {
+    return boardTeams;
+  }
+
+  // On the board, hidden teams' players sit in the unassigned list.
+  const unassignedOnBoard = boardTeams['allPlayers']?.players ?? [];
+  const unassignedOnBoardIds = new Set(unassignedOnBoard.map((player) => player.id));
+  const returnedPlayerIds = new Set<string>();
+  const result: TeamsMap = { ...boardTeams };
+  for (const teamKey of hiddenTeamKeys) {
+    // The team's saved players, minus any that were dragged into a visible team.
+    const playersBackInTeam = savedTeams[teamKey].players
+      .filter((player) => unassignedOnBoardIds.has(player.id));
+    playersBackInTeam.forEach((player) => returnedPlayerIds.add(player.id));
+    result[teamKey] = { players: playersBackInTeam };
+  }
+  // They're back in their teams, so they're no longer unassigned.
+  result['allPlayers'] = { players: unassignedOnBoard.filter((player) => !returnedPlayerIds.has(player.id)) };
+  return result;
+}
