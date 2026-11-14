@@ -1,18 +1,14 @@
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {Router} from '@angular/router';
-import {PopupsService} from 'ui';
 import {PlayersService} from '../players/players.service';
-import {Player, Statistics, TeamsOptions} from '../players/models/player.model';
+import {Player, TeamsOptions} from '../players/models/player.model';
 import {MatchEventsManagerService} from '../match-event-manager/services/match-events-manager.service';
 import {ComputedStatisticsService} from '../statistics/services/computed-statistics.service';
-import {RevealApiService, RevealTeam, RevealSnapshot, PositionedPlayer, Position} from '../reveal/reveal-api.service';
-import {computeTeamScores} from '../utils/team-scores.utils';
 import {CdkDragDrop} from '@angular/cdk/drag-drop';
-import {formatTeamLabel, TEAM_ALIAS_MAX_LENGTH, teamColorStyle, teamDisplayName} from '../utils/team-label.util';
+import {TEAM_ALIAS_MAX_LENGTH, teamColorStyle, teamDisplayName} from '../utils/team-label.util';
 import {collapseExtraTeams, restoreHiddenTeams} from '../utils/collapse-extra-teams.util';
 import {computeBalanceMeter} from '../utils/balance-meter.util';
 import {averageRating, totalRating} from '../utils/team-rating.util';
-import {createMutation} from '../shared/optimistic/run-optimistic';
 import {PlayersDragDropTableService} from '../players/players-drag-drop-table/players-drag-drop-table.service';
 
 
@@ -23,8 +19,6 @@ export class TeamBuilderService {
   readonly bench = this.playersService.allPlayersLabel;
   private matchEvents = inject(MatchEventsManagerService);
   private computedStatsService = inject(ComputedStatisticsService);
-  private revealApi = inject(RevealApiService);
-  private popupsService = inject(PopupsService);
   private router = inject(Router);
   // Reuses the existing balance algorithm and attack/defense scores.
   private balanceService = inject(PlayersDragDropTableService);
@@ -35,6 +29,9 @@ export class TeamBuilderService {
   // Teams can't change while a game runs: the game page holds which teams are playing.
   readonly canEdit = computed(() => this.isAdmin() && !this.isGameRunning());
   readonly showGameRunningHint = computed(() => this.isAdmin() && this.isGameRunning());
+  readonly gameUrl = computed(() => this.playersService.groupUrl('game'));
+  readonly gameLinkLabel = computed(() => this.isGameRunning() ? 'Back to game →' : 'Start game →');
+  readonly gameLinkHint = computed(() => this.isGameRunning() ? 'A game is in progress.' : 'Teams ready?');
 
   readonly teamCountOptions = [2, 3, 4];
   readonly teamCount = this.playersService.numberOfTeams;
@@ -52,7 +49,7 @@ export class TeamBuilderService {
   readonly teamColors = this.playersService.teamColors;
 
   readonly hasUnsavedChanges = this.playersService.hasUnsavedTeams;
-  readonly isSaving = computed(() => this.playersService.savePlayers.pending() || this.reveal.pending());
+  readonly isSaving = computed(() => this.playersService.savePlayers.pending());
   // Only changes made on this page are tracked (game-page moves are saved when a game ends),
   // so the status talks about this page, not about everything being saved.
   private readonly savedOnThisPage = signal(false);
@@ -258,82 +255,14 @@ export class TeamBuilderService {
   async save(): Promise<void> {
     this.saveShownTeams();
     const saved = await this.playersService.savePlayers.run();
-    if (saved) this.savedOnThisPage.set(true);
+    if (!saved) return;
+    this.savedOnThisPage.set(true);
+    // Saved teams are ready to play, so go straight to the game.
+    this.router.navigateByUrl(this.gameUrl());
   }
 
   // Saves the teams as shown: players of teams hidden by a lower team count go to the bench.
   private saveShownTeams(): void {
     this.playersService.setTeams(this.teams());
-  }
-
-  readonly reveal = createMutation({
-    run: async (groupId: string) => {
-      this.saveShownTeams();
-      // One after the other, so the reveal never shows teams that weren't saved.
-      // A failed teams save already shows its own error.
-      const teamsSaved = await this.playersService.savePlayers.run(undefined, true);
-      if (!teamsSaved) return;
-      await this.revealApi.saveSnapshot(groupId, this.buildSnapshot());
-
-      // The copied link is a convenience: a denied clipboard permission must not block opening the reveal.
-      const revealUrl = `${window.location.origin}/reveal?groupId=${groupId}`;
-      await navigator.clipboard.writeText(revealUrl).then(
-        () => this.popupsService.addSuccessPopOut('Link copied to clipboard!'),
-        () => {},
-      );
-      this.router.navigate(['/reveal'], { queryParams: { groupId } });
-    },
-    onError: () => this.popupsService.addErrorPopOut("The teams were saved, but the reveal couldn't be created. Please try again."),
-  });
-
-  saveAndReveal(): void {
-    const groupId = this.playersService.selectedGroup()?.id;
-    // Not while a game runs: the teams that are playing can't change.
-    if (!groupId || !this.canEdit()) return;
-    void this.reveal.run(groupId);
-  }
-
-  private buildSnapshot(): RevealSnapshot {
-    // Only the teams shown on the page: hidden teams' players are on the bench here.
-    const rawTeams = this.teams();
-    const statsMap = this.computedStatsService.statsMap();
-    const scores   = computeTeamScores(rawTeams, statsMap);
-
-    const aliases = this.playersService.teamAliases();
-    const teams: RevealTeam[] = Object.entries(rawTeams)
-      .filter(([key, team]: [string, any]) => key !== this.bench && team.players.length > 0)
-      .map(([key, team]: [string, any]) => ({
-        name:         formatTeamLabel(key, aliases[key]),
-        rating:       Math.round(averageRating(team.players)),
-        attackScore:  scores[key]?.attackScore  ?? 0,
-        defenseScore: scores[key]?.defenseScore ?? 0,
-        players:      this.assignPositions(team.players as Player[], statsMap),
-      }));
-
-    return { teams, savedAt: null };
-  }
-
-  private assignPositions(players: Player[], statsMap: Map<string, Map<string, Statistics>>): PositionedPlayer[] {
-    const scored = players.map(p => {
-      const dateMap = statsMap.get(p.id);
-      let goals = 0, conceded = 0, games = 0;
-      for (const s of (dateMap?.values() ?? [])) {
-        goals    += s.goals         ?? 0;
-        conceded += s.goalsConceded ?? 0;
-        games    += s.games         ?? 0;
-      }
-      const atk = games > 0 ? goals    / games : 0;
-      const def = games > 0 ? conceded / games : 0;
-      return { name: p.name, score: atk - def };
-    });
-    scored.sort((a, b) => a.score - b.score);
-    return scored.map((sp, i) => ({ name: sp.name, position: this.positionByIndex(i, scored.length) }));
-  }
-
-  private positionByIndex(index: number, total: number): Position {
-    const third = total / 3;
-    if (index < third)     return 'DEF';
-    if (index < 2 * third) return 'MID';
-    return 'FWD';
   }
 }

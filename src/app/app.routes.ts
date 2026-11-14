@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import {GameComponent} from './game/game.component';
 import {MainPageComponent} from './main-page/main-page.component';
 import {SelectGroupComponent} from './select-group/select-group.component';
-import {lastGroupRedirectGuard, selectedGroupGuard} from './guards/selected-group.guard';
+import {groupHomeRedirectGuard, lastGroupRedirectGuard, selectedGroupGuard} from './guards/selected-group.guard';
 import {SignInComponent} from './user/sign-in/sign-in.component';
 import {getUserGroupsResolver} from './resolvers/get-user-groups.resolver';
 import {groupAdminGuard} from './guards/group-admin.guard';
@@ -55,9 +55,8 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        component: GameComponent,
-        canActivate: [groupAdminGuard],
-        canDeactivate: [exitFormGuard]
+        canActivate: [groupHomeRedirectGuard],
+        children: [],
       },
       {
         path: 'game',

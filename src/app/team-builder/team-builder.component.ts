@@ -1,5 +1,6 @@
 import {Component, inject} from '@angular/core';
 import {NgStyle} from '@angular/common';
+import {RouterLink} from '@angular/router';
 import {DragDropModule} from '@angular/cdk/drag-drop';
 import {GameLayoutComponent} from '../shared/layouts/game-layout/game-layout.component';
 import {PlayerViewComponent} from '../players/player-view/player-view.component';
@@ -12,7 +13,7 @@ import {TeamBuilderService} from './team-builder.service';
 @Component({
   selector: 'app-team-builder',
   standalone: true,
-  imports: [GameLayoutComponent, NgStyle, DragDropModule, PlayerViewComponent, TeamColorPickerComponent, TeamScoreBarsComponent, ModalComponent],
+  imports: [GameLayoutComponent, NgStyle, RouterLink, DragDropModule, PlayerViewComponent, TeamColorPickerComponent, TeamScoreBarsComponent, ModalComponent],
   providers: [TeamBuilderService, PlayersDragDropTableService],
   templateUrl: './team-builder.component.html',
   styleUrl: './team-builder.component.scss',

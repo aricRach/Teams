@@ -23,6 +23,31 @@
   }
 }
 
+.start-game-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+
+.start-game-link {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+
+  &:hover { text-decoration-thickness: 2px; }
+}
+
 .builder-hint {
   margin: 0.15rem 0 0;
   color: var(--text-muted);
@@ -130,7 +155,10 @@
     margin: 0;
     font-size: 1.15rem;
     font-weight: 700;
-    overflow-wrap: anywhere;
+    // One line with "…" like the game page; the full name is in the title tooltip.
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .rename-btn {

@@ -21,6 +21,13 @@
     </div>
   </div>
 
+  @if (teamBuilderService.isAdmin()) {
+  <div class="start-game-strip">
+    <span>{{ teamBuilderService.gameLinkHint() }}</span>
+    <a class="start-game-link" [routerLink]="teamBuilderService.gameUrl()">{{ teamBuilderService.gameLinkLabel() }}</a>
+  </div>
+  }
+
   <div class="tools">
     @if (teamBuilderService.isAdmin()) {
     <button type="button" class="action-btn" [class.active-btn]="teamBuilderService.showRating()"
@@ -132,8 +139,6 @@
   @if (teamBuilderService.isAdmin()) {
   <div class="save-bar" [class.dirty]="teamBuilderService.hasUnsavedChanges()">
     <span class="save-status"><span class="dot"></span>{{ teamBuilderService.saveStatus() }}</span>
-    <button type="button" class="action-btn" [disabled]="teamBuilderService.isSaving() || !teamBuilderService.canEdit()"
-      [class.is-pending]="teamBuilderService.reveal.pending()" (click)="teamBuilderService.saveAndReveal()">Save & reveal</button>
     <button type="button" class="action-btn active-btn" [disabled]="teamBuilderService.isSaving() || !teamBuilderService.hasUnsavedChanges()"
       [class.is-pending]="teamBuilderService.isSaving()" (click)="teamBuilderService.save()">Save</button>
   </div>
