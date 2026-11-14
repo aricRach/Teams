@@ -99,8 +99,9 @@ export class TeamOfTheWeekService {
 
   reGenerateTeamOfTheWeek() {
     this.modalsService.openConfirmModal({
-      title: 'ReGenerate Team',
-      description: `By confirm you will regenerate team of the week.<br>current selection will be changed.`,
+      title: 'Pick a new team of the week?',
+      description: 'A new team is picked and replaces the current one.',
+      confirmBtn: 'pick new team',
     }).afterClosed().subscribe((confirm) => {
       if(confirm) {
         const date = this.statisticService.getSelectedDate();

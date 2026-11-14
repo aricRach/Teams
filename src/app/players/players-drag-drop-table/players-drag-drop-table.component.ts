@@ -6,16 +6,16 @@ import {DoubleClickDirective} from '../../directives/double-click.directive';
 import {GoalModalEvent, Player, Statistics, TeamsOptions} from '../models/player.model';
 import {currentDate} from '../../utils/date-utils';
 import {PlayerViewComponent} from '../player-view/player-view.component';
-import {ModalComponent} from '../../../modals/modal/modal.component';
 import {PlayersDragDropTableService} from './players-drag-drop-table.service';
 import {TeamScoreBarsComponent} from '../../shared/team-score-bars/team-score-bars.component';
 import {TeamLabelPipe} from '../../pipes/team-label.pipe';
-import {TEAM_ALIAS_MAX_LENGTH} from '../../utils/team-label.util';
+import {TEAM_ALIAS_MAX_LENGTH, teamColorStyle} from '../../utils/team-label.util';
 import {TeamColorPickerComponent} from '../../shared/team-color-picker/team-color-picker.component';
+import {averageRating, totalRating} from '../../utils/team-rating.util';
 
 @Component({
   selector: 'app-players-drag-drop-table',
-  imports: [DragDropModule, CommonModule, FormField, DoubleClickDirective, PlayerViewComponent, ModalComponent, TeamScoreBarsComponent, TeamLabelPipe, TeamColorPickerComponent],
+  imports: [DragDropModule, CommonModule, FormField, DoubleClickDirective, PlayerViewComponent, TeamScoreBarsComponent, TeamLabelPipe, TeamColorPickerComponent],
   standalone: true,
   providers: [PlayersDragDropTableService],
   templateUrl: './players-drag-drop-table.component.html',
@@ -29,9 +29,7 @@ export class PlayersDragDropTableComponent {
   editStatistics = input(false);
   clonedTeams = input<any>();
   enableShowRatings = input(false);
-  enableMakeBalancedTeams = input(true);
   aliases = input<Record<string, string>>({});
-  canRenameTeams = input(false);
   renameTeam = output<{teamKey: string, alias: string}>();
   colors = input<Record<string, string>>({});
   changeTeamColor = output<{teamKey: string, color: string}>();
@@ -52,7 +50,6 @@ export class PlayersDragDropTableComponent {
   );
 
   setGoalModalData = signal<GoalModalEvent>({} as GoalModalEvent);
-  makeBalancedTeamsModalVisible = signal(false);
 
   renamingTeamKey = signal<string | null>(null);
   teamAliasModel = signal({ alias: '' });
@@ -103,6 +100,17 @@ export class PlayersDragDropTableComponent {
     [...this.unlockedTeamKeys(), 'allPlayers']
   );
 
+  readonly benchCount = computed(() => this.clonedTeams()?.allPlayers?.players?.length ?? 0);
+
+  readonly teamColorStyles = computed<Record<string, Record<string, string>>>(() =>
+    Object.fromEntries(this.teamKeys().map(key => [key, teamColorStyle(this.colors()[key])]))
+  );
+
+  readonly teamAverages = computed<Record<string, number>>(() =>
+    Object.fromEntries(this.teamKeys().map(key => [key, averageRating(this.clonedTeams()?.[key]?.players ?? [])]))
+  );
+
+
   dropPlayer = output();
   updateTeamStatistics = output<{players: Player[], team: TeamsOptions, name: string, number: number}>();
 
@@ -146,7 +154,7 @@ export class PlayersDragDropTableComponent {
     })
       .reduce((acc, [teamName, teamData]) => {
         // @ts-ignore
-        acc[teamName] = this.calculateRating(teamData.players);
+        acc[teamName] = totalRating(teamData.players);
         return acc;
       }, {} as any) as any
   }
@@ -154,10 +162,6 @@ export class PlayersDragDropTableComponent {
   closeSetGoalModal() {
     this.isSetGoalModalVisible.set(false);
     this.ownGoalArmed.set(false);
-  }
-
-  calculateRating(players: Player[]) {
-    return players.reduce((sum, player) => sum + player.rating, 0);
   }
 
   drop(event: CdkDragDrop<any>) {
@@ -242,18 +246,6 @@ export class PlayersDragDropTableComponent {
 
   getPlayerStats(playerId: string): Map<string, Statistics> {
     return this.playerStatsMap().get(playerId) ?? new Map();
-  }
-
-  makeBalancedTeams() {
-      const teams = this.clonedTeams();
-      this.playersDragDropTableService.makeBalancedTeams(teams);
-  }
-
-    setBalancedTeamsModal(confirm : boolean) {
-    if(confirm) {
-      this.makeBalancedTeams();
-    }
-    this.makeBalancedTeamsModalVisible.set(false);
   }
 
   toggleShowStatistics() {

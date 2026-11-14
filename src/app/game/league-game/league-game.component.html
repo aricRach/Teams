@@ -1,7 +1,3 @@
-<div class="in-row center gap">
-  <h1>League</h1>
-</div>
-
 <button class="button-icon" (click)="league.toggleMovePlayersLock()">
   <img alt="lock" [src]="league.lockIcon()" height="30" width="30">
 </button>
@@ -21,7 +17,6 @@
   [matchIdByTeam]="league.matchIdByTeam()"
   [lockedTeamKeys]="league.lockedTeamKeys()"
   [showRating]="league.showRating()"
-  [isAdmin]="league.isAdmin()"
   [playerStatsMap]="league.playerStatsMap()"
   (start)="onStart($event)" (reset)="onReset($event)" (end)="onEnd($event)"
   (recordGoal)="recordGoal($event)"

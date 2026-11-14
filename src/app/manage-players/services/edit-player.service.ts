@@ -80,7 +80,10 @@ export class EditPlayerService {
 
   deletePlayer() {
     this.modalsService.openConfirmModal({
-      description: `Are you sure you want to delete ${this.selectedPlayer()?.name}?`,
+      title: `Delete ${this.selectedPlayer()?.name}?`,
+      description: 'They move to inactive players and stop showing in teams and statistics. You can reactivate them later.',
+      confirmBtn: 'delete player',
+      danger: true,
     }).afterClosed().subscribe((result) => {
       if(result) {
         this.playersService.setPlayerActiveStatus.run(this.selectedPlayer()!, false).then(done => { if (done) this.managePlayersService.removeSelectedPlayer(); });

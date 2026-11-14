@@ -1,4 +1,13 @@
 
+.team-builder-link {
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; }
+}
+
 app-capture-media {
   display: flex;
   justify-content: center;

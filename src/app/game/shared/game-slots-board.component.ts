@@ -25,7 +25,6 @@ export class GameSlotsBoardComponent {
   matchIdByTeam = input<Record<string, string | null>>({});
   lockedTeamKeys = input<string[]>([]);
   showRating = input(false);
-  isAdmin = input(false);
   playerStatsMap = input<Map<string, Map<string, Statistics>>>(new Map());
 
   matchCountChange = output<1 | 2>();

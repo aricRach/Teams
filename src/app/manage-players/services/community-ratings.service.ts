@@ -125,8 +125,9 @@ export class CommunityRatingsService {
 
   updateCommunityRatings() {
     this.modalsService.openConfirmModal({
-      title: 'Update ratings?',
-      description: 'By confirm all the existing ratings of this players will be override.'
+      title: 'Update player ratings?',
+      description: "These players' current ratings are replaced with the community ratings.",
+      confirmBtn: 'update ratings',
     }).afterClosed().subscribe((confirm) => {
       if(confirm) {
         void this.saveRatings.run();
@@ -136,8 +137,10 @@ export class CommunityRatingsService {
 
   deleteRatings() {
     this.modalsService.openConfirmModal({
-      title: 'Clean current community ratings?',
-      description: 'By confirm all the previous ratings will be removed and will not count in calculating the average.'
+      title: 'Clear the community ratings?',
+      description: "All ratings sent so far are removed and no longer count toward the average.",
+      confirmBtn: 'clear ratings',
+      danger: true,
     }).afterClosed().subscribe((confirm) => {
       if(confirm) {
         void this.deleteAllRatings.run();

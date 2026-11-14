@@ -9,8 +9,23 @@ import {MembersService} from '../admin/services/members.service';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
 import {TEAM_ALIAS_MAX_LENGTH} from '../utils/team-label.util';
 import {createMutation, runOptimistic} from '../shared/optimistic/run-optimistic';
+import {collapseExtraTeams} from '../utils/collapse-extra-teams.util';
 
 export const LAST_GROUP_ID_KEY = 'lastGroupId';
+
+type TeamsMap = {[key: string]: { players: Player[] }};
+
+/** The team key of every player, so saved teams can be restored later. */
+function teamOfPlayer(teams: TeamsMap): Record<string, string> {
+  const teamOf: Record<string, string> = {};
+  for (const [key, team] of Object.entries(teams)) {
+    for (const player of team?.players ?? []) teamOf[player.id] = key;
+  }
+  return teamOf;
+}
+
+/** The team key of every player at the last save. */
+type SavedTeams = Record<string, string>;
 
 @Injectable({
   providedIn: 'root'
@@ -36,6 +51,48 @@ export class PlayersService {
   allPlayersLabel = 'allPlayers';
 
   readonly isLoadingPlayers = signal(false);
+
+  // The starting point for the Team Builder's "Unsaved changes": the teams as last loaded, saved,
+  // or as they were when the Team Builder opened (see startTrackingTeamChanges).
+  private readonly savedTeams = signal<SavedTeams | null>(null);
+
+  /**
+   * Called when the Team Builder opens: only changes made there count as unsaved.
+   * Game-page moves aren't saved until a game ends, so without this they'd show as unsaved too.
+   */
+  startTrackingTeamChanges(): void {
+    // Not loaded yet: loading sets the starting point itself.
+    if (this.savedTeams() === null) return;
+    this.savedTeams.set(teamOfPlayer(this.teams()));
+  }
+  // Only moves count: adding, reactivating or removing a player is saved right away.
+  // A player who wasn't there at the last save counts as on the bench.
+  // Compares the teams as shown, so lowering the team count (hidden teams go to the bench) is a change too.
+  readonly hasUnsavedTeams = computed(() => {
+    const saved = this.savedTeams();
+    if (!saved) return false;
+    const shownTeams = collapseExtraTeams(this.teams(), this.numberOfTeams());
+    return Object.entries(shownTeams).some(([key, team]) =>
+      team.players.some(player => (saved[player.id] ?? this.allPlayersLabel) !== key));
+  });
+
+  /** Puts every player back in the team they were in when the Team Builder opened (or at the last save). Player details (name, rating...) are kept. */
+  discardUnsavedTeams(): void {
+    const saved = this.savedTeams();
+    if (!saved) return;
+    const current = this.teams();
+    const restored: TeamsMap = {};
+    for (const key of Object.keys(current)) restored[key] = { players: [] };
+    for (const [key, team] of Object.entries(current)) {
+      for (const player of team.players) {
+        const savedKey = saved[player.id];
+        restored[savedKey && restored[savedKey] ? savedKey : key].players.push(player);
+      }
+    }
+    this.teams.set(restored);
+    // Show every team that has players again, in case the team count was lowered.
+    this.numberOfTeams.set(Math.max(this.numberOfTeams(), this.countUsedTeams(restored)));
+  }
 
    computedTeams = computed(() =>  JSON.parse(JSON.stringify(this.teams()))) // use only in drag-drop-component.
 
@@ -78,11 +135,19 @@ export class PlayersService {
        .pipe(finalize(() => this.spinnerService.setIsLoading(false)));
   }
 
-  readonly savePlayers = createMutation<[specificTeams?: any, silent?: boolean], unknown>({
-    run: (specificTeams?: any) =>
-      this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, true, specificTeams)),
-    onSuccess: (_, _specificTeams, silent) => { if (!silent) this.popoutService.addSuccessPopOut('Data was saved successfully.'); },
-    onError: () => this.popoutService.addErrorPopOut('Cant save try to save locally meantime.'),
+  readonly savePlayers = createMutation<[specificTeams?: any, silent?: boolean], SavedTeams>({
+    run: async (specificTeams?: any) => {
+      // Taken before saving, so a change made while the save runs still counts as unsaved.
+      const savedTeams = teamOfPlayer(specificTeams || this.teams());
+      const saved = await this.playersApiService.savePlayers(this.selectedGroup().id, this.flattenPlayers(true, true, specificTeams));
+      if (!saved) throw new Error('Teams were not saved');
+      return savedTeams;
+    },
+    onSuccess: (savedTeams, _specificTeams, silent) => {
+      this.savedTeams.set(savedTeams);
+      if (!silent) this.popoutService.addSuccessPopOut('Data was saved successfully.');
+    },
+    onError: () => this.popoutService.addErrorPopOut('Could not save the teams, please try again.'),
   });
 
   flattenPlayers(showOnlyActive = true, includeGuests = true, specificTeams?: any): Player[] {
@@ -129,6 +194,7 @@ export class PlayersService {
               }
             }
             this.teams.set(teams);
+            this.savedTeams.set(teamOfPlayer(teams));
             this.numberOfTeams.set(this.countUsedTeams(teams));
           }
         })

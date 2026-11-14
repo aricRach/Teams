@@ -1,17 +1,24 @@
 <div class="player-view-container">
-  <span class="name-row">
-    <span class="player-name" cdkDragHandle>{{ player().name }}</span>
-    @if(player().isGuest) {
-      <span class="guest-badge">guest</span>
-    }
-    @if(playerForm() === PlayerFormStatus.UP) {
-      <span class="up">^</span>
-    }
-    @if(playerForm() === PlayerFormStatus.DOWN) {
-      <span class="down">^</span>
+  <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+  <span class="player-text">
+    <span class="name-row">
+      @if (dragHandle()) {
+      <span class="player-name" cdkDragHandle>{{ player().name }}</span>
+      } @else {
+      <span class="player-name">{{ player().name }}</span>
+      }
+      @if(player().isGuest) {
+        <span class="guest-badge">Guest</span>
+      }
+      @if(playerForm() === PlayerFormStatus.UP) {
+        <span class="up">^</span>
+      }
+      @if(playerForm() === PlayerFormStatus.DOWN) {
+        <span class="down">^</span>
+      }
+    </span>
+    @if (statsText()) {
+      <span class="player-stats">{{ statsText() }}</span>
     }
   </span>
-  @if (statsText()) {
-    <span class="player-stats">{{ statsText() }}</span>
-  }
 </div>

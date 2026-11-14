@@ -12,6 +12,7 @@ import {signInPageGuard} from './guards/sign-in-page.guard';
 import {draftMetaResolver} from './fantasy/resolvers/draft-meta.resolver';
 import {fantasyAllUsersPicksResolver} from './fantasy/resolvers/fantasy-all-users-picks.resolver';
 import {exitFormGuard} from './guards/exit-form.guard';
+import {unsavedTeamsGuard} from './team-builder/unsaved-teams.guard';
 import {exitFantasyDraftGuard} from './fantasy/guards/exit-fantasy-draft.guard';
 import {adminControlGuard} from './guards/admin-control.guard';
 import {inactivePlayersResolver} from './manage-players/resolvers/inactive-players.resolver';
@@ -64,6 +65,13 @@ export const routes: Routes = [
         canActivate: [groupAdminGuard],
         canDeactivate: [exitFormGuard],
         data: { breadcrumb: 'Game' },
+      },
+      {
+        // Everyone in the group can see the teams; only admins can change them.
+        path: 'teams',
+        loadComponent: () => import('./team-builder/team-builder.component').then(m => m.TeamBuilderComponent),
+        canDeactivate: [unsavedTeamsGuard],
+        data: { breadcrumb: 'Teams' },
       },
       {
         path: 'statistics',

@@ -14,6 +14,9 @@ export class ModalComponent {
   showCloseButton = input(true);
   showCloseIcon = input(true);
   showSubmitButton = input(true);
+  heading = input('');
+  submitLabel = input('Confirm');
+  closeLabel = input('Close');
   close = output();
   submit = output();
 }

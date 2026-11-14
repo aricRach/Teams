@@ -35,3 +35,21 @@ export function formatTeamLabel(teamKey: string, alias?: string | null): string 
   const trimmed = alias?.trim();
   return trimmed ? `${letter}: ${trimmed}` : letter;
 }
+
+/** Readable text color on top of a team color. The multicolor gradient isn't a hex, so it gets white. */
+export function teamInk(color: string): string {
+  if (!/^#[0-9a-f]{6}$/i.test(color)) return '#fff';
+  const n = parseInt(color.slice(1), 16);
+  const brightness = ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000;
+  return brightness > 150 ? '#111' : '#fff';
+}
+
+/** CSS variables that paint a team card or player in the team's color. Empty when the team has no color. */
+export function teamColorStyle(color?: string): Record<string, string> {
+  return color ? { '--team-color': color, '--team-ink': teamInk(color) } : {};
+}
+
+/** What people call the team: its alias, or "Team A" when it has none. */
+export function teamDisplayName(teamKey: string, alias?: string | null): string {
+  return alias?.trim() || `Team ${defaultTeamLetter(teamKey)}`;
+}

@@ -1,15 +1,20 @@
   <div class="modal-backdrop">
-    <div class="modal-container">
-      <ng-content></ng-content>
-      @if(showCloseIcon()) {
-        <button class="close-icon" (click)="close.emit()">×</button>
+    <div class="modal-container" role="dialog" aria-modal="true">
+      @if (heading()) {
+        <h3 class="modal-heading">{{ heading() }}</h3>
       }
-      <div class="modal-buttons gap">
-        @if(showSubmitButton()) {
-          <button (click)="submit.emit()">submit</button>
-        }
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+      @if(showCloseIcon()) {
+        <button class="close-icon" aria-label="Close" (click)="close.emit()">×</button>
+      }
+      <div class="modal-buttons">
         @if(showCloseButton()) {
-          <button (click)="close.emit()">close</button>
+          <button class="modal-btn" (click)="close.emit()">{{ closeLabel() }}</button>
+        }
+        @if(showSubmitButton()) {
+          <button class="modal-btn primary" (click)="submit.emit()">{{ submitLabel() }}</button>
         }
       </div>
     </div>

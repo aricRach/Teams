@@ -3,8 +3,6 @@ import {computed, Injectable, signal} from '@angular/core';
 export interface AdminControl {
   showRating: boolean;
   showProtectedPages: boolean;
-  showSaveButtons: boolean;
-  showMakeBalanceTeams: boolean;
 }
 @Injectable({
   providedIn: 'root'
