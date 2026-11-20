@@ -51,8 +51,18 @@ No success popup is needed when the UI change itself is the feedback.
 ## Utils
 
 - Keep services thin: put pure calculations and transformations (no signals, no injection, no Firestore)
-  in feature util files, e.g. `statistics/utils/performance.util.ts`, `statistics/utils/player-insights.util.ts`.
-  The service calls the util and holds the state; the util is easy to unit-test.
+  in util files. The service calls the util and holds the state; the util is easy to unit-test.
+- **One responsibility per util file**, named after it: `performance.util.ts`, `stats-range.util.ts`,
+  `winning-goal.util.ts`, `stat-table.util.ts`. Don't grow a catch-all `<feature>.util.ts` with sections —
+  when a file starts needing `// ---- section ----` comments, each section is its own file.
+  Aim for small files (most under ~50 lines); a constant/type lives with the util that owns it.
+- Split by responsibility, not by size: don't break up code that does one job just to make files smaller.
+  Functions that only serve one job stay together (e.g. the chart's series, options and caption in
+  `chart.util.ts`; all leader cards in `leaders.util.ts`), and a one-function file is fine only when that
+  function is its own responsibility.
+- Where they go: helpers shared by several pages in the area's `utils/` folder (`statistics/utils/`);
+  helpers used by one page in that page's own `utils/` folder (`statistics/player-stats/utils/`).
+- Import from the specific file you need; no barrel `index.ts` files.
 
 ## Naming
 

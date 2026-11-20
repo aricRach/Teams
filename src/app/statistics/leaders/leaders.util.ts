@@ -1,7 +1,9 @@
 import { Player } from '../../players/models/player.model';
-import {
-  countWinningGoals, duoRecords, longestWinStreaks, MatchSummary, percentOf, PlayerTotals, plural, ratio, roundTo,
-} from '../utils/player-insights.util';
+import { countWinningGoals, duoRecords, longestWinStreaks } from '../utils/match-records.util';
+import { MatchSummary } from '../utils/match-summary.util';
+import { PlayerTotals } from '../utils/player-totals.util';
+import { plural } from '../utils/stats-format.util';
+import { percentOf, ratio, roundTo } from '../utils/stats-math.util';
 
 /** Rate cards (win %, defender, duo, performance) only count players with enough matches. */
 const MIN_SHARE_FOR_PLAYER = 0.25;

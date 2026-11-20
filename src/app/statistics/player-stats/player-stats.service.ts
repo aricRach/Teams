@@ -7,15 +7,18 @@ import {PlayersService} from '../../players/players.service';
 import {Player, Statistics} from '../../players/models/player.model';
 import {ComputedStatisticsService} from '../services/computed-statistics.service';
 import {PERFORMANCE_RULES} from '../utils/performance.util';
+import {formatDateSpan, formatDay, plural, spansMultipleYears} from '../utils/stats-format.util';
+import {matchesOnDates} from '../utils/match-summary.util';
+import {totalsForDates} from '../utils/player-totals.util';
+import {datesInRange, parseRange, rangeQueryParam, STATS_RANGES, StatsRange} from '../utils/stats-range.util';
+import {MAX_COMPARED_PLAYERS, parsePlayerIds, PLAYER_COLORS, playerTag} from './utils/selected-players.util';
 import {
-  datesInRange, formatDateSpan, formatDay, matchesOnDates, parseRange, plural, rangeQueryParam, spansMultipleYears, STATS_RANGES,
-  StatsRange, totalsForDates,
-} from '../utils/player-insights.util';
-import {
-  buildChartCaption, buildChartDataset, buildChartOptions, buildHeadToHeadView, buildPerformanceExample,
-  buildStatTableRows, CHART_MODES, CHART_STATS, ChartMode, ChartStat, DEFAULT_CHART_MODE, DEFAULT_CHART_STAT,
-  MAX_COMPARED_PLAYERS, parseChartMode, parseChartStat, parsePlayerIds, PLAYER_COLORS, playerTag,
-} from './player-stats.util';
+  CHART_MODES, CHART_STATS, ChartMode, ChartStat, DEFAULT_CHART_MODE, DEFAULT_CHART_STAT, parseChartMode, parseChartStat,
+} from './utils/chart-settings.util';
+import {buildChartCaption, buildChartDataset, buildChartOptions} from './utils/chart.util';
+import {buildStatTableRows} from './utils/stat-table.util';
+import {buildPerformanceExample} from './utils/performance-example.util';
+import {buildHeadToHeadView} from './utils/head-to-head-view.util';
 
 @Injectable()
 export class PlayerStatsService {

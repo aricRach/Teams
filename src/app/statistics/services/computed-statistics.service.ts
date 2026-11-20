@@ -2,7 +2,7 @@ import {computed, inject, Injectable} from '@angular/core';
 import {AllMatchDataService} from '../../match-event-manager/services/all-match-data.service';
 import {Statistics} from '../../players/models/player.model';
 import {compareDates, formatDateToString} from '../../utils/date-utils';
-import {buildMatchSummaries, MatchSummary} from '../utils/player-insights.util';
+import {buildMatchSummaries, MatchSummary} from '../utils/match-summary.util';
 
 @Injectable({providedIn: 'root'})
 export class ComputedStatisticsService {
