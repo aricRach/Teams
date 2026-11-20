@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { MatDialogRef } from '@angular/material/dialog';
 import { AdminControlComponent } from './admin-control.component';
 
 describe('AdminControlComponent', () => {
@@ -8,7 +9,8 @@ describe('AdminControlComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminControlComponent]
+      imports: [AdminControlComponent],
+      providers: [{ provide: MatDialogRef, useValue: { close: () => {} } }]
     })
     .compileComponents();
 

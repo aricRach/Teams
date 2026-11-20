@@ -25,13 +25,11 @@ export class HeaderComponent {
 
   openAdminControl() {
     // MatDialog directly (not ModalsService) so the height follows the content instead of a fixed box.
-    const dialogRef = this.dialog.open(AdminControlComponent, {
+    // The dialog closes itself (AdminControlDialogService.close).
+    this.dialog.open(AdminControlComponent, {
       width: '380px',
       maxWidth: 'calc(100vw - 32px)',
       autoFocus: false,
-    });
-    dialogRef.componentInstance.submitted.subscribe(() => {
-      dialogRef.close();
     });
   }
 }
