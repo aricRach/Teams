@@ -1,5 +1,6 @@
 import {Component, inject, input, output} from '@angular/core';
-import {ModalsService, NavigationBarComponent} from 'ui'
+import {MatDialog} from '@angular/material/dialog';
+import {NavigationBarComponent} from 'ui'
 import {UserService} from '../user/user.service';
 import {FormsModule} from '@angular/forms';
 import {AdminControlComponent} from '../admin/admin-control/admin-control.component';
@@ -14,7 +15,7 @@ import {AdminControlComponent} from '../admin/admin-control/admin-control.compon
 })
 export class HeaderComponent {
 
-  modalsService = inject(ModalsService);
+  private dialog = inject(MatDialog);
 
   title = input<string>('TeamsRach');
   navItems = input<any[]>([]);
@@ -23,13 +24,12 @@ export class HeaderComponent {
   share = output<void>();
 
   openAdminControl() {
-    const dialogRef = this.modalsService.openComponentModal(AdminControlComponent, {
-      width: 300,
-      height: 400,
-    });
-    // @ts-ignore
-    dialogRef.componentInstance.submitted.subscribe(() => {
-      dialogRef.close();
+    // MatDialog directly (not ModalsService) so the height follows the content instead of a fixed box.
+    // The dialog closes itself (AdminControlDialogService.close).
+    this.dialog.open(AdminControlComponent, {
+      width: '380px',
+      maxWidth: 'calc(100vw - 32px)',
+      autoFocus: false,
     });
   }
 }

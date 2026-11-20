@@ -1,4 +1,4 @@
-import {computed, inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {ManagePlayersService} from './manage-players.service';
 import {FormGroup} from '@angular/forms';
 import {convertFormValuesToNumbers} from '../../utils/form-utils';
@@ -49,6 +49,13 @@ export class EditPlayerStatisticsService {
     return controls && controls.length > 0
   })
 
+  /** The form shows only after the admin confirms the note about what corrections don't change. */
+  isNoteConfirmed = signal(false);
+
+  confirmNote() {
+    this.isNoteConfirmed.set(true);
+  }
+
   getLastDayStatistics(playerData: any): any {
     if (!playerData?.id) return null;
 
@@ -77,7 +84,7 @@ export class EditPlayerStatisticsService {
     const groupId = this.playersService.selectedGroup()?.id;
     if (!groupId) return;
 
-    const currentStats: Statistics = lastDay.statistics || {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0, ownGoals: 0};
+    const currentStats: Statistics = lastDay.statistics || {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0, scoredGames: 0, ownGoals: 0, cleanSheets: 0};
     const delta: Partial<Statistics> = {};
     for (const key of ['goals', 'wins', 'loses', 'draws', 'games', 'goalsConceded'] as (keyof Statistics)[]) {
       const d = (formValues[key] || 0) - (currentStats[key] || 0);

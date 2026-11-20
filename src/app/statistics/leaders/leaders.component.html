@@ -1,0 +1,40 @@
+<app-data-layout
+  [loading]="leadersService.isLoading()"
+  [error]="leadersService.hasError()"
+  errorHeading="Couldn't load stats"
+  (retry)="leadersService.reload()">
+  <div class="leaders-page">
+    <div class="seg" role="group" aria-label="Range">
+      @for (range of leadersService.ranges; track range.value) {
+        <button type="button" [attr.aria-pressed]="leadersService.range() === range.value" (click)="leadersService.setRange(range.value)">
+          {{ range.label }}
+        </button>
+      }
+    </div>
+
+    <p class="section-title">{{ leadersService.rangeLabel() }}</p>
+
+    <div class="cards">
+      @for (card of leadersService.cards(); track card.title) {
+        <section class="card">
+          <h3>{{ card.title }}</h3>
+          <p class="desc">{{ card.description }}</p>
+          <ol>
+            @for (row of card.rows; track row.id) {
+              <li class="row" [class.first]="row.rank === 1">
+                <span class="medal" [attr.data-rank]="row.rank">{{ row.rank }}</span>
+                <a class="name" [routerLink]="leadersService.playerStatsUrl()" [queryParams]="row.queryParams" title="Open in Player Stats">{{ row.name }}</a>
+                <span class="value">{{ row.valueText }}<small>{{ row.sub }}</small></span>
+              </li>
+            } @empty {
+              <li class="none">Not enough matches in this range yet.</li>
+            }
+          </ol>
+        </section>
+      }
+    </div>
+
+    <p class="footnote">Tap a name to open them in Player Stats. Guests are not included.</p>
+    <p class="footnote">Match winner, Best duo, Inseparable and Longest win streak use recorded matches only, so manual stat corrections don't change them.</p>
+  </div>
+</app-data-layout>

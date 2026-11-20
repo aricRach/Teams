@@ -308,6 +308,8 @@ export class PlayersService {
   }
 
   selectGroup(selectedGroup: {admins: string[]; members?: string[]; id: string, createdBy?: string, teamAliases?: Record<string, string>, teamColors?: Record<string, string>}, email: string) {
+    // The inactive players are cached per group; a new group must fetch its own.
+    if (this.selectedGroup()?.id !== selectedGroup.id) this.inActivePlayers.set(null);
     this.selectedGroup.set(selectedGroup);
     this.isAdmin.set(selectedGroup.admins.includes(email));
     this.isGroupOwner.set(selectedGroup.createdBy === email)
@@ -425,11 +427,5 @@ export class PlayersService {
       inactivePlayers.push(player);
       return inactivePlayers;
     })
-  }
-
-  deleteAllStatsAndSpecialCollections() {
-     this.playersApiService.deleteAllStatsAndSpecialCollections(this.selectedGroup().id).then(() => {
-       this.popoutService.addSuccessPopOut('All statistics, Fantasy, Team Of The Week data deleted');
-     })
   }
 }

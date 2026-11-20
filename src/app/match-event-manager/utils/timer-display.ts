@@ -5,8 +5,14 @@ export function formatElapsedMsAsMmSs(elapsedMs: number): string {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
+/** Saved minute: whole minutes played, so 0 during the first minute. */
 export function elapsedMsToGameMinute(elapsedMs: number): number {
   return Math.floor(elapsedMs / 60000);
+}
+
+/** Minute as shown to people, football style: the first minute (saved as 0) shows as 1'. */
+export function toDisplayMinute(minute: number | null | undefined): number | null {
+  return minute == null ? null : minute + 1;
 }
 
 export function isValidMmSs(value: string): boolean {

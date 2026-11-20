@@ -80,13 +80,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     },
     {
       action: MenuAction.NAVIGATE,
-      alias: 'Players',
-      show: !!this.playersService.selectedGroup() && !this.playersService.isAdmin(),
-      link: this.playersService.groupUrl('players/manage-players')
-    },
-    {
-      action: MenuAction.NAVIGATE,
-      alias: 'Players',
+      alias: 'Manage Players',
       show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
       link: this.playersService.groupUrl('players')
     },
@@ -101,12 +95,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
       alias: 'Fantasy',
       show: !!this.playersService.selectedGroup(),
       link: this.playersService.groupUrl('fantasy')
-    },
-    {
-      action: MenuAction.NAVIGATE,
-      alias: 'Manage Group',
-      show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
-      link: this.playersService.groupUrl('manage-group')
     },
     {
       action: MenuAction.NAVIGATE,

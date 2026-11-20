@@ -13,12 +13,6 @@ export class ManagePlayersService {
 
   innerTabs = computed(() => {
     return [
-      {
-        link: 'player-progress',
-        title: 'Player progress',
-        tooltip: '',
-        isDisabled: false,
-      },
       ...(
         this.playersService.isAdmin() ?
           [

@@ -1,4 +1,5 @@
 import {computed, effect, inject, Injectable, signal} from '@angular/core';
+import {toDisplayMinute} from '../utils/timer-display';
 import {MatchEventRecord, MatchRecord} from '../models/match-event.model';
 import {PlayersService} from '../../players/players.service';
 import {PlayersApiService} from '../../players/players-api.service';
@@ -78,7 +79,7 @@ export class MatchTimelineService {
         .filter((e) => isScoringEvent(e))
         .map((e) => ({
           name: e.playerNameSnapshot ?? 'Goal',
-          minute: e.minute,
+          minute: toDisplayMinute(e.minute),
           teamKey: e.teamKey,
           isOwnGoal: e.type === 'own_goal',
         }))
