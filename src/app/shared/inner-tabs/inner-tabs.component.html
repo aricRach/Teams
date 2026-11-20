@@ -1,4 +1,8 @@
-<section class="statistic-links">
+<section
+  class="statistic-links"
+  [class.fade-start]="canScrollStart()"
+  [class.fade-end]="canScrollEnd()"
+  (scroll)="updateFades()">
   @for(tab of tabs(); track tab.link) {
     @if(tab.tooltip) {
       <div [matTooltip]="tab.tooltip">

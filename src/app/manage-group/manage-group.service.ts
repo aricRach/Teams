@@ -25,7 +25,7 @@ export class ManageGroupService {
   owner = computed<string | undefined>(() => this.playersService.selectedGroup()?.createdBy);
   myEmail = this.auth.currentUser?.email ?? '';
   addPlayersUrl = computed(() => this.playersService.groupUrl('players/register-players'));
-  playersHubUrl = computed(() => this.playersService.groupUrl('players/manage-players'));
+  editPlayerUrl = computed(() => this.playersService.groupUrl('players/manage-players/edit-player'));
 
   isValidEmail(email: string): boolean {
     return Validators.email({ value: email.trim() } as any) === null;

@@ -93,6 +93,18 @@ export const routes: Routes = [
             data: { breadcrumb: 'TOTW' },
           },
           {
+            path: 'players',
+            loadComponent: () => import('./statistics/player-stats/player-stats.component').then(m => m.PlayerStatsComponent),
+            resolve: { inactivePlayers: inactivePlayersResolver },
+            data: { breadcrumb: 'Players' },
+          },
+          {
+            path: 'leaders',
+            loadComponent: () => import('./statistics/leaders/leaders.component').then(m => m.LeadersComponent),
+            resolve: { inactivePlayers: inactivePlayersResolver },
+            data: { breadcrumb: 'Leaders' },
+          },
+          {
             path: 'edit-statistics',
             loadComponent: () => import('./statistics/edit-statistics/edit-statistics.component').then(m => m.EditStatisticsComponent),
             data: { breadcrumb: 'Edit Statistics' },
@@ -130,7 +142,7 @@ export const routes: Routes = [
       },
       {
         path: 'players',
-        data: { breadcrumb: 'Players' },
+        data: { breadcrumb: 'Manage Players' },
         children: [
           {
             path: '',
@@ -150,12 +162,11 @@ export const routes: Routes = [
           {
             path: 'manage-players',
             loadComponent: () => import('./manage-players/manage-players/manage-players.component').then(m => m.ManagePlayersComponent),
-            data: { breadcrumb: 'Players Hub' },
             children: [
               {
                 path: '',
                 pathMatch: 'full',
-                redirectTo: 'player-progress'
+                redirectTo: 'edit-player',
               },
               {
                 path: 'edit-player',
@@ -173,11 +184,6 @@ export const routes: Routes = [
                 canActivate: [groupAdminGuard, adminControlGuard],
                 canDeactivate: [exitFormGuard],
                 data: { breadcrumb: 'Edit Player Statistics' },
-              },
-              {
-                path: 'player-progress',
-                loadComponent: () => import('./manage-players/player-progress-chart/player-progress-chart.component').then(m => m.PlayerProgressChartComponent),
-                data: { breadcrumb: 'Player Progress' },
               },
             ]
           },

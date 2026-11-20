@@ -38,11 +38,24 @@ export class StatisticsService {
         isDisabled: false,
       },
       {
+        link: 'players',
+        title: 'Players',
+        tooltip: '',
+        isDisabled: false,
+      },
+      {
+        link: 'leaders',
+        title: 'Leaders',
+        tooltip: '',
+        isDisabled: false,
+      },
+      // Admins only; everyone else would just see a disabled tab.
+      ...(this.playersService.isAdmin() ? [{
         link: 'edit-statistics',
         title: 'Edit statistics',
         tooltip: this.adminControl.getAdminControl().showProtectedPages ? '' : 'In order to see this page enable \'show protected pages\' in admin control',
         isDisabled: !this.adminControl.getAdminControl().showProtectedPages
-      }
+      }] : [])
     ]
   })
   playersService = inject(PlayersService);
@@ -60,6 +73,11 @@ export class StatisticsService {
   );
 
   isTableTabActive = computed(() => this.currentUrl().includes('/statistics/table'));
+
+  /** Players and Leaders have their own range picker instead of the date filter. */
+  showDateFilter = computed(() =>
+    !this.currentUrl().includes('/statistics/players') && !this.currentUrl().includes('/statistics/leaders')
+  );
 
   setShowGuests(event: Event) {
     this.showGuests.set((event.target as HTMLInputElement).checked);

@@ -1,29 +1,28 @@
 import { Statistics } from '../../players/models/player.model';
 
+/** Points per event in a game-day performance score. */
+export const PERFORMANCE_POINTS = {
+  goal: 2.5,
+  win: 1.5,
+  draw: 1,
+  cleanSheet: 1,
+  ownGoal: -2,
+};
 
-/** The scoring rules of calculatePerformance, for display; keep it in sync with the function. */
-export const PERFORMANCE_DESCRIPTION = [
-  'Goal: +2',
-  'Win: +1.5',
-  'Draw: +1',
-  'Conceded < 5: +3',
-  'Own goal: -2',
-].join('\n');
+/** The scoring rules, for display. */
+export const PERFORMANCE_RULES = [
+  { label: 'Goal', points: '+2.5' },
+  { label: 'Win', points: '+1.5' },
+  { label: 'Draw', points: '+1' },
+  { label: 'Clean sheet (match with 0 conceded)', points: '+1' },
+  { label: 'Own goal', points: '−2' },
+];
 
+/** Score for one game day: everything the player did in all their matches that day, added up. */
 export function calculatePerformance(stats: Statistics): number {
-  const cleanSheetBonus = stats.goalsConceded < 5 ? 3 : 0;
-  return stats.goals * 2
-    + stats.wins * 1.5
-    + stats.draws
-    + cleanSheetBonus
-    - stats.ownGoals * 2;
-}
-
-export function averagePerformance(statsList: Statistics[]): number {
-  const values = statsList
-    .filter(stats => stats.games > 0)
-    .map(calculatePerformance);
-
-  if (!values.length) return 0;
-  return Math.round((values.reduce((sum, v) => sum + v, 0) / values.length) * 100) / 100;
+  return stats.goals * PERFORMANCE_POINTS.goal
+    + stats.wins * PERFORMANCE_POINTS.win
+    + stats.draws * PERFORMANCE_POINTS.draw
+    + (stats.cleanSheets || 0) * PERFORMANCE_POINTS.cleanSheet
+    + stats.ownGoals * PERFORMANCE_POINTS.ownGoal;
 }

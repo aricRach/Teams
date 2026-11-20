@@ -80,13 +80,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     },
     {
       action: MenuAction.NAVIGATE,
-      alias: 'Players',
-      show: !!this.playersService.selectedGroup() && !this.playersService.isAdmin(),
-      link: this.playersService.groupUrl('players/manage-players')
-    },
-    {
-      action: MenuAction.NAVIGATE,
-      alias: 'Players',
+      alias: 'Manage Players',
       show: !!this.playersService.selectedGroup() && this.playersService.isAdmin(),
       link: this.playersService.groupUrl('players')
     },

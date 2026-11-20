@@ -2,6 +2,7 @@ import {computed, inject, Injectable} from '@angular/core';
 import {AllMatchDataService} from '../../match-event-manager/services/all-match-data.service';
 import {Statistics} from '../../players/models/player.model';
 import {compareDates, formatDateToString} from '../../utils/date-utils';
+import {buildMatchSummaries, MatchSummary} from '../utils/player-insights.util';
 
 @Injectable({providedIn: 'root'})
 export class ComputedStatisticsService {
@@ -13,6 +14,11 @@ export class ComputedStatisticsService {
   reload(): void {
     this.allMatchData.reload();
   }
+
+  /** Completed matches (who was on which side, winning goal), oldest first. */
+  readonly matchSummaries = computed<MatchSummary[]>(() =>
+    buildMatchSummaries(this.allMatchData.matchesWithEvents())
+  );
 
   readonly statsMap = computed<Map<string, Map<string, Statistics>>>(() => {
     const matchData = this.allMatchData.matchesWithEvents();
@@ -42,13 +48,13 @@ export class ComputedStatisticsService {
           const stats = this.getOrInitStats(result, playerId, dateKey);
           stats.games++;
           isDraw ? stats.draws++ : stats.wins++;
-          stats.goalsConceded += (match.loseTeamScore || 0);
+          this.addConceded(stats, match.loseTeamScore);
         }
         for (const playerId of (match.loserPlayerIds || [])) {
           const stats = this.getOrInitStats(result, playerId, dateKey);
           stats.games++;
           isDraw ? stats.draws++ : stats.loses++;
-          stats.goalsConceded += (match.wonTeamScore || 0);
+          this.addConceded(stats, match.wonTeamScore);
         }
       }
 
@@ -81,6 +87,14 @@ export class ComputedStatisticsService {
     return this.statsMap().get(playerId) ?? new Map();
   }
 
+  /** Goals conceded and clean sheet for one match. With no saved score neither is counted. */
+  private addConceded(stats: Statistics, opponentScore: number | undefined) {
+    if (opponentScore == null) return;
+    stats.scoredGames++;
+    stats.goalsConceded += opponentScore;
+    if (opponentScore === 0) stats.cleanSheets++;
+  }
+
   private getOrInitStats(
     result: Map<string, Map<string, Statistics>>,
     playerId: string,
@@ -89,7 +103,7 @@ export class ComputedStatisticsService {
     if (!result.has(playerId)) result.set(playerId, new Map());
     const playerMap = result.get(playerId)!;
     if (!playerMap.has(dateKey)) {
-      playerMap.set(dateKey, {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0, ownGoals: 0});
+      playerMap.set(dateKey, {goals: 0, wins: 0, loses: 0, draws: 0, games: 0, goalsConceded: 0, scoredGames: 0, ownGoals: 0, cleanSheets: 0});
     }
     return playerMap.get(dateKey)!;
   }

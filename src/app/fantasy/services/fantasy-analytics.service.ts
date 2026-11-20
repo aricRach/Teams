@@ -56,10 +56,8 @@ export class FantasyAnalyticsService {
     return result;
   })
 
-   calculatePoints(stats: { goals: number; wins: number; goalsConceded: number }): number {
-    let points = (stats.goals || 0) * 3 + (stats.wins || 0) * 2;
-    if (stats.goalsConceded < 5) points += 3;
-    return points;
+   calculatePoints(stats: { goals: number; wins: number; cleanSheets: number }): number {
+    return (stats.goals || 0) * 3 + (stats.wins || 0) * 2 + (stats.cleanSheets || 0);
   }
 
   processUserPicks(

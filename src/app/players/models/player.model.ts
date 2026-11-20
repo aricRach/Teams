@@ -20,7 +20,11 @@ export interface Statistics {
   draws: number;
   games: number;
   goalsConceded: number;
+  /** Matches with a saved score: goalsConceded is counted over these, so conceded/game divides by this. */
+  scoredGames: number;
   ownGoals: number;
+  /** Matches the player's team finished with 0 goals conceded. */
+  cleanSheets: number;
 }
 
 

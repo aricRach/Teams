@@ -1,9 +1,11 @@
 <app-section-layout [tabs]="statisticsService.innerTabs()">
-  <app-date-filter
-    section-toolbar
-    [dates]="statisticsService.allUniqueDates()"
-    [selectedDate]="statisticsService.getSelectedDate()"
-    (dateSelected)="statisticsService.setSelectedDate($event)" />
+  @if (statisticsService.showDateFilter()) {
+    <app-date-filter
+      section-toolbar
+      [dates]="statisticsService.allUniqueDates()"
+      [selectedDate]="statisticsService.getSelectedDate()"
+      (dateSelected)="statisticsService.setSelectedDate($event)" />
+  }
 
   @if (statisticsService.isTableTabActive()) {
     <label section-toolbar>

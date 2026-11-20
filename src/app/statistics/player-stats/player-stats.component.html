@@ -1,0 +1,182 @@
+<app-data-layout
+  [loading]="playerStatsService.isLoading()"
+  [error]="playerStatsService.hasError()"
+  errorHeading="Couldn't load stats"
+  (retry)="playerStatsService.reload()">
+  <div class="player-stats">
+    <div class="chips">
+      @for (chip of playerStatsService.selectedPlayerChips(); track chip.id) {
+        <span class="chip">
+          <span class="dot" [style.background]="chip.color"></span>
+          <span class="chip-name">{{ chip.name }}</span>
+          <span class="tag">{{ chip.tag }}</span>
+          <button type="button" class="remove" [attr.aria-label]="'Remove ' + chip.name" (click)="playerStatsService.removePlayer(chip.id)">×</button>
+        </span>
+      }
+      <label class="add-player">
+        <span>{{ playerStatsService.addPlayerLabel() }}</span>
+        <app-auto-complete
+          inputValue=""
+          [options]="playerStatsService.pickerOptions()"
+          [isDisabled]="!playerStatsService.canAddPlayer()"
+          (optionSelected)="playerStatsService.onPickPlayer($event)" />
+      </label>
+    </div>
+
+    <div class="seg" role="group" aria-label="Range">
+      @for (range of playerStatsService.ranges; track range.value) {
+        <button type="button" [attr.aria-pressed]="playerStatsService.range() === range.value" (click)="playerStatsService.setRange(range.value)">
+          {{ range.label }}
+        </button>
+      }
+    </div>
+
+    @if (!playerStatsService.hasPlayers()) {
+      <div class="card empty">
+        Select a player to see their stats.<br>
+        {{ playerStatsService.emptyStateHint }}
+      </div>
+    }
+
+    @if (playerStatsService.hasPlayers()) {
+      <section>
+        <p class="section-title">{{ playerStatsService.rangeLabel() }}</p>
+        <div class="card table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                @for (chip of playerStatsService.selectedPlayerChips(); track chip.id) {
+                  <th>
+                    <span class="col-head">
+                      <span class="dot" [style.background]="chip.color"></span>
+                      <span class="col-name">{{ chip.name }}</span>
+                    </span>
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of playerStatsService.tableRows(); track row.label) {
+                <tr>
+                  <td>
+                    {{ row.label }}
+                    <button
+                      type="button"
+                      class="info-btn"
+                      [hidden]="!row.hasInfo"
+                      [attr.aria-expanded]="!!playerStatsService.performanceExample()"
+                      aria-label="How performance is calculated"
+                      (click)="playerStatsService.togglePerformanceInfo()">i</button>
+                    <small>{{ row.sub }}</small>
+                  </td>
+                  @for (cell of row.cells; track $index) {
+                    <td [class.best]="cell.isBest">
+                      <span class="value">{{ cell.text }}</span><span class="rank">{{ cell.rank }}</span>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="footnote" [hidden]="playerStatsService.isComparing()">#rank among active players in this range</p>
+      </section>
+    }
+
+    @if (playerStatsService.performanceExample(); as example) {
+      <section class="card explainer">
+        <h3>
+          How performance is calculated
+          <button type="button" class="close-btn" aria-label="Close" (click)="playerStatsService.closePerformanceInfo()">×</button>
+        </h3>
+        <p>
+          Each game day gets a score that adds up everything the player did in all their matches that day.
+        </p>
+        <div class="rules">
+          @for (rule of playerStatsService.performanceRules; track rule.label) {
+            <span>{{ rule.label }}</span><span class="points">{{ rule.points }}</span>
+          }
+        </div>
+        <div class="example" [hidden]="!example.title">
+          <div class="line"><b>{{ example.title }}</b></div>
+          @for (line of example.lines; track line.label) {
+            <div class="line" [class.muted]="line.isZero"><span>{{ line.label }}</span><span class="points">{{ line.points }}</span></div>
+          }
+          <div class="line total"><span>Game-day score</span><span class="points">{{ example.total }}</span></div>
+        </div>
+        <p><b>Avg performance</b> is the average of these game-day scores over the selected range, so every game day counts the same.</p>
+      </section>
+    }
+
+    @if (playerStatsService.hasPlayers()) {
+      <section>
+        <div class="controls">
+          <div class="seg" role="group" aria-label="Stat">
+            @for (stat of playerStatsService.chartStats; track stat.value) {
+              <button type="button" [attr.aria-pressed]="playerStatsService.chartStat() === stat.value" (click)="playerStatsService.setChartStat(stat.value)">
+                {{ stat.label }}
+              </button>
+            }
+          </div>
+          <div class="seg" role="group" aria-label="Chart mode">
+            @for (mode of playerStatsService.chartModes; track mode.value) {
+              <button type="button" [attr.aria-pressed]="playerStatsService.chartMode() === mode.value" (click)="playerStatsService.setChartMode(mode.value)">
+                {{ mode.label }}
+              </button>
+            }
+          </div>
+        </div>
+        <div class="card chart-card">
+          <div class="chart-box">
+            <canvas
+              baseChart
+              type="line"
+              aria-label="Player stat chart"
+              [data]="playerStatsService.chartData()"
+              [options]="playerStatsService.chartOptions()"
+              [legend]="false">
+            </canvas>
+          </div>
+        </div>
+        <p class="caption">
+          {{ playerStatsService.chartCaption() }}
+          <button type="button" class="link-btn" [hidden]="!playerStatsService.isPerformanceStat()" (click)="playerStatsService.openPerformanceInfo()">
+            How is performance calculated?
+          </button>
+        </p>
+      </section>
+    }
+
+    @if (playerStatsService.headToHead(); as headToHead) {
+      <section>
+        <p class="section-title">Head to head</p>
+        <div class="card h2h">
+          <div class="h2h-row">
+            <div class="h2h-label"><b>Together</b><span>{{ headToHead.together.label }}</span></div>
+            <div class="bar">
+              <i class="won" [style.width.%]="headToHead.together.wonPercent"></i>
+              <i class="drawn" [style.width.%]="headToHead.together.drawnPercent"></i>
+              <i class="lost" [style.width.%]="headToHead.together.lostPercent"></i>
+            </div>
+            <div class="legend">
+              <span>{{ headToHead.together.wonText }}</span><span>{{ headToHead.together.drawnText }}</span><span>{{ headToHead.together.lostText }}</span>
+            </div>
+          </div>
+          <div class="h2h-row">
+            <div class="h2h-label"><b>Against each other</b><span>{{ headToHead.against.label }}</span></div>
+            <div class="bar">
+              <i [style.width.%]="headToHead.against.firstPlayerPercent" [style.background]="headToHead.against.firstPlayerColor"></i>
+              <i class="drawn" [style.width.%]="headToHead.against.drawsPercent"></i>
+              <i [style.width.%]="headToHead.against.secondPlayerPercent" [style.background]="headToHead.against.secondPlayerColor"></i>
+            </div>
+            <div class="legend">
+              <span>{{ headToHead.against.firstPlayerText }}</span><span>{{ headToHead.against.drawsText }}</span><span>{{ headToHead.against.secondPlayerText }}</span>
+            </div>
+          </div>
+        </div>
+        <p class="footnote">From recorded matches only, so manual stat corrections don't change it.</p>
+      </section>
+    }
+  </div>
+</app-data-layout>
