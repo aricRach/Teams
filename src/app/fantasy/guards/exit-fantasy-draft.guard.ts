@@ -13,9 +13,10 @@ export const exitFantasyDraftGuard: CanDeactivateFn<any> = (component: FantasyDr
     return true;
   }
     return modalsService.openConfirmModal({
-      title: 'Are you sure?',
-      confirmBtn: 'exit page',
-      description: 'the changes will not be saved'
+      title: 'Leave your fantasy draft?',
+      confirmBtn: 'leave draft',
+      danger: true,
+      description: "Your picks aren't saved yet. If you leave, they are lost."
     }).afterClosed().pipe(map((result: string) => {
         if(result) {
           return true;

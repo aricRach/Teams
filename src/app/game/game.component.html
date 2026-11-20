@@ -1,11 +1,5 @@
 <app-game-layout [loading]="playersService.isLoadingPlayers()" [teamCount]="gameService.teamCount()">
-  @if(adminControlService.getAdminControl().showSaveButtons) {
-    <ng-container ngProjectAs="[board-start]">
-      <button (click)="load()">Load local data</button>
-      <button (click)="save()">Save local data</button>
-      <button [disabled]="playersService.savePlayers.pending()" [class.is-pending]="playersService.savePlayers.pending()" (click)="saveGlobal()">Save Global</button>
-    </ng-container>
-  }
+  <a board-start class="team-builder-link" [routerLink]="gameService.teamBuilderUrl()">Team Builder →</a>
 
   @if(adminControlService.isAdminModeEnabled()) {
     <button board-center class="action-btn active-btn" (click)="adminControlService.cleanAdminControlState()">Revert admin mode</button>

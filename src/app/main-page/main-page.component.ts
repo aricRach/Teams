@@ -28,6 +28,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private popupsService = inject(PopupsService);
+
   breadcrumbs = signal([]);
 
   subscription = new Subscription();
@@ -53,6 +54,12 @@ export class MainPageComponent implements OnInit, OnDestroy {
   }
 
   headerNavItems = computed(() => [
+    {
+      action: MenuAction.NAVIGATE,
+      alias: 'Teams',
+      show: !!this.playersService.selectedGroup(),
+      link: this.playersService.groupUrl('teams')
+    },
     {
       action: MenuAction.NAVIGATE,
       alias: 'Game',

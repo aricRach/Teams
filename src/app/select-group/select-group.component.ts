@@ -29,9 +29,8 @@ export class SelectGroupComponent {
     const email = this.currentUserEmail;
     if (email) {
       this.playersService.selectGroup(this.selectedGroup, email);
-      const page = this.selectedGroup.admins.includes(email) ? 'game' : 'statistics';
-      const route = ['/home', this.selectedGroup.id, page];
-      this.router.navigate(route);
+      // The group root picks the start page: Team Builder for admins, statistics for everyone else.
+      this.router.navigate(['/home', this.selectedGroup.id]);
     }
   }
 

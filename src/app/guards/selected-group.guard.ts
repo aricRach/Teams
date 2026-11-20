@@ -44,6 +44,13 @@ export const selectedGroupGuard: CanActivateFn = async (route, state) => {
   return true;
 };
 
+/** /home/<groupId> with no page: admins start on the Team Builder, everyone else on statistics. */
+export const groupHomeRedirectGuard: CanActivateFn = () => {
+  const playersService = inject(PlayersService);
+  const page = playersService.isAdmin() ? 'teams' : 'statistics';
+  return inject(Router).createUrlTree([playersService.groupUrl(page)]);
+};
+
 /** Plain /home (no group id): go to the selected or last used group, otherwise the group picker. */
 export const lastGroupRedirectGuard: CanActivateFn = () => {
   const playersService = inject(PlayersService);

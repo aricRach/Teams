@@ -1,39 +1,76 @@
-@use '../../game/shared/game-board';
+// Team cards with a color bar, colored player rows, and a bench of chips.
+// --team-color / --team-ink come from the team's color (set inline), with neutral fallbacks.
+
+.board {
+  --board-shadow: 0 1px 2px rgba(10, 30, 25, 0.06), 0 4px 14px rgba(10, 30, 25, 0.07);
+  --bench-bg: #eaf3ef;
+}
 
 .table-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
 }
 
-.team-header {
-  width: 100%;
+// Teams
+
+.all-teams-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+}
+
+.team-card {
+  width: 320px;
+  max-width: 100%;
   min-width: 0;
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--board-shadow);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    height: 6px;
+    background: var(--team-color, var(--border-strong));
+  }
+
+  &.team-locked { opacity: 0.75; }
+}
+
+.team-header {
+  min-width: 0;
+  padding: 0.6rem 0.75rem 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.35rem;
 
-  h2 {
-    margin: 0;
-  }
+  h2 { margin: 0; }
 }
 
 .team-name {
-  // Truncate instead of wrapping, so all team columns start at the same height.
+  // Truncate instead of wrapping, so all team cards start at the same height.
   display: flex;
   align-items: center;
-  flex: 1 1 auto;
-  min-width: 0;
+  // Basis 0: a long name takes only the free space and truncates, so it never pushes Play to a new line.
+  // The min-width keeps room for the pencil + color dot; only very narrow cards still wrap.
+  flex: 1 1 0;
+  min-width: 6rem;
   gap: 0.35rem;
 
   h2 {
     min-width: 0;
     flex: 1 1 auto;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+    font-weight: 700;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -48,16 +85,12 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  opacity: 0.6;
+  opacity: 0.55;
 
-  &:hover {
-    opacity: 1;
-  }
+  &:hover { opacity: 1; }
 }
 
-app-team-color-picker {
-  flex-shrink: 0;
-}
+app-team-color-picker { flex-shrink: 0; }
 
 .team-rename {
   display: flex;
@@ -67,17 +100,37 @@ app-team-color-picker {
   width: 100%;
 
   .team-rename-input {
-    padding: 0.25rem 0.4rem;
+    padding: 0.3rem 0.5rem;
     font-size: 1rem;
     flex: 1 1 auto;
     min-width: 0;
     box-sizing: border-box;
+    border: 1px solid var(--border);
+    border-radius: 6px;
   }
 
   .team-rename-btn {
-    padding: 0.25rem 0.5rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
     cursor: pointer;
   }
+}
+
+.team-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding: 0.2rem 0.75rem 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+app-team-score-bars {
+  display: block;
+  padding: 0 0.75rem 0.5rem;
 }
 
 .slot-selector {
@@ -112,74 +165,171 @@ app-team-color-picker {
   }
 }
 
-.list-container {
-  @include game-board.team-column;
+.edit-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  justify-content: space-around;
+  min-height: 50px;
 
-  .list {
-    @include game-board.team-list;
-  }
-
-  .edit-buttons {
+  div {
     display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-    justify-content: space-around;
-    min-height: 50px;
-    div {
-      display: flex;
-      flex-direction: column;
-      button {
-        margin-top: 5px;
-        width: 65px;
-      }
+    flex-direction: column;
+
+    button {
+      margin-top: 5px;
+      width: 65px;
     }
   }
 }
 
-.box {
-  @include game-board.player-row;
+.list {
+  min-height: 64px;
+  padding: 0 0.4rem 0.5rem;
+  display: block;
 }
+
+// Player rows inside a team
+
+.list .box {
+  display: block;
+  padding: 0.45rem 0.4rem;
+  border-top: 1px solid var(--divider);
+  background: var(--surface);
+
+  &:first-child { border-top: 0; }
+}
+
+.list-empty {
+  margin: 0.25rem 0;
+  padding: 1rem 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-subtle);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+
+// Bench
+
+.bench {
+  margin-top: 1.5rem;
+  padding: 0.9rem;
+  border-radius: 14px;
+  background: var(--bench-bg);
+}
+
+.bench-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .bench-count {
+    margin-left: 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+}
+
+.bench-search {
+  flex: 1 1 200px;
+  max-width: 280px;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.bench-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+  min-height: 52px;
+
+  .list-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    background: var(--surface);
+  }
+}
+
+.bench-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  min-width: 0;
+
+  &:hover { border-color: var(--primary); }
+}
+
+// Drag and drop
 
 .cdk-drag-preview {
   box-sizing: border-box;
-  border-radius: 4px;
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
-  0 8px 10px 1px rgba(0, 0, 0, 0.14),
-  0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  background: var(--surface);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
   overflow: hidden;
 }
 
-.cdk-drag-placeholder {
-  opacity: 0;
-}
+.cdk-drag-placeholder { opacity: 0.25; }
 
 .cdk-drag-animating {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.list.cdk-drop-list-dragging .box:not(.cdk-drag-placeholder) {
+.list.cdk-drop-list-dragging .box:not(.cdk-drag-placeholder),
+.bench-list.cdk-drop-list-dragging .box:not(.cdk-drag-placeholder) {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
-.all-teams-container {
-  @include game-board.teams-grid;
+
+.list.cdk-drop-list-receiving,
+.bench-list.cdk-drop-list-receiving {
+  outline: 2px dashed var(--primary);
+  outline-offset: 2px;
+  border-radius: 8px;
 }
 
+// Phone: two team cards per row, like before.
 @media (max-width: 640px) {
+  .all-teams-container { gap: 8px; }
+
+  .team-card { width: calc(50% - 4px); }
+
+  .team-header { padding: 0.5rem 0.5rem 0; }
+
+  .team-meta { padding: 0.15rem 0.5rem 0.4rem; font-size: 0.72rem; }
+
+  .team-name h2 { font-size: 0.95rem; }
+
   .slot-selector button {
     min-width: 0;
     padding: 0.35rem 0.5rem;
+
+    &.play-toggle { min-width: 0; }
   }
 
-  .team-name h2 {
-    font-size: 0.95rem;
-  }
+  .list { padding: 0 0.25rem 0.4rem; }
+
+  .bench-list { grid-template-columns: 1fr 1fr; }
 }
 
-.box.available-player {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: normal;
-}
+// Goal modal (game page)
 
 .set-goal-modal {
   position: absolute;
@@ -236,20 +386,5 @@ app-team-color-picker {
         text-decoration: none;
       }
     }
-  }
-}
-
-.player {
-  display: flex;
-  border: 1px solid black;
-  padding: 5px;
-  margin: 2px;
-  min-width: 0;
-
-  .box {
-    word-break: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    min-width: 0;
   }
 }

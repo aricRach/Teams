@@ -12,7 +12,7 @@ import { GameService } from '../game.service';
 import { Player } from '../../players/models/player.model';
 import { MatchEventRecord } from '../../match-event-manager/models/match-event.model';
 import { PanelScorer } from './game-slot-panel.component';
-import { collapseExtraTeams, restoreHiddenTeams } from '../../utils/collapse-extra-teams.util';
+import { collapseExtraTeams } from '../../utils/collapse-extra-teams.util';
 import { computeGoalTally, isScoringEvent } from '../../match-event-manager/utils/scoring.util';
 
 export interface SlotViewModel {
@@ -117,7 +117,6 @@ export abstract class ParallelSlotsGameService {
   readonly showRating = computed(() => this.adminControl.getAdminControl().showRating);
   readonly teamAliases = computed(() => this.playersService.teamAliases());
   readonly teamColors = computed(() => this.playersService.teamColors());
-  readonly isAdmin = computed(() => this.playersService.isAdmin());
 
   protected readonly groupId = computed(() => this.playersService.selectedGroup()?.id ?? null);
 
@@ -182,8 +181,9 @@ export abstract class ParallelSlotsGameService {
   }
 
   updateTeams(teams: any): void {
-    // The board shows hidden teams' players as unassigned, so put them back in their teams before saving.
-    this.playersService.setTeams(restoreHiddenTeams(teams, this.playersService.getTeams(), this.teamCount()));
+    // Hidden teams are always empty here: lowering the count moves their players to the bench.
+    this.playersService.setTeams(teams);
+    // Not saved here: the teams are saved when a game ends (GameService.endGame).
     this.unpickEmptyTeams();
   }
 

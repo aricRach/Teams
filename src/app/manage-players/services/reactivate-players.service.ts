@@ -33,8 +33,9 @@ export class ReactivatePlayersService {
 
   reactivatePlayer() {
     this.modalsService.openConfirmModal({
-      title: 'Are you sure?',
-      description: `By reactivate <b>${this.selectedPlayer()?.name}</b>, he will be available again, his statistics will be shown and if he has a valid email he will get access for the application`,
+      title: `Reactivate ${this.selectedPlayer()?.name}?`,
+      description: 'They can be picked for teams again, their statistics show again, and if they have a valid email they get access to the app.',
+      confirmBtn: 'reactivate',
     }).afterClosed().subscribe((result) => {
       if (result) {
         this.playersService.setPlayerActiveStatus.run(this.selectedPlayer(), true).then(done => {

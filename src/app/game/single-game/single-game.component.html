@@ -1,8 +1,3 @@
-<div class="in-row center gap">
-  <h1>Teams</h1>
-  <button class="active-btn action-btn" [disabled]="single.isRevealingTeams()" [class.is-pending]="single.isRevealingTeams()" (click)="single.revealTeams()">Save Team Selection</button>
-</div>
-
 <button class="button-icon" (click)="single.toggleMovePlayersLock()">
   <img alt="lock" [src]="single.lockIcon()" height="30" width="30">
 </button>
@@ -22,7 +17,6 @@
   [matchIdByTeam]="single.matchIdByTeam()"
   [lockedTeamKeys]="single.lockedTeamKeys()"
   [showRating]="single.showRating()"
-  [isAdmin]="single.isAdmin()"
   [playerStatsMap]="single.playerStatsMap()"
   (start)="onStart($event)" (reset)="onReset($event)" (end)="onEnd($event)"
   (recordGoal)="recordGoal($event)"

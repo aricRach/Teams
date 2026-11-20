@@ -1,19 +1,15 @@
-<div>
-  <!--  <div class="center gap statistics-button">-->
+<div class="board">
   <div class="table-actions">
-    @if(showStatistics()) {
+    @if (showStatistics()) {
     <button class="active-btn action-btn" (click)="toggleShowStatistics()">Hide Statistics</button>
     } @else {
     <button class="active-btn action-btn" (click)="toggleShowStatistics()">Show Statistics</button>
     }
-
-    @if(enableMakeBalancedTeams()) {
-    <button class="active-btn action-btn" (click)="makeBalancedTeamsModalVisible.set(true)">make balanced teams</button>
-    }
   </div>
+
   <div class="all-teams-container">
     @for (teamKey of teamKeys(); track teamKey) {
-    <div class="list-container">
+    <section class="team-card" [class.team-locked]="isTeamLocked(teamKey)" [ngStyle]="teamColorStyles()[teamKey]">
       <div class="team-header">
         @if (renamingTeamKey() === teamKey) {
         <div class="team-rename">
@@ -26,16 +22,17 @@
         } @else {
         <div class="team-name">
           <h2 [title]="teamKey | teamLabel: aliases()">{{ teamKey | teamLabel: aliases() }}</h2>
-          @if (canRenameTeams()) {
+          <!-- Edit-statistics doesn't handle team renames or colors. -->
+          @if (!editStatistics()) {
           <button type="button" class="button-icon team-rename-pencil" aria-label="Edit team name"
             (click)="startTeamRename(teamKey)">
-            <img src="assets/icons/pencil.svg" alt="edit" height="18" width="18">
+            <img src="assets/icons/pencil.svg" alt="edit" height="16" width="16">
           </button>
-          }
           <app-team-color-picker
             [color]="colors()[teamKey]"
             [takenColors]="takenColorsExcluding(teamKey)"
             (colorChange)="changeTeamColor.emit({teamKey, color: $event})" />
+          }
         </div>
         }
         @if (availableSlots().length === 1) {
@@ -56,6 +53,15 @@
         </div>
         }
       </div>
+
+      <div class="team-meta">
+        <span>{{ clonedTeams()?.[teamKey]?.players?.length ?? 0 }} players</span>
+        @if (enableShowRatings()) {
+        <span>avg {{ teamAverages()[teamKey].toFixed(2) }}</span>
+        <span>total {{ totalRatings()?.[teamKey]?.toFixed(1) }}</span>
+        }
+      </div>
+
       @if(editStatistics() ) {
       <div class="edit-buttons">
         @if(clonedTeams()?.[teamKey]?.players.length > 0 ) {
@@ -87,7 +93,6 @@
       </div>
       }
       @if (enableShowRatings()) {
-        <h5>{{ totalRatings()?.[teamKey]?.toFixed(2) }}</h5>
         @if ((playersDragDropTableService.teamScores()[teamKey]?.attackScore ?? 0) > 0 ||
              (playersDragDropTableService.teamScores()[teamKey]?.defenseScore ?? 0) > 0) {
           <app-team-score-bars
@@ -107,31 +112,39 @@
           [showRating]="enableShowRatings()"
           [dateStats]="getPlayerDateStats(item.id)"
           [allPlayerStats]="getPlayerStats(item.id)"
+          [ngStyle]="teamColorStyles()[teamKey]"
           appDoubleClick
           [doubleClickDisabled]="!isGoalTaggingEnabled(teamKey)"
           (doubleClicked)="openSetGoalModal($event, {player: item, team: teamKey})" class="box"
-          cdkDrag></app-player-view>
+          cdkDrag [cdkDragData]="item"></app-player-view>
+        } @empty {
+        <div class="list-empty">Drag players here</div>
         }
       </div>
-    </div>
+    </section>
     }
   </div>
 
-  <h2>Players</h2>
-  <div cdkDropList id="allPlayers" [cdkDropListDisabled]="isLocked()"
-    [cdkDropListData]="clonedTeams()?.allPlayers?.players" [cdkDropListConnectedTo]="unlockedTeamKeys()"
-    class="box available-player" (cdkDropListDropped)="drop($event)">
-    @for (item of clonedTeams()?.allPlayers?.players; track item; let idx = $index) {
-    <div class="player">
+  <section class="bench">
+    <div class="bench-head">
+      <h2>Bench <span class="bench-count">{{ benchCount() }}</span></h2>
+    </div>
+    <div cdkDropList id="allPlayers" [cdkDropListDisabled]="isLocked()"
+      [cdkDropListData]="clonedTeams()?.allPlayers?.players" [cdkDropListConnectedTo]="unlockedTeamKeys()"
+      class="bench-list" (cdkDropListDropped)="drop($event)">
+      @for (item of clonedTeams()?.allPlayers?.players; track item) {
       <app-player-view
         [player]="item"
         [showStatistics]="false"
         [showRating]="enableShowRatings()"
-        class="box"
-        cdkDrag></app-player-view>
+        class="box bench-chip"
+        cdkDrag [cdkDragData]="item"></app-player-view>
+      }
+      @if (benchCount() === 0) {
+      <div class="list-empty">Everyone is on a team. Drag a player here to take them out.</div>
+      }
     </div>
-    }
-  </div>
+  </section>
 
 </div>
 
@@ -152,9 +165,3 @@
 </div>
 }
 
-
-@if(makeBalancedTeamsModalVisible()) {
-<app-modal (submit)="setBalancedTeamsModal(true)" (close)="setBalancedTeamsModal(false)">
-  <div>Are you sure you want to change teams?</div>
-</app-modal>
-}

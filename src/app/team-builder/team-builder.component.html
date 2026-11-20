@@ -1,0 +1,176 @@
+<app-game-layout [loading]="teamBuilderService.isLoading()" [teamCount]="teamBuilderService.teamCount()">
+  <div class="builder-head">
+    <div>
+      <h1>Team Builder</h1>
+      @if (teamBuilderService.showGameRunningHint()) {
+      <p class="builder-hint warn">A game is running. You can change teams again once it ends.</p>
+      } @else if (teamBuilderService.isAdmin()) {
+      <p class="builder-hint">Tap a player to move them to another team or the bench.</p>
+      } @else {
+      <p class="builder-hint">The teams for the next game. Only admins can change them.</p>
+      }
+    </div>
+    <div class="team-count-picker">
+      <span>Number of teams</span>
+      <div class="segmented" [class.locked]="!teamBuilderService.canEdit()">
+        @for (count of teamBuilderService.teamCountOptions; track count) {
+        <button type="button" [class.active]="teamBuilderService.teamCount() === count"
+          [disabled]="!teamBuilderService.canEdit()" (click)="teamBuilderService.setTeamCount(count)">{{ count }}</button>
+        }
+      </div>
+    </div>
+  </div>
+
+  @if (teamBuilderService.isAdmin()) {
+  <div class="start-game-strip">
+    <span>{{ teamBuilderService.gameLinkHint() }}</span>
+    <a class="start-game-link" [routerLink]="teamBuilderService.gameUrl()">{{ teamBuilderService.gameLinkLabel() }}</a>
+  </div>
+  }
+
+  <div class="tools">
+    @if (teamBuilderService.isAdmin()) {
+    <button type="button" class="action-btn" [class.active-btn]="teamBuilderService.showRating()"
+      [attr.aria-pressed]="teamBuilderService.showRating()" (click)="teamBuilderService.toggleRatings()">{{ teamBuilderService.ratingsButtonLabel() }}</button>
+    }
+    @if (teamBuilderService.canEdit()) {
+    <button type="button" class="action-btn active-btn" (click)="teamBuilderService.isBalanceConfirmVisible.set(true)">✨ Balance teams</button>
+    <button type="button" class="action-btn" [disabled]="!teamBuilderService.hasPlayersInTeams()"
+      (click)="teamBuilderService.isClearConfirmVisible.set(true)">Clear teams</button>
+    }
+    @if (teamBuilderService.balanceMeter()) {
+    <div class="balance-meter" [attr.data-level]="teamBuilderService.balanceMeter()?.level">
+      <span>Balance</span>
+      <div class="balance-track"><div class="balance-fill" [style.width.%]="teamBuilderService.balanceMeter()?.fill"></div></div>
+      <strong>{{ teamBuilderService.balanceMeter()?.word }}</strong>
+      <span class="balance-gap">{{ teamBuilderService.balanceGapText() }}</span>
+    </div>
+    }
+  </div>
+
+  <div>
+    <div class="teams">
+      @for (teamKey of teamBuilderService.teamKeys(); track teamKey) {
+      <section class="team-card" [ngStyle]="teamBuilderService.teamColorStyles()[teamKey]">
+        <div class="team-head">
+          @if (teamBuilderService.renamingTeamKey() === teamKey) {
+          <div class="rename">
+            <input type="text" placeholder="Team name" [attr.maxlength]="teamBuilderService.aliasMaxLength"
+              [value]="teamBuilderService.renameDraft()" (input)="teamBuilderService.renameDraft.set($any($event.target).value)"
+              (keyup.enter)="teamBuilderService.saveRename(teamKey)" (keyup.escape)="teamBuilderService.cancelRename()">
+            <button type="button" (click)="teamBuilderService.saveRename(teamKey)">Save</button>
+            <button type="button" (click)="teamBuilderService.cancelRename()">Cancel</button>
+          </div>
+          } @else if (teamBuilderService.isAdmin()) {
+          <div class="team-name">
+            <h2 [title]="teamBuilderService.teamNames()[teamKey]">{{ teamBuilderService.teamNames()[teamKey] }}</h2>
+            <button type="button" class="button-icon rename-btn" aria-label="Rename team" (click)="teamBuilderService.startRename(teamKey)">
+              <img src="assets/icons/pencil.svg" alt="" height="16" width="16">
+            </button>
+            <app-team-color-picker
+              [color]="teamBuilderService.teamColors()[teamKey]"
+              [takenColors]="teamBuilderService.takenColorsExcluding(teamKey)"
+              (colorChange)="teamBuilderService.changeTeamColor(teamKey, $event)" />
+          </div>
+          } @else {
+          <div class="team-name">
+            <h2 [title]="teamBuilderService.teamNames()[teamKey]">{{ teamBuilderService.teamNames()[teamKey] }}</h2>
+          </div>
+          }
+          <div class="team-meta">
+            <span>{{ teamBuilderService.teamPlayers()[teamKey].length }} players</span>
+            @if (teamBuilderService.showRating()) {
+            <span>avg {{ teamBuilderService.teamAverages()[teamKey].toFixed(2) }}</span>
+            <span>total {{ teamBuilderService.teamTotals()[teamKey].toFixed(1) }}</span>
+            }
+          </div>
+        </div>
+
+        @if (teamBuilderService.showRating()) {
+        <app-team-score-bars variant="light"
+          [attackScore]="teamBuilderService.teamScores()[teamKey]?.attackScore ?? 0"
+          [defenseScore]="teamBuilderService.teamScores()[teamKey]?.defenseScore ?? 0" />
+        }
+
+        <div class="roster" cdkDropList [id]="teamKey" [cdkDropListData]="teamKey"
+          [cdkDropListConnectedTo]="teamBuilderService.dropListIds()" (cdkDropListDropped)="teamBuilderService.dropPlayer($event)">
+          @for (player of teamBuilderService.teamPlayers()[teamKey]; track player.id) {
+          <button type="button" class="player-row" [disabled]="!teamBuilderService.canEdit()"
+            cdkDrag [cdkDragData]="player" [cdkDragDisabled]="teamBuilderService.isDragDisabled()"
+            (cdkDragEnded)="teamBuilderService.dragEnded()"
+            (click)="teamBuilderService.openMoveMenu(player, teamKey, $event)">
+            <app-player-view [player]="player" [showStatistics]="false" [showRating]="teamBuilderService.showRating()"
+              [dragHandle]="false" [ngStyle]="teamBuilderService.teamColorStyles()[teamKey]" />
+          </button>
+          } @empty {
+          <p class="empty">No players yet</p>
+          }
+        </div>
+      </section>
+      }
+    </div>
+
+    <section class="bench">
+      <div class="bench-head">
+        <h2>Bench <span class="bench-count">{{ teamBuilderService.benchCount() }}</span></h2>
+        <input type="search" class="bench-search" placeholder="Search players" aria-label="Search bench players"
+          [value]="teamBuilderService.benchSearch()" (input)="teamBuilderService.benchSearch.set($any($event.target).value)">
+      </div>
+      <div class="bench-list" cdkDropList [id]="teamBuilderService.bench" [cdkDropListData]="teamBuilderService.bench"
+        [cdkDropListConnectedTo]="teamBuilderService.dropListIds()" (cdkDropListDropped)="teamBuilderService.dropPlayer($event)">
+        @for (player of teamBuilderService.benchPlayers(); track player.id) {
+        <button type="button" class="bench-chip" [disabled]="!teamBuilderService.canEdit()"
+          cdkDrag [cdkDragData]="player" [cdkDragDisabled]="teamBuilderService.isDragDisabled()"
+          (cdkDragEnded)="teamBuilderService.dragEnded()"
+          (click)="teamBuilderService.openMoveMenu(player, teamBuilderService.bench, $event)">
+          <app-player-view [player]="player" [showStatistics]="false" [showRating]="teamBuilderService.showRating()"
+            [dragHandle]="false" />
+        </button>
+        }
+        @if (teamBuilderService.benchCount() === 0) {
+        <p class="empty">Everyone is on a team.</p>
+        } @else if (teamBuilderService.showNoBenchMatch()) {
+        <p class="empty">No bench player matches “{{ teamBuilderService.benchSearch() }}”.</p>
+        }
+      </div>
+    </section>
+  </div>
+
+  @if (teamBuilderService.isAdmin()) {
+  <div class="save-bar" [class.dirty]="teamBuilderService.hasUnsavedChanges()">
+    <span class="save-status"><span class="dot"></span>{{ teamBuilderService.saveStatus() }}</span>
+    <button type="button" class="action-btn active-btn" [disabled]="teamBuilderService.isSaving() || !teamBuilderService.hasUnsavedChanges()"
+      [class.is-pending]="teamBuilderService.isSaving()" (click)="teamBuilderService.save()">Save</button>
+  </div>
+  }
+</app-game-layout>
+
+@if (teamBuilderService.moveMenu()) {
+<div class="move-backdrop" (click)="teamBuilderService.closeMoveMenu()"></div>
+<div class="move-menu" role="menu" [attr.aria-label]="teamBuilderService.moveMenuTitle()"
+  [style.top.px]="teamBuilderService.moveMenu()?.top" [style.left.px]="teamBuilderService.moveMenu()?.left">
+  <div class="move-title">{{ teamBuilderService.moveMenuTitle() }}</div>
+  @for (option of teamBuilderService.moveOptions(); track option.key) {
+  <button type="button" role="menuitem" class="move-option" [class.bench-option]="option.key === teamBuilderService.bench"
+    [ngStyle]="option.style" (click)="teamBuilderService.chooseMoveTarget(option.key)">
+    <span class="swatch"></span>
+    <span class="move-label">{{ option.label }}</span>
+    <span class="move-count">{{ option.count }}</span>
+  </button>
+  }
+</div>
+}
+
+@if (teamBuilderService.isBalanceConfirmVisible()) {
+<app-modal heading="Balance the teams?" submitLabel="Balance" closeLabel="Cancel" [showCloseIcon]="false"
+  (submit)="teamBuilderService.balance()" (close)="teamBuilderService.isBalanceConfirmVisible.set(false)">
+  Players will be moved between the teams to make them as even as possible.
+</app-modal>
+}
+
+@if (teamBuilderService.isClearConfirmVisible()) {
+<app-modal heading="Clear the teams?" submitLabel="Clear" closeLabel="Cancel" [showCloseIcon]="false"
+  (submit)="teamBuilderService.clearTeams()" (close)="teamBuilderService.isClearConfirmVisible.set(false)">
+  Every player will move to the bench. Nothing is saved until you click Save.
+</app-modal>
+}

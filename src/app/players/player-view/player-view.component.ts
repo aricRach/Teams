@@ -22,6 +22,8 @@ export class PlayerViewComponent {
   showStatistics = input.required<boolean>();
   dateStats = input<Statistics | undefined>();
   allPlayerStats = input<Map<string, Statistics>>(new Map());
+  /** Off when the whole row is the drag target (Team Builder), so dragging works from anywhere on it. */
+  dragHandle = input(true);
 
   statsText = computed(() => {
     const stats = this.dateStats();
@@ -32,6 +34,10 @@ export class PlayerViewComponent {
       `goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} - conceded: ${this.getDisplayValue(stats.goalsConceded)} -games: ${this.getDisplayValue(stats.games)}`
       : `rating ${this.player().rating} - goals: ${this.getDisplayValue(stats.goals)} - wins: ${this.getDisplayValue(stats.wins)} - loses: ${this.getDisplayValue(stats.loses)} -games: ${this.getDisplayValue(stats.games)}`
   })
+
+  initials = computed(() =>
+    this.player().name.trim().split(/[\s-]+/).filter(Boolean).slice(0, 2).map(word => word[0]).join('').toUpperCase()
+  );
 
   playerForm = computed(() => {
     const statsEntries = Array.from(this.allPlayerStats().entries()) as [string, Statistics][];

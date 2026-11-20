@@ -11,16 +11,24 @@ export const exitFormGuard: CanDeactivateFn<unknown> = (component: any) => {
   const router = inject(Router);
   const navigationService = inject(NavigationService);
   const isGenericForm = !!component.genericForm;
-  if ( navigationService.isLocked() ||
-    (isGenericForm && component.genericForm.form()?.dirty && !component.genericForm.isSubmitted())
-      // || (component.form?.dirty && navigationService.isLocked())
-    // || (typeof component.form === 'function' && component.form()?.dirty && navigationService.isLocked())
-  ) {
-    return modalsService.openConfirmModal({
-      title: 'Are you sure?',
-      confirmBtn: 'exit page',
-      description: 'the changes will not be saved'
-    }).afterClosed().pipe(map((result: string) => {
+  const isInProgress = navigationService.isLocked();
+  const isFormDirty = isGenericForm && component.genericForm.form()?.dirty && !component.genericForm.isSubmitted();
+  if (isInProgress || isFormDirty) {
+    // Locked navigation means something is running on the page (a live game, a draft session).
+    const dialog = isInProgress
+      ? {
+          title: 'Leave this page?',
+          description: "Something is still running here, like a live game or a draft. If you leave, this page loses track of it.",
+          confirmBtn: 'leave page',
+          danger: true,
+        }
+      : {
+          title: 'Discard your changes?',
+          description: "You haven't saved this form. If you leave, your changes are lost.",
+          confirmBtn: 'discard changes',
+          danger: true,
+        };
+    return modalsService.openConfirmModal(dialog).afterClosed().pipe(map((result: string) => {
       if(result) {
         navigationService.unlockNavigation();
         return true;

@@ -1,0 +1,511 @@
+// Team cards (color bar, players listed), a bench of chips, a "move to" menu next to the tapped player,
+// and a sticky save bar. --team-color / --team-ink are set inline from the team's color.
+
+:host {
+  display: block;
+  --card-shadow: 0 1px 2px rgba(10, 30, 25, 0.06), 0 4px 14px rgba(10, 30, 25, 0.07);
+  --bench-bg: #eaf3ef;
+}
+
+// Header
+
+.builder-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.75rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+}
+
+.start-game-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+}
+
+.start-game-link {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+
+  &:hover { text-decoration-thickness: 2px; }
+}
+
+.builder-hint {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+
+  &.warn { color: #b07800; }
+}
+
+.team-count-picker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+
+  .segmented > button { padding: 0.35rem 0.9rem; }
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.balance-meter {
+  --level: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+
+  &[data-level='close'] { --level: #c98a00; }
+  &[data-level='lopsided'] { --level: var(--danger); }
+
+  strong { color: var(--text); }
+
+  .balance-track {
+    width: 110px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-raised);
+    overflow: hidden;
+  }
+
+  .balance-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: var(--level);
+    transition: width 0.3s, background 0.3s;
+  }
+
+  .balance-gap {
+    font-variant-numeric: tabular-nums;
+
+    &:empty { display: none; }
+  }
+}
+
+// Teams
+
+.teams {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+}
+
+.team-card {
+  width: 300px;
+  max-width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    height: 6px;
+    background: var(--team-color, var(--border-strong));
+  }
+}
+
+.team-head {
+  padding: 0.6rem 0.75rem 0.4rem;
+  min-width: 0;
+}
+
+.team-name {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+
+  h2 {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    // One line with "…" like the game page; the full name is in the title tooltip.
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rename-btn {
+    flex-shrink: 0;
+    padding: 2px;
+    opacity: 0.55;
+
+    &:hover { opacity: 1; }
+  }
+
+  app-team-color-picker { flex-shrink: 0; }
+}
+
+.rename {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  input {
+    flex: 1 1 120px;
+    min-width: 0;
+    padding: 0.3rem 0.5rem;
+    font: inherit;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+
+  button {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface);
+    cursor: pointer;
+  }
+}
+
+.team-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.75rem;
+  margin-top: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+app-team-score-bars {
+  display: block;
+  padding: 0 0.75rem 0.5rem;
+}
+
+.roster {
+  min-height: 56px;
+  padding: 0 0.4rem 0.5rem;
+}
+
+// A player you can tap (and drag with a mouse).
+.player-row,
+.bench-chip {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+
+  // Read-only (viewers, or a game is running): looks normal, just not clickable.
+  &:disabled {
+    cursor: default;
+    opacity: 1;
+    color: inherit;
+  }
+}
+
+.player-row {
+  padding: 0.45rem 0.4rem;
+  border: 0;
+  border-top: 1px solid var(--divider);
+  border-radius: 6px;
+  background: var(--surface);
+
+  &:first-child { border-top-color: transparent; }
+
+  &:hover:not(:disabled) { background: var(--surface-raised); }
+}
+
+.empty {
+  margin: 0.25rem 0;
+  padding: 0.9rem 0.5rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-subtle);
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+}
+
+// Bench
+
+.bench {
+  margin-top: 1.5rem;
+  padding: 0.9rem;
+  border-radius: 14px;
+  background: var(--bench-bg);
+}
+
+.bench-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .bench-count {
+    margin-left: 0.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+}
+
+.bench-search {
+  flex: 1 1 200px;
+  max-width: 280px;
+  padding: 0.45rem 0.7rem;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.bench-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px;
+  min-height: 52px;
+
+  .empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    background: var(--surface);
+  }
+}
+
+.bench-chip {
+  justify-content: center;
+  padding: 4px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+
+  &:hover:not(:disabled) { border-color: var(--primary); }
+}
+
+// Drag with a mouse
+
+.cdk-drag-preview {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0.45rem 0.6rem;
+  background: var(--surface);
+  border: 0;
+  border-radius: 10px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+}
+
+.cdk-drag-placeholder { opacity: 0.25; }
+
+.cdk-drop-list-receiving {
+  outline: 2px dashed var(--primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+// "Move to" menu
+
+.move-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+}
+
+.move-menu {
+  position: fixed;
+  z-index: 901;
+  width: 220px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(10, 30, 25, 0.2);
+  animation: move-menu-in 0.14s ease-out;
+}
+
+.move-title {
+  padding: 6px 8px 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.move-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible { background: var(--surface-raised); }
+
+  .swatch {
+    flex: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--team-color, var(--border-strong));
+  }
+
+  .move-label {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .move-count {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &.bench-option {
+    margin-top: 4px;
+    border-top: 1px solid var(--divider);
+    border-radius: 0 0 8px 8px;
+
+    .swatch {
+      background: var(--bench-bg);
+      border: 1px dashed var(--text-subtle);
+    }
+  }
+}
+
+@keyframes move-menu-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .move-menu { animation: none; }
+}
+
+// Save bar: sticks to the bottom so Save is always in reach.
+
+.save-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  padding: 0.65rem 0.75rem;
+  padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 14px rgba(10, 30, 25, 0.06);
+
+  .action-btn { white-space: nowrap; }
+}
+
+.save-status {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+
+  .dot {
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+  }
+}
+
+.save-bar.dirty .save-status {
+  color: var(--text);
+  font-weight: 600;
+
+  .dot { background: #e0a100; }
+}
+
+// Phone: two team cards per row, every player listed.
+
+@media (max-width: 640px) {
+  .teams { gap: 8px; }
+
+  .team-card { width: calc(50% - 4px); }
+
+  .team-head { padding: 0.5rem 0.5rem 0.3rem; }
+
+  .team-name h2 { font-size: 0.95rem; }
+
+  .team-meta { font-size: 0.72rem; }
+
+  .roster { padding: 0 0.2rem 0.4rem; }
+
+  .player-row { padding: 0.45rem 0.25rem; }
+
+  .balance-meter { margin-left: 0; width: 100%; }
+
+  .bench-list { grid-template-columns: 1fr 1fr; }
+
+  // Status on its own line, the two buttons share the row under it.
+  .save-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+
+    .save-status { flex-basis: 100%; }
+
+    .action-btn {
+      flex: 1;
+      margin: 0;
+    }
+  }
+}

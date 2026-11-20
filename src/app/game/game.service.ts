@@ -1,17 +1,12 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {firstValueFrom} from 'rxjs';
-import {Router} from '@angular/router';
-import {Player, Statistics} from '../players/models/player.model';
 import {PlayersService} from '../players/players.service';
 import {GameDetails, GameStatus, MatchEventsManagerService} from '../match-event-manager/services/match-events-manager.service';
 import {NavigationService} from '../shared/navigation/navigation.service';
 import {ComputedStatisticsService} from '../statistics/services/computed-statistics.service';
-import {computeTeamScores} from '../utils/team-scores.utils';
 import {isScoringEvent} from '../match-event-manager/utils/scoring.util';
-import {RevealApiService, RevealTeam, RevealSnapshot, PositionedPlayer, Position} from '../reveal/reveal-api.service';
-import {formatTeamLabel} from '../utils/team-label.util';
-import {PopupsService} from 'ui';
-import {createMutation} from '../shared/optimistic/run-optimistic';
+import {collapseExtraTeams} from '../utils/collapse-extra-teams.util';
+import {ModalsService} from 'ui';
 
 export type GameMode = 'single' | 'league';
 
@@ -22,9 +17,7 @@ export class GameService {
   matchEventsService = inject(MatchEventsManagerService);
   navigationService = inject(NavigationService);
   computedStatsService = inject(ComputedStatisticsService);
-  private revealApi = inject(RevealApiService);
-  private popupsService = inject(PopupsService);
-  private router = inject(Router);
+  private modalsService = inject(ModalsService);
 
   computedStats = computed(() => this.computedStatsService.statsMap())
 
@@ -44,33 +37,29 @@ export class GameService {
 
   setTeamCount(count: number): void {
     if (this.isSetupLocked()) return;
-    this.playersService.setNumberOfTeams(count);
+    const teams = this.playersService.getTeams();
+    const shownTeams = collapseExtraTeams(teams, count);
+    const bench = this.playersService.allPlayersLabel;
+    const movedCount = shownTeams[bench].players.length - (teams[bench]?.players.length ?? 0);
+    if (movedCount === 0) {
+      this.playersService.setNumberOfTeams(count);
+      return;
+    }
+
+    // Lowering the count moves the hidden teams' players to the bench and saves it, so every page agrees.
+    this.modalsService.openConfirmModal({
+      title: 'Lower the number of teams?',
+      confirmBtn: 'move to bench',
+      description: `${movedCount} players from the removed teams will move to the bench.`,
+    }).afterClosed().subscribe((confirmed: string) => {
+      if (!confirmed) return;
+      this.playersService.setNumberOfTeams(count);
+      this.playersService.setTeams(shownTeams);
+      void this.playersService.savePlayers.run(undefined, true);
+    });
   }
 
-  readonly reveal = createMutation({
-    run: async (groupId: string) => {
-      const [teamsSaved] = await Promise.all([
-        this.playersService.savePlayers.run(undefined, true),
-        this.revealApi.saveSnapshot(groupId, this.buildSnapshot()),
-      ]);
-      if (!teamsSaved) return;
-
-      // The copied link is a convenience: a denied clipboard permission must not block opening the reveal.
-      const revealUrl = `${window.location.origin}/reveal?groupId=${groupId}`;
-      await navigator.clipboard.writeText(revealUrl).then(
-        () => this.popupsService.addSuccessPopOut('Link copied to clipboard!'),
-        () => {},
-      );
-      this.router.navigate(['/reveal'], { queryParams: { groupId } });
-    },
-    onError: () => this.popupsService.addErrorPopOut("Couldn't save the team selection, please try again."),
-  });
-
-  revealTeams() {
-    const groupId = this.playersService.selectedGroup()?.id;
-    if (!groupId) return;
-    void this.reveal.run(groupId);
-  }
+  readonly teamBuilderUrl = computed(() => this.playersService.groupUrl('teams'));
 
   async endGame(teams: any, slot = 1) {
     let team1Score = 0;
@@ -119,6 +108,8 @@ export class GameService {
     const gameDetails: GameDetails = {gameStatus, winner, loser, wonTeamScore, loseTeamScore};
 
     await this.matchEventsService.endGameAndPersist(gameDetails, slot);
+    // Moves on the game page aren't saved one by one: keep the teams that just played.
+    void this.playersService.savePlayers.run(undefined, true);
 
     if (!this.matchEventsService.hasAnyLiveMatch()) {
       try {
@@ -128,53 +119,5 @@ export class GameService {
       }
       this.navigationService.unlockNavigation();
     }
-  }
-
-  private buildSnapshot(): RevealSnapshot {
-    const rawTeams = this.playersService.getTeams();
-    const statsMap = this.computedStatsService.statsMap();
-    const scores   = computeTeamScores(rawTeams, statsMap);
-
-    const aliases = this.playersService.teamAliases();
-    const teams: RevealTeam[] = Object.entries(rawTeams)
-      .filter(([key, team]: [string, any]) => key !== 'allPlayers' && team.players.length > 0)
-      .map(([key, team]: [string, any]) => ({
-        name:         formatTeamLabel(key, aliases[key]),
-        rating:       this.averageRating(team.players),
-        attackScore:  scores[key]?.attackScore  ?? 0,
-        defenseScore: scores[key]?.defenseScore ?? 0,
-        players:      this.assignPositions(team.players as Player[], statsMap),
-      }));
-
-    return { teams, savedAt: null };
-  }
-
-  private assignPositions(players: Player[], statsMap: Map<string, Map<string, Statistics>>): PositionedPlayer[] {
-    const scored = players.map(p => {
-      const dateMap = statsMap.get(p.id);
-      let goals = 0, conceded = 0, games = 0;
-      for (const s of (dateMap?.values() ?? [])) {
-        goals    += s.goals         ?? 0;
-        conceded += s.goalsConceded ?? 0;
-        games    += s.games         ?? 0;
-      }
-      const atk = games > 0 ? goals    / games : 0;
-      const def = games > 0 ? conceded / games : 0;
-      return { name: p.name, score: atk - def };
-    });
-    scored.sort((a, b) => a.score - b.score);
-    return scored.map((sp, i) => ({ name: sp.name, position: this.positionByIndex(i, scored.length) }));
-  }
-
-  private positionByIndex(index: number, total: number): Position {
-    const third = total / 3;
-    if (index < third)     return 'DEF';
-    if (index < 2 * third) return 'MID';
-    return 'FWD';
-  }
-
-  private averageRating(players: Player[]): number {
-    if (!players.length) return 0;
-    return Math.round(players.reduce((sum, p) => sum + (p.rating || 0), 0) / players.length);
   }
 }

@@ -9,6 +9,9 @@ import {AllMatchDataService} from '../../match-event-manager/services/all-match-
 import {formatDateToString} from '../../utils/date-utils';
 import {MatchEventsApiService} from '../../match-event-manager/services/match-events-api.service';
 import {ComputedStatisticsService} from './computed-statistics.service';
+import {formatTeamLabel} from '../../utils/team-label.util';
+
+const STAT_LABELS: Record<string, string> = { wins: 'win', loses: 'loss', games: 'game' };
 
 export class EditStatisticsService {
 
@@ -35,7 +38,10 @@ export class EditStatisticsService {
   async deleteDayStatistics(): Promise<void> {
     const selectedDate = this.statisticsService.getSelectedDate();
     this.modalsService.openConfirmModal({
-      description: `Are you sure you want to <b>void</b> <b>${selectedDate}</b>?<br>Stats for this day will be removed. This can be undone.`
+      title: `Void stats for ${selectedDate}?`,
+      description: 'Every match played that day stops counting in the statistics. You can undo this later.',
+      confirmBtn: 'void day',
+      danger: true,
     }).afterClosed().subscribe(async (res) => {
       if (!res) return;
       const groupId = this.playersService.selectedGroup()?.id;
@@ -55,10 +61,14 @@ export class EditStatisticsService {
   }
 
   async updateTeamStatistics(editTeamEvent: { players: Player[], team: TeamsOptions, name: string; number: number }): Promise<void> {
+    const statLabel = STAT_LABELS[editTeamEvent.name] ?? editTeamEvent.name;
+    const teamLabel = formatTeamLabel(editTeamEvent.team, this.playersService.teamAliases()[editTeamEvent.team]);
+    const isAdding = editTeamEvent.number > 0;
     this.modalsService.openConfirmModal({
-      title: `Edit ${editTeamEvent.team} ${editTeamEvent.name}`,
-      height: 400,
-      description: `Are you sure you want to perform this action?<br>All the team players will be affected.<br>${editTeamEvent.players.map(p => `<b>${p.name}</b>`).join('<br>')}`
+      title: isAdding ? `Add a ${statLabel} to ${teamLabel}?` : `Remove a ${statLabel} from ${teamLabel}?`,
+      description: `Every player in the team gets this change:<br>${editTeamEvent.players.map(p => `<b>${p.name}</b>`).join('<br>')}`,
+      confirmBtn: isAdding ? `add ${statLabel}` : `remove ${statLabel}`,
+      danger: !isAdding,
     }).afterClosed().subscribe(async (res) => {
       if (res) {
         const statKey = editTeamEvent.name as keyof Statistics;

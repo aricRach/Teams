@@ -8,10 +8,4 @@ export class SingleGameService extends ParallelSlotsGameService {
   constructor() {
     super(SINGLE_GAME_SLOTS, 1);
   }
-
-  readonly isRevealingTeams = this.gameService.reveal.pending;
-
-  revealTeams(): void {
-    this.gameService.revealTeams();
-  }
 }
