@@ -81,7 +81,7 @@ export class EditPlayerService {
   deletePlayer() {
     this.modalsService.openConfirmModal({
       title: `Delete ${this.selectedPlayer()?.name}?`,
-      description: 'They move to inactive players and stop showing in teams and statistics. You can reactivate them later.',
+      description: 'They move to inactive players and leave the teams and the statistics table. Their past matches still count in Player Stats and Leaders. You can reactivate them later.',
       confirmBtn: 'delete player',
       danger: true,
     }).afterClosed().subscribe((result) => {
