@@ -1,4 +1,4 @@
-import {computed, inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable, signal} from '@angular/core';
 import {ManagePlayersService} from './manage-players.service';
 import {FormGroup} from '@angular/forms';
 import {convertFormValuesToNumbers} from '../../utils/form-utils';
@@ -48,6 +48,13 @@ export class EditPlayerStatisticsService {
     const controls = this.gameControls();
     return controls && controls.length > 0
   })
+
+  /** The form shows only after the admin confirms the note about what corrections don't change. */
+  isNoteConfirmed = signal(false);
+
+  confirmNote() {
+    this.isNoteConfirmed.set(true);
+  }
 
   getLastDayStatistics(playerData: any): any {
     if (!playerData?.id) return null;

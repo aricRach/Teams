@@ -1,11 +1,12 @@
-import {Component, HostListener, inject, output, signal} from '@angular/core';
+import {Component, computed, HostListener, inject, output, signal} from '@angular/core';
+import {RouterLink} from '@angular/router';
 import {AdminControlService} from '../../user/admin-control.service';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {PlayersService} from '../../players/players.service';
 
 @Component({
   selector: 'app-admin.svg-control',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './admin-control.component.html',
   styleUrl: './admin-control.component.scss'
 })
@@ -16,7 +17,16 @@ export class AdminControlComponent {
 
   isAllowed = signal(false);
 
+  private canDeleteAll = computed(() => this.isAllowed() && this.playersService.isGroupOwner());
+  /** Deleting is two steps in place: the button, then Delete / Cancel (no second dialog). */
+  private isAskingToDelete = signal(false);
+  showDeleteButton = computed(() => this.canDeleteAll() && !this.isAskingToDelete());
+  isConfirmingDelete = computed(() => this.canDeleteAll() && this.isAskingToDelete());
+
   submitted = output();
+
+  /** Opened from the header, which shows the admin button only to group admins. Clicking closes the modal. */
+  manageGroupUrl = computed(() => this.playersService.groupUrl('manage-group'));
 
   codeForm = new FormGroup({
     code: new FormControl('', [Validators.required, Validators.pattern(/^2626$/),]),
@@ -64,7 +74,16 @@ export class AdminControlComponent {
     }
   }
 
+  askToDeleteAll() {
+    this.isAskingToDelete.set(true);
+  }
+
+  cancelDeleteAll() {
+    this.isAskingToDelete.set(false);
+  }
+
   deleteAll() {
+    this.isAskingToDelete.set(false);
     this.playersService.deleteAllStatsAndSpecialCollections();
   }
 }

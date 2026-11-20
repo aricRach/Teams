@@ -1,11 +1,19 @@
 <app-form-layout [heading]="editStatisticsService.showForm() ? editStatisticsService.editStatisticsFormTitle() : undefined">
-  @if(editStatisticsService.showForm()) {
+  @if (!editStatisticsService.showForm()) {
+    <app-state-message kind="empty" heading="This player has not played yet, nothing to edit" />
+  } @else if (!editStatisticsService.isNoteConfirmed()) {
+    <div class="note">
+      <p>
+        Changes here only adjust this player's totals. Anything that depends on the match itself,
+        like the score, clean sheets (and their fantasy points) or the match winner, changes only when you edit the match in Manage Events.
+      </p>
+      <button type="button" class="active-btn" (click)="editStatisticsService.confirmNote()">Got it</button>
+    </div>
+  } @else {
     <app-generic-form
       [class.form-is-pending]="editStatisticsService.saveCorrection.pending()"
       [formFields]=editStatisticsService.gameControls()
       (formSubmit)="editStatisticsService.editLastStatistics($event)">
     </app-generic-form>
-  } @else {
-    <app-state-message kind="empty" heading="This player has not played yet, nothing to edit" />
   }
 </app-form-layout>

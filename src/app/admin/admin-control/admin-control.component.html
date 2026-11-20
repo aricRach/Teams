@@ -1,39 +1,74 @@
-<h1>Admin Control</h1>
+<div class="admin-control">
+  <h2>Admin Control</h2>
 
-@if(isAllowed()) {
-  <form [formGroup]="adminForm" (ngSubmit)="submitAdminControl()">
+  <section class="section">
+    <h3>Group</h3>
+    <a class="link-row" [routerLink]="manageGroupUrl()" (click)="submitted.emit()">
+      <span>
+        <b>Manage Group</b>
+        <small>Add or remove members and admins</small>
+      </span>
+      <span class="arrow" aria-hidden="true">›</span>
+    </a>
+  </section>
 
-    <div class="center">
-      <button class="active-btn action-btn" (click)="selectAll()">Toggle all</button>
-    </div>
+  <section class="section">
+    <h3>Admin settings</h3>
+    @if (isAllowed()) {
+      <form [formGroup]="adminForm" (ngSubmit)="submitAdminControl()">
+        <label class="toggle-row">
+          <span>
+            <b>Show ratings</b>
+            <small>Player ratings on the game board</small>
+          </span>
+          <input type="checkbox" formControlName="showRating" />
+        </label>
 
-    <label>
-      <input type="checkbox" formControlName="showRating" />
-      Show Rating
-    </label>
+        <label class="toggle-row">
+          <span>
+            <b>Show protected pages</b>
+            <small>Edit Player, Edit Statistics and Community Ratings</small>
+          </span>
+          <input type="checkbox" formControlName="showProtectedPages" />
+        </label>
 
-    <label>
-      <input type="checkbox" formControlName="showProtectedPages" />
-      Show Protected Pages
-    </label>
+        <div class="actions">
+          <button type="button" class="text-btn" (click)="selectAll()">Toggle all</button>
+          <button type="submit" class="submit-btn active-btn">Save</button>
+        </div>
+      </form>
+    } @else {
+      <form class="code-form" [formGroup]="codeForm" (ngSubmit)="submitCode()">
+        <small>Enter the admin code to change these settings.</small>
+        <div class="code-row">
+          <input
+            type="password"
+            inputmode="numeric"
+            autocomplete="off"
+            aria-label="Admin code"
+            placeholder="Admin code"
+            formControlName="code"
+            [class.invalid]="codeForm.invalid && codeForm.dirty">
+          <button type="submit" class="submit-btn active-btn">Continue</button>
+        </div>
+      </form>
+    }
+  </section>
 
-    <div class="center">
-      <button class="submit-btn active-btn" type="submit">Save Settings</button>
-    </div>
-  </form>
-
-
-
-  @if(playersService.isGroupOwner()) {
-    <button (click)="deleteAll()" class="delete-all alert-btn active-btn">Delete All Statistics TOTW and Fantasy Data</button>
+  @if (showDeleteButton()) {
+    <section class="section danger-zone">
+      <h3>Danger zone</h3>
+      <small>Deletes all statistics, Team of the Week and Fantasy data of this group.</small>
+      <button type="button" class="alert-btn active-btn" (click)="askToDeleteAll()">Delete all data</button>
+    </section>
+  } @else if (isConfirmingDelete()) {
+    <section class="section danger-zone">
+      <h3>Danger zone</h3>
+      <small><b>This can't be undone.</b> Delete all statistics, Team of the Week and Fantasy data?</small>
+      <div class="confirm-row">
+        <button type="button" class="alert-btn active-btn" (click)="deleteAll()">Delete</button>
+        <button type="button" class="text-btn" (click)="cancelDeleteAll()">Cancel</button>
+      </div>
+    </section>
   }
-} @else {
-  <form [formGroup]="codeForm" (ngSubmit)="submitCode()">
-    <input [class.invalid]="codeForm.invalid && codeForm.dirty" placeholder="admin code" formControlName="code">
-    <div class="center">
-      <button class="continue submit-btn active-btn">Continue</button>
-    </div>
-  </form>
-}
-
-
+</div>

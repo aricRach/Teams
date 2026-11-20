@@ -11,8 +11,8 @@ Every page follows the same three-layer split (see `create-group/`, `manage-grou
   the template (`protected <feature>Service = inject(<Feature>Service)`). No logic, no other services
   (not even `PlayersService` — wrap what the template needs, e.g. URLs, in the page service).
 - `<feature>.service.ts` — `@Injectable()` (no `providedIn`), listed in the component's `providers: [...]`.
-  Holds all page state (signals/computed), validation, and actions. Injects `PlayersService`,
-  `PopupsService`, the api service, etc.
+  Holds all page state (signals/computed), validation, and actions, and delegates pure logic to utils
+  (see **Utils**). Injects `PlayersService`, `PopupsService`, the api service, etc.
 - `<feature>-api.service.ts` — `@Injectable({ providedIn: 'root' })`. Only Firestore calls, no state,
   no popups. Keep a feature's Firestore calls in its own api service instead of adding to unrelated ones.
 
@@ -47,6 +47,17 @@ No success popup is needed when the UI change itself is the feedback.
   (e.g. `showRemove = computed(() => isAdmin() && !isOwner())`) or use flat `@if / @else if / @else`.
 - No `@let` in templates. Put derived values in the service as `computed` signals and read them
   directly (`manageGroupService.admins()`).
+
+## Utils
+
+- Keep services thin: put pure calculations and transformations (no signals, no injection, no Firestore)
+  in feature util files, e.g. `statistics/utils/performance.util.ts`, `statistics/utils/player-insights.util.ts`.
+  The service calls the util and holds the state; the util is easy to unit-test.
+
+## Naming
+
+- Use clear, descriptive names that say what a thing is or does (`selectedPlayers`, `canRemoveAdmin`,
+  `buildLeaderboard`). Avoid abbreviations and generic names like `data`, `item`, `tmp`, `res`.
 
 ## Style
 

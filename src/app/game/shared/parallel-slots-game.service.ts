@@ -1,4 +1,5 @@
 import { computed, effect, inject, Injectable, ResourceRef, signal, untracked, WritableSignal } from '@angular/core';
+import { toDisplayMinute } from '../../match-event-manager/utils/timer-display';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { of } from 'rxjs';
 import { PopupsService } from 'ui';
@@ -173,7 +174,7 @@ export abstract class ParallelSlotsGameService {
       .filter((e) => isScoringEvent(e))
       .map((e) => ({
         name: e.playerNameSnapshot ?? 'Goal',
-        minute: e.minute,
+        minute: toDisplayMinute(e.minute),
         teamKey: e.teamKey,
         isOwnGoal: e.type === 'own_goal'
       }))

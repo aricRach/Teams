@@ -8,7 +8,7 @@ import { MatchEventsManagerService } from '../services/match-events-manager.serv
 import { Auth, authState } from '@angular/fire/auth';
 import { PopupsService } from 'ui';
 import { DatePipe } from '@angular/common';
-import { formatElapsedMsAsMmSs, parseMmSsToMinute, parseMmSsToMs } from '../utils/timer-display';
+import { formatElapsedMsAsMmSs, parseMmSsToMinute, parseMmSsToMs, toDisplayMinute } from '../utils/timer-display';
 import { MatchEventRecord, MatchRecord, MatchStatus } from '../models/match-event.model';
 import { isScoringEvent } from '../utils/scoring.util';
 import { formatTeamLabel } from '../../utils/team-label.util';
@@ -285,7 +285,7 @@ export class MatchEventsManagerComponent {
     if (timerMs != null) return formatElapsedMsAsMmSs(timerMs);
     const timerDisplay = event.payload?.['timerDisplay'] as string | undefined;
     if (timerDisplay) return timerDisplay;
-    return `${event.minute ?? '-'}'`;
+    return `${toDisplayMinute(event.minute) ?? '-'}'`;
   }
 
   onSelectMatch(matchId: string) {
