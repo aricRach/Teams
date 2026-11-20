@@ -1,4 +1,4 @@
-import { MatchSummary } from './match-summary.util';
+import { MatchSummary } from '../../utils/match-summary.util';
 
 export interface HeadToHead {
   together: { matches: number; wins: number; draws: number; losses: number };

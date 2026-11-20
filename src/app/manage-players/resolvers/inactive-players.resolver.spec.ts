@@ -1,11 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { ResolveFn } from '@angular/router';
 
 import { inactivePlayersResolver } from './inactive-players.resolver';
 
 describe('inactivePlayersResolver', () => {
-  const executeResolver: ResolveFn<boolean> = (...resolverParameters) => 
-      TestBed.runInInjectionContext(() => inactivePlayersResolver(...resolverParameters));
+  const executeResolver = () => TestBed.runInInjectionContext(() => inactivePlayersResolver());
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

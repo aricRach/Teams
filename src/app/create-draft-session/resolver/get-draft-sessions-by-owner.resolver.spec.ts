@@ -4,7 +4,7 @@ import { ResolveFn } from '@angular/router';
 import { getDraftSessionsByOwnerResolver } from './get-draft-sessions-by-owner.resolver';
 
 describe('getDraftSessionsByOwnerResolver', () => {
-  const executeResolver: ResolveFn<boolean> = (...resolverParameters) =>
+  const executeResolver: ResolveFn<Promise<any>> = (...resolverParameters) =>
       TestBed.runInInjectionContext(() => getDraftSessionsByOwnerResolver(...resolverParameters));
 
   beforeEach(() => {

@@ -1,6 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { signal } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { provideRouter } from '@angular/router';
+import { PopupsService } from 'ui';
+import { PlayersService } from '../../players/players.service';
+import { PlayersApiService } from '../../players/players-api.service';
 import { AdminControlComponent } from './admin-control.component';
 
 describe('AdminControlComponent', () => {
@@ -10,7 +14,16 @@ describe('AdminControlComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AdminControlComponent],
-      providers: [{ provide: MatDialogRef, useValue: { close: () => {} } }]
+      providers: [
+        provideRouter([]),
+        { provide: MatDialogRef, useValue: { close: () => {} } },
+        {
+          provide: PlayersService,
+          useValue: { groupUrl: () => '/home/group-1/manage-group', isGroupOwner: signal(false), selectedGroup: signal({ id: 'group-1' }) },
+        },
+        { provide: PlayersApiService, useValue: { deleteAllStatsAndSpecialCollections: () => Promise.resolve() } },
+        { provide: PopupsService, useValue: { addSuccessPopOut: () => {}, addErrorPopOut: () => {} } },
+      ],
     })
     .compileComponents();
 

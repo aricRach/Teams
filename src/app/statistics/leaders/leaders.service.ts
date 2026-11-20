@@ -7,7 +7,7 @@ import {ComputedStatisticsService} from '../services/computed-statistics.service
 import {formatDateSpan, plural} from '../utils/stats-format.util';
 import {matchesOnDates} from '../utils/match-summary.util';
 import {totalsForDates} from '../utils/player-totals.util';
-import {rankTopThree} from '../utils/ranking.util';
+import {rankTopThree} from './utils/ranking.util';
 import {datesInRange, parseRange, rangeQueryParam, STATS_RANGES, StatsRange} from '../utils/stats-range.util';
 import {buildLeaderCards} from './leaders.util';
 

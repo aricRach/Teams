@@ -1,5 +1,5 @@
 import { Player } from '../../players/models/player.model';
-import { countWinningGoals, duoRecords, longestWinStreaks } from '../utils/match-records.util';
+import { countWinningGoals, duoRecords, longestWinStreaks } from './utils/match-records.util';
 import { MatchSummary } from '../utils/match-summary.util';
 import { PlayerTotals } from '../utils/player-totals.util';
 import { plural } from '../utils/stats-format.util';

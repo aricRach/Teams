@@ -428,10 +428,4 @@ export class PlayersService {
       return inactivePlayers;
     })
   }
-
-  deleteAllStatsAndSpecialCollections() {
-     this.playersApiService.deleteAllStatsAndSpecialCollections(this.selectedGroup().id).then(() => {
-       this.popoutService.addSuccessPopOut('All statistics, Fantasy, Team Of The Week data deleted');
-     })
-  }
 }

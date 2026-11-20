@@ -66,7 +66,7 @@
       <h3>Danger zone</h3>
       <small><b>This can't be undone.</b> Delete all statistics, Team of the Week and Fantasy data?</small>
       <div class="confirm-row">
-        <button type="button" class="alert-btn active-btn" (click)="adminControlDialogService.deleteAll()">Delete</button>
+        <button type="button" class="alert-btn active-btn" [disabled]="adminControlDialogService.deleteAllData.pending()" (click)="adminControlDialogService.deleteAllData.run()">Delete</button>
         <button type="button" class="text-btn" (click)="adminControlDialogService.cancelDeleteAll()">Cancel</button>
       </div>
     </section>

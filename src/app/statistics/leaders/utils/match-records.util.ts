@@ -1,4 +1,4 @@
-import { MatchSummary } from './match-summary.util';
+import { MatchSummary } from '../../utils/match-summary.util';
 
 /** Most matches won in a row, per player. A draw or a loss ends the streak. */
 export function longestWinStreaks(matches: MatchSummary[]): Map<string, number> {

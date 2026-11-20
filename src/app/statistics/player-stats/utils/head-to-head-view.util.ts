@@ -1,5 +1,5 @@
 import { Player } from '../../../players/models/player.model';
-import { countHeadToHead } from '../../utils/head-to-head.util';
+import { countHeadToHead } from './head-to-head.util';
 import { MatchSummary } from '../../utils/match-summary.util';
 import { plural } from '../../utils/stats-format.util';
 import { ratio } from '../../utils/stats-math.util';

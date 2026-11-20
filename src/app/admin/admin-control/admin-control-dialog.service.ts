@@ -1,8 +1,11 @@
-import {computed, inject, Injectable, signal} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatDialogRef} from '@angular/material/dialog';
 import {AdminControlService} from '../../user/admin-control.service';
+import {PopupsService} from 'ui';
 import {PlayersService} from '../../players/players.service';
+import {PlayersApiService} from '../../players/players-api.service';
+import {createMutation} from '../../shared/optimistic/run-optimistic';
 
 const ADMIN_CODE = '2626';
 
@@ -12,6 +15,13 @@ export class AdminControlDialogService {
   private dialogRef = inject(MatDialogRef);
   private adminControlService = inject(AdminControlService);
   private playersService = inject(PlayersService);
+  private playersApiService = inject(PlayersApiService);
+  private popupsService = inject(PopupsService);
+
+  constructor() {
+    // A shortcut save still waiting must not run after the dialog closed.
+    inject(DestroyRef).onDestroy(() => clearTimeout(this.shortcutSaveTimer));
+  }
 
   /** Opened from the header, which shows the admin button only to group admins. */
   manageGroupUrl = computed(() => this.playersService.groupUrl('manage-group'));
@@ -45,15 +55,20 @@ export class AdminControlDialogService {
   toggleAllSettings() {
     this.adminControlService.setToggleAll(!this.adminControlService.getToggleAll());
     const isOn = this.adminControlService.getToggleAll();
-    this.settingsForm.patchValue({showRating: isOn, showProtectedPages: isOn});
+    for (const control of Object.values(this.settingsForm.controls)) {
+      control.setValue(isOn);
+    }
   }
 
-  /** Shortcut: pressing "a" after the code toggles all settings and saves. */
+  private shortcutSaveTimer?: ReturnType<typeof setTimeout>;
+
+  /** Shortcut: pressing "a" after the code toggles all settings and saves. Repeat presses wait for that save. */
   onKeydown(event: KeyboardEvent) {
-    if (!this.isCodeAccepted() || event.key.toLowerCase() !== 'a') return;
+    const isShortcut = this.isCodeAccepted() && event.key?.toLowerCase() === 'a';
+    if (!isShortcut || this.shortcutSaveTimer) return;
     event.preventDefault();
     this.toggleAllSettings();
-    setTimeout(() => this.saveSettings(), 500);
+    this.shortcutSaveTimer = setTimeout(() => this.saveSettings(), 500);
   }
 
   // ---------- delete all data (group owner only) ----------
@@ -72,10 +87,14 @@ export class AdminControlDialogService {
     this.isAskingToDelete.set(false);
   }
 
-  deleteAll() {
-    this.isAskingToDelete.set(false);
-    this.playersService.deleteAllStatsAndSpecialCollections();
-  }
+  readonly deleteAllData = createMutation({
+    run: () => this.playersApiService.deleteAllStatsAndSpecialCollections(this.playersService.selectedGroup().id),
+    onSuccess: () => {
+      this.isAskingToDelete.set(false);
+      this.popupsService.addSuccessPopOut('All statistics, Team of the Week and Fantasy data was deleted.');
+    },
+    onError: () => this.popupsService.addErrorPopOut('Could not delete the data, so nothing was changed.'),
+  });
 
   close() {
     this.dialogRef.close();
