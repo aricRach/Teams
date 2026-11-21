@@ -103,7 +103,7 @@
       }
 
       <div cdkDropList id="{{teamKey}}" [cdkDropListDisabled]="isTeamLocked(teamKey)"
-        [cdkDropListData]="clonedTeams()?.[teamKey]?.players" [cdkDropListConnectedTo]="dropListRefs()" class="list"
+        [cdkDropListData]="teamKey" [cdkDropListConnectedTo]="dropListRefs()" class="list"
         (cdkDropListDropped)="drop($event)">
         @for (item of clonedTeams()?.[teamKey]?.players; track item) {
         <app-player-view
@@ -125,26 +125,50 @@
     }
   </div>
 
-  <section class="bench">
-    <div class="bench-head">
-      <h2>Bench <span class="bench-count">{{ benchCount() }}</span></h2>
-    </div>
-    <div cdkDropList id="allPlayers" [cdkDropListDisabled]="isLocked()"
-      [cdkDropListData]="clonedTeams()?.allPlayers?.players" [cdkDropListConnectedTo]="unlockedTeamKeys()"
-      class="bench-list" (cdkDropListDropped)="drop($event)">
-      @for (item of clonedTeams()?.allPlayers?.players; track item) {
-      <app-player-view
-        [player]="item"
-        [showStatistics]="false"
-        [showRating]="enableShowRatings()"
-        class="box bench-chip"
-        cdkDrag [cdkDragData]="item"></app-player-view>
-      }
-      @if (benchCount() === 0) {
-      <div class="list-empty">Everyone is on a team. Drag a player here to take them out.</div>
-      }
-    </div>
-  </section>
+  <div class="bench-area">
+    <section class="bench">
+      <div class="bench-head">
+        <h2>Bench <span class="bench-count">{{ benchPlayers(false).length }}</span></h2>
+      </div>
+      <div cdkDropList [id]="benchKey" [cdkDropListDisabled]="isLocked()" [cdkDropListSortingDisabled]="true"
+        [cdkDropListData]="benchKey" [cdkDropListConnectedTo]="unlockedTeamKeys()"
+        class="bench-list" (cdkDropListDropped)="drop($event)">
+        @for (item of benchPlayers(false); track item.id) {
+        <app-player-view
+          [player]="item"
+          [showStatistics]="false"
+          [showRating]="enableShowRatings()"
+          class="box bench-chip"
+          cdkDrag [cdkDragData]="item"></app-player-view>
+        } @empty {
+        <div class="list-empty">Everyone is on a team. Drag a player here to take them out.</div>
+        }
+      </div>
+    </section>
+
+    <!-- Editing a past day's statistics has no guest flow. -->
+    @if (!editStatistics()) {
+    <section class="bench guests">
+      <div class="bench-head">
+        <h2>Guests <span class="bench-count">{{ benchPlayers(true).length }}</span></h2>
+      </div>
+      <div cdkDropList [id]="guestsListId" [cdkDropListDisabled]="isLocked()" [cdkDropListSortingDisabled]="true"
+        [cdkDropListData]="benchKey" [cdkDropListConnectedTo]="unlockedTeamKeys()"
+        class="bench-list" (cdkDropListDropped)="drop($event)">
+        @for (item of benchPlayers(true); track item.id) {
+        <app-player-view
+          [player]="item"
+          [showStatistics]="false"
+          [showRating]="enableShowRatings()"
+          class="box bench-chip"
+          cdkDrag [cdkDragData]="item"></app-player-view>
+        } @empty {
+        <div class="list-empty">No guests waiting. Add them on the Team Builder.</div>
+        }
+      </div>
+    </section>
+    }
+  </div>
 
 </div>
 

@@ -27,8 +27,9 @@ export class ReactivatePlayersService {
     this.selectedPlayer.set(null);
   }
 
+  /** Guests are left out: they're brought back from the Team Builder's Guests section. */
   setInactivePlayersOptions(inActivePlayers: Player[]) {
-    this.allPlayersArray.set(inActivePlayers)
+    this.allPlayersArray.set(inActivePlayers.filter(player => !player.isGuest))
   }
 
   reactivatePlayer() {

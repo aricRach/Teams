@@ -1,5 +1,5 @@
 import {Component, computed, HostListener, inject, input, linkedSignal, output, signal,} from '@angular/core';
-import {CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem} from '@angular/cdk/drag-drop';
+import {CdkDragDrop, DragDropModule, moveItemInArray} from '@angular/cdk/drag-drop';
 import {CommonModule} from '@angular/common';
 import {form, FormField, maxLength} from '@angular/forms/signals';
 import {DoubleClickDirective} from '../../directives/double-click.directive';
@@ -96,11 +96,14 @@ export class PlayersDragDropTableComponent {
     this.teamKeys().filter(key => !this.isTeamLocked(key))
   );
 
-  readonly dropListRefs = computed(() =>
-    [...this.unlockedTeamKeys(), 'allPlayers']
-  );
+  readonly benchKey = 'allPlayers';
+  readonly guestsListId = 'guests';
 
-  readonly benchCount = computed(() => this.clonedTeams()?.allPlayers?.players?.length ?? 0);
+  // Edit-statistics has no Guests list, so it isn't connected there.
+  readonly dropListRefs = computed(() => this.editStatistics()
+    ? [...this.unlockedTeamKeys(), this.benchKey]
+    : [...this.unlockedTeamKeys(), this.benchKey, this.guestsListId]
+  );
 
   readonly teamColorStyles = computed<Record<string, Record<string, string>>>(() =>
     Object.fromEntries(this.teamKeys().map(key => [key, teamColorStyle(this.colors()[key])]))
@@ -164,22 +167,36 @@ export class PlayersDragDropTableComponent {
     this.ownGoalArmed.set(false);
   }
 
+  /** Each list's data is its team key; the Guests list is part of the bench (`allPlayers`). */
   drop(event: CdkDragDrop<any>) {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    const teams = this.clonedTeams();
+    const fromKey: string = event.previousContainer.data;
+    const toKey: string = event.container.data;
+    if (fromKey === toKey) {
+      // The bench sections show filtered lists, so their order can't be changed by dragging.
+      if (toKey === this.benchKey) return;
+      moveItemInArray(teams[toKey].players, event.previousIndex, event.currentIndex);
     } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
-      event.container.data.forEach((p: Player) => {
-        // @ts-ignore
-        p.team = event.container.id;
-      })
+      const player = event.item.data as Player;
+      const fromPlayers: Player[] = teams[fromKey].players;
+      const fromIndex = fromPlayers.findIndex(p => p.id === player.id);
+      if (fromIndex === -1) return;
+      fromPlayers.splice(fromIndex, 1);
+      const toPlayers: Player[] = teams[toKey].players;
+      toPlayers.splice(toKey === this.benchKey ? toPlayers.length : event.currentIndex, 0, player);
+      player.team = toKey as TeamsOptions;
     }
-    this.dropPlayer.emit(this.clonedTeams());
+    this.dropPlayer.emit(teams);
+  }
+
+  /**
+   * The bench is shown as two sections: regulars and guests. Edit-statistics has no Guests section,
+   * so its Bench shows everyone. A method, not a computed: drops change the teams in place.
+   */
+  benchPlayers(guests: boolean): Player[] {
+    const players: Player[] = this.clonedTeams()?.[this.benchKey]?.players ?? [];
+    if (this.editStatistics()) return guests ? [] : players;
+    return players.filter(player => !!player.isGuest === guests);
   }
 
   removeFromList(team: string, index: number) {
