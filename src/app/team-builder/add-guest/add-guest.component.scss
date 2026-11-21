@@ -1,0 +1,96 @@
+// Search box, a list of returning guests to tap, and a "create" row for a new name.
+
+.hint {
+  margin: 0 0 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.guest-search {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.guest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  margin-top: 0.6rem;
+  overflow-y: auto;
+}
+
+.guest-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) { border-color: var(--primary); }
+  &:disabled { cursor: default; opacity: 0.6; }
+}
+
+.guest-name {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.guest-meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.guest-action {
+  margin-left: auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.empty,
+.taken {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-subtle);
+}
+
+.taken { color: var(--text-muted); }
+
+.create-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
+}
+
+.rating-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+
+  input {
+    width: 5.5rem;
+    padding: 0.45rem 0.6rem;
+    font: inherit;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+}
+
+.create-btn { flex: 1 1 auto; }

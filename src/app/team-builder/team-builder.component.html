@@ -110,30 +110,66 @@
       }
     </div>
 
-    <section class="bench">
-      <div class="bench-head">
-        <h2>Bench <span class="bench-count">{{ teamBuilderService.benchCount() }}</span></h2>
-        <input type="search" class="bench-search" placeholder="Search players" aria-label="Search bench players"
-          [value]="teamBuilderService.benchSearch()" (input)="teamBuilderService.benchSearch.set($any($event.target).value)">
-      </div>
-      <div class="bench-list" cdkDropList [id]="teamBuilderService.bench" [cdkDropListData]="teamBuilderService.bench"
-        [cdkDropListConnectedTo]="teamBuilderService.dropListIds()" (cdkDropListDropped)="teamBuilderService.dropPlayer($event)">
-        @for (player of teamBuilderService.benchPlayers(); track player.id) {
-        <button type="button" class="bench-chip" [disabled]="!teamBuilderService.canEdit()"
-          cdkDrag [cdkDragData]="player" [cdkDragDisabled]="teamBuilderService.isDragDisabled()"
-          (cdkDragEnded)="teamBuilderService.dragEnded()"
-          (click)="teamBuilderService.openMoveMenu(player, teamBuilderService.bench, $event)">
-          <app-player-view [player]="player" [showStatistics]="false" [showRating]="teamBuilderService.showRating()"
-            [dragHandle]="false" />
-        </button>
-        }
-        @if (teamBuilderService.benchCount() === 0) {
-        <p class="empty">Everyone is on a team.</p>
-        } @else if (teamBuilderService.showNoBenchMatch()) {
-        <p class="empty">No bench player matches “{{ teamBuilderService.benchSearch() }}”.</p>
-        }
-      </div>
-    </section>
+    <input type="search" class="bench-search" placeholder="Search bench and guests" aria-label="Search bench and guests"
+      [value]="teamBuilderService.benchSearch()" (input)="teamBuilderService.benchSearch.set($any($event.target).value)">
+
+    <div class="bench-area">
+      <section class="bench">
+        <div class="bench-head">
+          <h2>Bench <span class="bench-count">{{ teamBuilderService.benchCount() }}</span></h2>
+        </div>
+        <div class="bench-list" cdkDropList [id]="teamBuilderService.bench" [cdkDropListData]="teamBuilderService.bench"
+          [cdkDropListConnectedTo]="teamBuilderService.dropListIds()" (cdkDropListDropped)="teamBuilderService.dropPlayer($event)">
+          @for (player of teamBuilderService.benchPlayers(); track player.id) {
+          <button type="button" class="bench-chip" [disabled]="!teamBuilderService.canEdit()"
+            cdkDrag [cdkDragData]="player" [cdkDragDisabled]="teamBuilderService.isDragDisabled()"
+            (cdkDragEnded)="teamBuilderService.dragEnded()"
+            (click)="teamBuilderService.openMoveMenu(player, teamBuilderService.bench, $event)">
+            <app-player-view [player]="player" [showStatistics]="false" [showRating]="teamBuilderService.showRating()"
+              [dragHandle]="false" />
+          </button>
+          }
+          @if (teamBuilderService.benchCount() === 0) {
+          <p class="empty">Everyone is on a team.</p>
+          } @else if (teamBuilderService.showNoBenchMatch()) {
+          <p class="empty">No bench player matches “{{ teamBuilderService.benchSearch() }}”.</p>
+          }
+        </div>
+      </section>
+
+      <section class="bench guests">
+        <div class="bench-head">
+          <h2>Guests <span class="bench-count">{{ teamBuilderService.guestCount() }}</span></h2>
+          <div class="guest-actions">
+            @if (teamBuilderService.canEdit()) {
+            <button type="button" class="action-btn active-btn" (click)="teamBuilderService.isAddGuestOpen.set(true)">+ Add guest</button>
+            }
+            @if (teamBuilderService.showClearGuests()) {
+            <button type="button" class="action-btn" [disabled]="teamBuilderService.clearGuestsMutation.pending()"
+              [class.is-pending]="teamBuilderService.clearGuestsMutation.pending()"
+              (click)="teamBuilderService.isClearGuestsConfirmVisible.set(true)">{{ teamBuilderService.clearGuestsLabel() }}</button>
+            }
+          </div>
+        </div>
+        <div class="bench-list" cdkDropList [id]="teamBuilderService.guestsListId" [cdkDropListData]="teamBuilderService.bench"
+          [cdkDropListConnectedTo]="teamBuilderService.dropListIds()" (cdkDropListDropped)="teamBuilderService.dropPlayer($event)">
+          @for (player of teamBuilderService.guestPlayers(); track player.id) {
+          <button type="button" class="bench-chip" [disabled]="!teamBuilderService.canEdit()"
+            cdkDrag [cdkDragData]="player" [cdkDragDisabled]="teamBuilderService.isDragDisabled()"
+            (cdkDragEnded)="teamBuilderService.dragEnded()"
+            (click)="teamBuilderService.openMoveMenu(player, teamBuilderService.bench, $event)">
+            <app-player-view [player]="player" [showStatistics]="false" [showRating]="teamBuilderService.showRating()"
+              [dragHandle]="false" />
+          </button>
+          }
+          @if (teamBuilderService.guestCount() === 0) {
+          <p class="empty">No guests waiting.</p>
+          } @else if (teamBuilderService.showNoGuestMatch()) {
+          <p class="empty">No guest matches “{{ teamBuilderService.benchSearch() }}”.</p>
+          }
+        </div>
+      </section>
+    </div>
   </div>
 
   @if (teamBuilderService.isAdmin()) {
@@ -173,4 +209,15 @@
   (submit)="teamBuilderService.clearTeams()" (close)="teamBuilderService.isClearConfirmVisible.set(false)">
   Every player will move to the bench. Nothing is saved until you click Save.
 </app-modal>
+}
+
+@if (teamBuilderService.isClearGuestsConfirmVisible()) {
+<app-modal [heading]="teamBuilderService.clearGuestsHeading()" submitLabel="Clear guests" closeLabel="Cancel" [showCloseIcon]="false"
+  (submit)="teamBuilderService.clearGuests()" (close)="teamBuilderService.isClearGuestsConfirmVisible.set(false)">
+  Use this at the end of the day. Every guest leaves their team and the Guests list. They aren't deleted: their statistics are kept, and next time you can bring them back with Add guest.
+</app-modal>
+}
+
+@if (teamBuilderService.isAddGuestOpen()) {
+<app-add-guest (closed)="teamBuilderService.isAddGuestOpen.set(false)" />
 }

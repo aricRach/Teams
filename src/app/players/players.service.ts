@@ -1,6 +1,6 @@
 import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersApiService} from './players-api.service';
-import {Player} from './models/player.model';
+import {Player, TeamsOptions} from './models/player.model';
 import {finalize, of, take, tap} from 'rxjs';
 import {SpinnerService} from '../spinner.service';
 import {PopupsService} from 'ui';
@@ -298,8 +298,33 @@ export class PlayersService {
   addPlayersSignal(addedPlayers: Player[], team='allPlayers') {
     this.teams.update((teams) => {
       teams[team].players.push(...addedPlayers);
-      return teams;
+      return {...teams};
     })
+  }
+
+  /** Shows players as active again: on the bench and out of the cached inactive list. No Firestore write. */
+  showAsActive(players: Player[]): void {
+    const ids = new Set(players.map(player => player.id));
+    this.addPlayersSignal(players.map(player => ({...player, isActive: true, team: TeamsOptions.AllPlayers})));
+    this.inActivePlayers.update(inactivePlayers => inactivePlayers?.filter(player => !ids.has(player.id)) ?? null);
+    this.markSavedOnBench(players);
+  }
+
+  /** Shows players as inactive: off every team and in the cached inactive list. No Firestore write. */
+  showAsInactive(players: Player[]): void {
+    const ids = new Set(players.map(player => player.id));
+    this.teams.update(teams => Object.fromEntries(Object.entries(teams).map(([key, team]) =>
+      [key, {...team, players: team.players.filter(player => !ids.has(player.id))}])));
+    const nowInactive = players.map(player => ({...player, isActive: false, team: TeamsOptions.AllPlayers}));
+    this.inActivePlayers.update(inactivePlayers => inactivePlayers ? [...inactivePlayers, ...nowInactive] : null);
+    this.markSavedOnBench(players);
+  }
+
+  /** Firestore now has these players on the bench, so "Unsaved changes" and Discard must treat the bench as saved. */
+  private markSavedOnBench(players: Player[]): void {
+    this.savedTeams.update(saved => saved
+      ? {...saved, ...Object.fromEntries(players.map(player => [player.id, this.allPlayersLabel]))}
+      : saved);
   }
 
   /** URL inside the selected group, e.g. groupUrl('statistics') -> '/home/<groupId>/statistics'. */

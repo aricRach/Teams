@@ -1,0 +1,45 @@
+<app-modal heading="Add guests" closeLabel="Done" [showSubmitButton]="false" (close)="closed.emit()">
+  <p class="hint">Search for a guest who came before, or type a new name.</p>
+  <input type="search" class="guest-search" placeholder="Guest name" aria-label="Guest name"
+    [value]="addGuestService.search()" (input)="addGuestService.search.set($any($event.target).value)"
+    (keyup.enter)="addGuestService.create()">
+
+  <div class="guest-list">
+    @if (addGuestService.isLoadingInactive()) {
+    <p class="empty">Loading guests…</p>
+    } @else if (addGuestService.hasInactiveLoadFailed()) {
+    <p class="taken">Could not load the guests who came before, so new guests can't be added right now. Close and try again.</p>
+    }
+    @for (match of addGuestService.guestMatches(); track match.guest.id) {
+    <button type="button" class="guest-option" [disabled]="addGuestService.isBusy()"
+      (click)="addGuestService.bringBackGuest.run(match.guest)">
+      <span class="guest-name">{{ match.guest.name }}</span>
+      @if (match.lastPlayed) {
+      <span class="guest-meta">last played {{ match.lastPlayed }}</span>
+      }
+      <span class="guest-action">Bring back</span>
+    </button>
+    }
+    @if (addGuestService.showNoGuestMatch()) {
+    <p class="empty">No returning guest matches.</p>
+    }
+  </div>
+
+  @if (addGuestService.nameTakenMessage()) {
+  <p class="taken">{{ addGuestService.nameTakenMessage() }}</p>
+  } @else if (addGuestService.nameTooLong()) {
+  <p class="taken">Names can be up to {{ addGuestService.nameMaxLength }} characters.</p>
+  } @else if (addGuestService.canCreate()) {
+  <div class="create-row">
+    <label class="rating-field">
+      Rating
+      <input type="number" min="1" max="10" step="0.5" [placeholder]="addGuestService.defaultRating()"
+        [value]="addGuestService.ratingDraft()" (input)="addGuestService.ratingDraft.set($any($event.target).value)">
+    </label>
+    <button type="button" class="active-btn action-btn create-btn"
+      [disabled]="addGuestService.isBusy() || !addGuestService.isRatingValid()"
+      [class.is-pending]="addGuestService.createGuest.pending()"
+      (click)="addGuestService.create()">{{ addGuestService.createLabel() }}</button>
+  </div>
+  }
+</app-modal>

@@ -10,6 +10,10 @@ import {collapseExtraTeams, restoreHiddenTeams} from '../utils/collapse-extra-te
 import {computeBalanceMeter} from '../utils/balance-meter.util';
 import {averageRating, totalRating} from '../utils/team-rating.util';
 import {PlayersDragDropTableService} from '../players/players-drag-drop-table/players-drag-drop-table.service';
+import {PopupsService} from 'ui';
+import {createMutation} from '../shared/optimistic/run-optimistic';
+import {TeamBuilderApiService} from './team-builder-api.service';
+import {filterBenchByName} from './utils/bench-search.util';
 
 
 @Injectable()
@@ -20,6 +24,8 @@ export class TeamBuilderService {
   private matchEvents = inject(MatchEventsManagerService);
   private computedStatsService = inject(ComputedStatisticsService);
   private router = inject(Router);
+  private teamBuilderApiService = inject(TeamBuilderApiService);
+  private popupsService = inject(PopupsService);
   // Reuses the existing balance algorithm and attack/defense scores.
   private balanceService = inject(PlayersDragDropTableService);
 
@@ -120,14 +126,45 @@ export class TeamBuilderService {
     this.showRating() && this.balanceMeter() && !this.balanceMeter()?.uneven ? `gap ${this.balanceMeter()?.gap}` : ''
   );
 
+  // The bench is one stored team, shown as two sections: regulars and guests. The search filters both.
   readonly benchSearch = signal('');
-  readonly benchCount = computed(() => this.teams()?.[this.bench]?.players?.length ?? 0);
-  readonly benchPlayers = computed<Player[]>(() => {
-    const players: Player[] = this.teams()?.[this.bench]?.players ?? [];
-    const query = this.benchSearch().trim().toLowerCase();
-    return query ? players.filter(player => player.name.toLowerCase().includes(query)) : players;
-  });
+  readonly guestsListId = 'guests';
+  private readonly benchRegulars = computed<Player[]>(() =>
+    (this.teams()?.[this.bench]?.players ?? []).filter((player: Player) => !player.isGuest));
+  private readonly benchGuests = computed<Player[]>(() =>
+    (this.teams()?.[this.bench]?.players ?? []).filter((player: Player) => player.isGuest));
+  readonly benchCount = computed(() => this.benchRegulars().length);
+  readonly benchPlayers = computed(() => filterBenchByName(this.benchRegulars(), this.benchSearch()));
   readonly showNoBenchMatch = computed(() => this.benchCount() > 0 && this.benchPlayers().length === 0);
+  readonly guestCount = computed(() => this.benchGuests().length);
+  readonly guestPlayers = computed(() => filterBenchByName(this.benchGuests(), this.benchSearch()));
+  readonly showNoGuestMatch = computed(() => this.guestCount() > 0 && this.guestPlayers().length === 0);
+
+  // Guests: brought in with Add guest.
+  readonly isAddGuestOpen = signal(false);
+  // Clear guests (after the day): every guest leaves the teams and the Guests list and becomes inactive.
+  readonly isClearGuestsConfirmVisible = signal(false);
+  private readonly activeGuests = computed(() =>
+    this.playersService.flattenPlayers(true, true).filter(player => player.isGuest));
+  readonly showClearGuests = computed(() => this.canEdit() && this.activeGuests().length > 0);
+  readonly clearGuestsLabel = computed(() => `Clear guests (${this.activeGuests().length})`);
+  readonly clearGuestsHeading = computed(() => {
+    const count = this.activeGuests().length;
+    return `Clear ${count} ${count === 1 ? 'guest' : 'guests'}?`;
+  });
+
+  readonly clearGuestsMutation = createMutation({
+    run: (guests: Player[]) =>
+      this.teamBuilderApiService.setPlayersActive(this.playersService.selectedGroup().id, guests, false),
+    onSuccess: (_, guests) => this.playersService.showAsInactive(guests),
+    onError: () => this.popupsService.addErrorPopOut('Could not clear the guests, so they are still here.'),
+  });
+
+  clearGuests(): void {
+    this.isClearGuestsConfirmVisible.set(false);
+    if (!this.canEdit()) return;
+    void this.clearGuestsMutation.run(this.activeGuests());
+  }
 
   /** Moves a player to a team or to the bench. */
   movePlayer(playerId: string, toKey: string): void {
@@ -145,7 +182,7 @@ export class TeamBuilderService {
   private readonly coarsePointerQuery = window.matchMedia('(pointer: coarse)');
   private readonly isTouch = signal(this.coarsePointerQuery.matches);
   readonly isDragDisabled = computed(() => !this.canEdit() || this.isTouch());
-  readonly dropListIds = computed(() => [...this.teamKeys(), this.bench]);
+  readonly dropListIds = computed(() => [...this.teamKeys(), this.bench, this.guestsListId]);
   private lastDragEndedAt = 0;
 
   dropPlayer(event: CdkDragDrop<string>): void {
@@ -169,7 +206,10 @@ export class TeamBuilderService {
         count: this.teamPlayers()[key].length,
         style: this.teamColorStyles()[key],
       }));
-    const benchOption = { key: this.bench, label: 'Bench', count: this.benchCount(), style: {} };
+    // A guest goes back to the Guests section, a regular to the Bench.
+    const benchOption = menu.player.isGuest
+      ? { key: this.bench, label: 'Guests', count: this.guestCount(), style: {} }
+      : { key: this.bench, label: 'Bench', count: this.benchCount(), style: {} };
     return menu.fromKey === this.bench ? teamOptions : [...teamOptions, benchOption];
   });
   readonly moveMenuTitle = computed(() => `Move ${this.moveMenu()?.player.name ?? ''} to`);

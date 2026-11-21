@@ -9,11 +9,12 @@ import {TeamScoreBarsComponent} from '../shared/team-score-bars/team-score-bars.
 import {ModalComponent} from '../../modals/modal/modal.component';
 import {PlayersDragDropTableService} from '../players/players-drag-drop-table/players-drag-drop-table.service';
 import {TeamBuilderService} from './team-builder.service';
+import {AddGuestComponent} from './add-guest/add-guest.component';
 
 @Component({
   selector: 'app-team-builder',
   standalone: true,
-  imports: [GameLayoutComponent, NgStyle, RouterLink, DragDropModule, PlayerViewComponent, TeamColorPickerComponent, TeamScoreBarsComponent, ModalComponent],
+  imports: [GameLayoutComponent, NgStyle, RouterLink, DragDropModule, PlayerViewComponent, TeamColorPickerComponent, TeamScoreBarsComponent, ModalComponent, AddGuestComponent],
   providers: [TeamBuilderService, PlayersDragDropTableService],
   templateUrl: './team-builder.component.html',
   styleUrl: './team-builder.component.scss',
