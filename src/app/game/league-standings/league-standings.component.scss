@@ -58,6 +58,27 @@
       vertical-align: middle;
     }
 
+    td.team .letter.is-playing::after {
+      content: 'LIVE';
+      display: inline-block;
+      white-space: nowrap;
+      margin-left: 0.4em;
+      padding: 0 0.35em;
+      border-radius: 4px;
+      background: #e74c3c;
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      line-height: 1.5;
+      vertical-align: middle;
+      animation: live-pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes live-pulse {
+      50% { opacity: 0.55; }
+    }
+
     td.team .alias {
       font-weight: normal;
       font-size: 0.75rem;

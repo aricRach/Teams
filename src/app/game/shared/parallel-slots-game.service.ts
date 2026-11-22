@@ -82,7 +82,7 @@ export abstract class ParallelSlotsGameService {
     this.assignments.set(next);
   }
 
-  readonly isMovePlayersLocked = signal(false);
+  readonly isMovePlayersLocked = signal(true);
 
   readonly lockIcon = computed(() =>
     this.isMovePlayersLocked() ? 'assets/icons/unlock.svg' : 'assets/icons/lock.svg'

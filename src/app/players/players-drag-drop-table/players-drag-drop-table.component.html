@@ -9,7 +9,7 @@
 
   <div class="all-teams-container">
     @for (teamKey of teamKeys(); track teamKey) {
-    <section class="team-card" [class.team-locked]="isTeamLocked(teamKey)" [ngStyle]="teamColorStyles()[teamKey]">
+    <section class="team-card" [class.team-locked]="isTeamInLiveGame(teamKey)" [ngStyle]="teamColorStyles()[teamKey]">
       <div class="team-header">
         @if (renamingTeamKey() === teamKey) {
         <div class="team-rename">
@@ -49,7 +49,7 @@
             [disabled]="isSlotButtonDisabled(teamKey, slot)" (click)="setTeamSlot(teamKey, slot)">G{{ slot }}</button>
           }
           <button type="button" [class.active]="!teamSlots()[teamKey]"
-            [disabled]="isTeamLocked(teamKey)" (click)="setTeamSlot(teamKey, null)">–</button>
+            [disabled]="isTeamInLiveGame(teamKey)" (click)="setTeamSlot(teamKey, null)">–</button>
         </div>
         }
       </div>

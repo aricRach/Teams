@@ -124,14 +124,14 @@ export class PlayersDragDropTableComponent {
   }
 
   isSlotButtonDisabled(teamKey: string, slot: number): boolean {
-    if (this.isTeamLocked(teamKey)) return true;
+    if (this.isTeamInLiveGame(teamKey)) return true;
     if (this.teamSlots()[teamKey] === slot) return false;
     const isEmpty = !this.clonedTeams()?.[teamKey]?.players?.length;
     return isEmpty || this.slotTeamCount(slot, teamKey) >= 2;
   }
 
   setTeamSlot(teamKey: string, slot: number | null) {
-    if (this.isTeamLocked(teamKey)) return;
+    if (this.isTeamInLiveGame(teamKey)) return;
     const current = { ...this.teamSlots() };
     if (slot === null || current[teamKey] === slot) {
       delete current[teamKey];
@@ -140,6 +140,12 @@ export class PlayersDragDropTableComponent {
       current[teamKey] = slot;
     }
     this.teamSlotChange.emit(current);
+  }
+
+  // Picking teams for a game depends only on the team not being in a running game,
+  // not on the drag-and-drop lock.
+  isTeamInLiveGame(teamKey: string): boolean {
+    return this.lockedTeamKeys().includes(teamKey);
   }
 
   isTeamLocked(teamKey: string): boolean {

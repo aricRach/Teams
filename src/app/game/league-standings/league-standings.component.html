@@ -21,7 +21,7 @@
         <tr>
           <td class="team">
             <div class="team-cell">
-              <span class="letter" [appTeamColor]="colors()[row.teamKey]">{{ teamLetter(row.teamKey) }}</span>
+              <span class="letter" [class.is-playing]="isPlaying(row.teamKey)" [appTeamColor]="colors()[row.teamKey]">{{ teamLetter(row.teamKey) }}</span>
               @if (teamAlias(row.teamKey); as alias) {
               <span class="alias">{{ alias }}</span>
               }

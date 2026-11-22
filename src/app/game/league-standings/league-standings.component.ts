@@ -15,6 +15,11 @@ export class LeagueStandingsComponent {
   title = input<string>('League table');
   aliases = input<Record<string, string>>({});
   colors = input<Record<string, string>>({});
+  playingTeamKeys = input<string[]>([]);
+
+  isPlaying(teamKey: string): boolean {
+    return this.playingTeamKeys().includes(teamKey);
+  }
 
   teamLetter(teamKey: string): string {
     return defaultTeamLetter(teamKey);
