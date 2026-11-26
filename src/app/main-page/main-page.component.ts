@@ -9,6 +9,7 @@ import {distinctUntilChanged, map, Subscription} from 'rxjs';
 import {PlayersService} from '../players/players.service';
 import {MenuAction} from 'ui';
 import {AdminControlService} from '../user/admin-control.service';
+import {LiveMatchResumeService} from '../live-match-resume/live-match-resume.service';
 
 @Component({
   selector: 'app-main-page',
@@ -28,6 +29,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private popupsService = inject(PopupsService);
+  private liveMatchResumeService = inject(LiveMatchResumeService);
 
   breadcrumbs = signal([]);
 
@@ -113,6 +115,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     ).subscribe(() => {
       this.adminControlService.cleanAdminControlState();
       this.playersService.loadGroupPlayers();
+      void this.liveMatchResumeService.checkForLiveMatches();
     }));
 
     this.subscription.add(this.breadcrumbsService.getBreadcrumbs().subscribe((a) => {

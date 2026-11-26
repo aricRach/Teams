@@ -16,6 +16,8 @@ export class StopwatchComponent {
   time = 0;
   interval: any;
   running = false;
+  // True from the first start until reset/clear, even while paused.
+  private hasStarted = false;
 
   timeEndEvent = output();
   timeStartEvent = output();
@@ -25,10 +27,25 @@ export class StopwatchComponent {
   start(): void {
     if (!this.running) {
       this.running = true;
+      this.hasStarted = true;
       this.startTime = Date.now() - this.pausedTime; // Adjust startTime to include paused time
       this.interval = setInterval(() => this.updateTime(), 1000);
       this.timeStartEvent.emit();
     }
+  }
+
+  /** Runs again from the given time without emitting a start, e.g. for a game resumed after a refresh. */
+  resumeFrom(elapsedMs: number): void {
+    if (this.running) return;
+    this.running = true;
+    this.hasStarted = true;
+    this.time = elapsedMs;
+    this.startTime = Date.now() - elapsedMs;
+    this.interval = setInterval(() => this.updateTime(), 1000);
+  }
+
+  isUnused(): boolean {
+    return !this.hasStarted;
   }
 
   pause(): void {
@@ -44,6 +61,7 @@ export class StopwatchComponent {
     this.pause();
     this.time = 0;
     this.pausedTime = 0;
+    this.hasStarted = false;
     this.timeResetEvent.emit();
   }
 
@@ -54,6 +72,7 @@ export class StopwatchComponent {
   clear(): void {
     clearInterval(this.interval);
     this.running = false;
+    this.hasStarted = false;
     this.time = 0;
     this.pausedTime = 0;
     this.startTime = 0;

@@ -72,4 +72,9 @@ No success popup is needed when the UI change itself is the feedback.
 ## Style
 
 Prefer plain, simple code — an `@if` over a clever abstraction. Lazy-load new routes with `loadComponent`.
+
+Avoid `effect` and `untracked` unless there's no simpler way. First try a `computed`, a `linkedSignal`
+(a value that follows a source but can still be set), or doing the work directly in the action that
+causes the change. Use an effect only when the alternative costs clearly more (e.g. restructuring
+state that many methods write to), and add a comment saying why it's needed.
 Verify with `npx ng build --configuration development`.

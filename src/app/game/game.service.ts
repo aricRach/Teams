@@ -1,4 +1,5 @@
-import {computed, inject, Injectable, signal} from '@angular/core';
+import {computed, inject, Injectable, linkedSignal} from '@angular/core';
+import {LiveMatchResumeService} from '../live-match-resume/live-match-resume.service';
 import {firstValueFrom} from 'rxjs';
 import {PlayersService} from '../players/players.service';
 import {GameDetails, GameStatus, MatchEventsManagerService} from '../match-event-manager/services/match-events-manager.service';
@@ -18,11 +19,21 @@ export class GameService {
   navigationService = inject(NavigationService);
   computedStatsService = inject(ComputedStatisticsService);
   private modalsService = inject(ModalsService);
+  private liveMatchResumeService = inject(LiveMatchResumeService);
 
   computedStats = computed(() => this.computedStatsService.statsMap())
 
-  // A running match keeps its own mode; otherwise always start in League.
-  readonly mode = signal<GameMode>(this.matchEventsService.liveMode() ?? 'league');
+  // A running match sets the mode, also when it's resumed while this page is open. When it ends the
+  // mode stays as it was; with no match yet, start in League.
+  readonly mode = linkedSignal<GameMode | null, GameMode>({
+    source: this.matchEventsService.liveMode,
+    computation: (liveMode, previous) => liveMode ?? previous?.value ?? 'league',
+  });
+
+  constructor() {
+    // Live games that weren't resumed on this device: ask again before new games are started on top of them.
+    void this.liveMatchResumeService.checkForLiveMatches();
+  }
   readonly teamCountOptions = [2, 3, 4];
   // The game page's team count. The game services and the layout read it from here.
   readonly teamCount = this.playersService.numberOfTeams;

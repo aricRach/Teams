@@ -33,6 +33,14 @@ export interface StartMatchOptions {
 
 export const SINGLE_SLOT = 1;
 
+/** A match running on this device, with what the game page needs to show it again after a refresh. */
+export interface LiveMatch {
+  id: string;
+  teamKeys: string[];
+  startedAtMs: number;
+  sessionId?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -48,32 +56,36 @@ export class MatchEventsManagerService {
     return user?.email ?? user?.uid ?? '';
   }
 
-  private readonly liveMatches = signal<Record<number, string | null>>({});
+  private readonly liveMatches = signal<Record<number, LiveMatch>>({});
+
+  readonly liveMatchesBySlot = this.liveMatches.asReadonly();
 
   readonly liveMode = signal<'single' | 'league' | null>(null);
 
   readonly liveMatchId = computed(() => this.liveMatchIdFor(SINGLE_SLOT));
 
-  readonly hasAnyLiveMatch = computed(() =>
-    Object.values(this.liveMatches()).some(Boolean)
+  readonly hasAnyLiveMatch = computed(() => Object.keys(this.liveMatches()).length > 0);
+
+  // The live league games all belong to the same session.
+  readonly liveSessionId = computed(() =>
+    Object.values(this.liveMatches()).find(liveMatch => liveMatch.sessionId)?.sessionId ?? null
   );
 
   liveMatchIdFor(slot = SINGLE_SLOT): string | null {
-    return this.liveMatches()[slot] ?? null;
+    return this.liveMatches()[slot]?.id ?? null;
   }
 
   liveSlots(): number[] {
-    return Object.entries(this.liveMatches())
-      .filter(([, id]) => !!id)
-      .map(([slot]) => Number(slot))
+    return Object.keys(this.liveMatches())
+      .map(Number)
       .sort((a, b) => a - b);
   }
 
-  private setLiveMatch(slot: number, matchId: string | null): void {
+  private setLiveMatch(slot: number, liveMatch: LiveMatch | null): void {
     this.liveMatches.update(current => {
       const next = { ...current };
-      if (matchId) {
-        next[slot] = matchId;
+      if (liveMatch) {
+        next[slot] = liveMatch;
       } else {
         delete next[slot];
       }
@@ -97,21 +109,22 @@ export class MatchEventsManagerService {
     }
 
     try {
+      const startedAt = new Date();
+      const teamKeys = options.teamKeys ?? [];
+      // mode, slot and teamKeys are saved for every match, so it can be resumed after a refresh.
       const matchDoc: Omit<MatchRecord, 'id'> = {
         status: 'live',
-        startedAt: new Date(),
+        startedAt,
         createdBy: this.getActorId(),
-        teamAliasSnapshot: { ...this.playersService.teamAliases() }
+        teamAliasSnapshot: { ...this.playersService.teamAliases() },
+        mode,
+        slot,
+        teamKeys
       };
-      if (mode === 'league') {
-        matchDoc.mode = 'league';
-        matchDoc.slot = slot;
-        if (options.sessionId) matchDoc.sessionId = options.sessionId;
-        if (options.teamKeys?.length) matchDoc.teamKeys = options.teamKeys;
-      }
+      if (mode === 'league' && options.sessionId) matchDoc.sessionId = options.sessionId;
 
       const id = await this.matchEventsApiService.createMatch(selectedGroup.id, matchDoc);
-      this.setLiveMatch(slot, id);
+      this.setLiveMatch(slot, { id, teamKeys, startedAtMs: startedAt.getTime(), sessionId: matchDoc.sessionId });
       this.liveMode.set(mode);
       return id;
     } catch (e) {
@@ -138,6 +151,22 @@ export class MatchEventsManagerService {
     await this.matchEventsApiService.deleteEvent(groupId, matchId, eventSnapshot.id);
   }
 
+  /** Marks matches that are live in the DB (e.g. after a page refresh) as running on this device again. */
+  resumeLiveMatches(matches: MatchRecord[]): void {
+    for (const match of matches) {
+      if (!match.id || !match.slot || !match.teamKeys) continue;
+      this.setLiveMatch(match.slot, {
+        id: match.id,
+        teamKeys: match.teamKeys,
+        startedAtMs: match.startedAt.toMillis(),
+        sessionId: match.sessionId
+      });
+    }
+    if (this.hasAnyLiveMatch()) {
+      this.liveMode.set(matches[0].mode ?? 'single');
+    }
+  }
+
   async abandonLiveMatchOnReset(slot = SINGLE_SLOT): Promise<void> {
     const selectedGroup = this.playersService.selectedGroup();
     const matchId = this.liveMatchIdFor(slot);
@@ -145,21 +174,23 @@ export class MatchEventsManagerService {
     this.setLiveMatch(slot, null);
     if (!selectedGroup?.id || !matchId) return;
     try {
-      const eventsObs = this.matchEventsApiService.getEvents(selectedGroup.id, matchId);
-      const events = await firstValueFrom(eventsObs);
-
-      const goalEventIdsToDelete = events
-        .filter(event => isScoringEvent(event) && event.id)
-        .map(event => event.id!);
-      await this.matchEventsApiService.deleteEvents(selectedGroup.id, matchId, goalEventIdsToDelete);
-
-      await this.matchEventsApiService.updateMatch(selectedGroup.id, matchId, {
-        status: 'abandoned',
-        endedAt: new Date()
-      });
+      await this.abandonMatch(selectedGroup.id, matchId);
     } catch (e) {
       console.error('Failed to rollback abandoned match events:', e);
     }
+  }
+
+  /** Deletes the match's goals and marks it abandoned. */
+  async abandonMatch(groupId: string, matchId: string): Promise<void> {
+    const events = await firstValueFrom(this.matchEventsApiService.getEvents(groupId, matchId));
+    const goalEventIdsToDelete = events
+      .filter(event => isScoringEvent(event) && event.id)
+      .map(event => event.id!);
+    await this.matchEventsApiService.deleteEvents(groupId, matchId, goalEventIdsToDelete);
+    await this.matchEventsApiService.updateMatch(groupId, matchId, {
+      status: 'abandoned',
+      endedAt: new Date()
+    });
   }
 
   async recordPlayerGoalFromTimer(player: Player, teamKey: string, elapsedMs: number, slot = SINGLE_SLOT): Promise<void> {
