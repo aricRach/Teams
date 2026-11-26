@@ -1,4 +1,4 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, Injectable, linkedSignal } from '@angular/core';
 import { StartMatchOptions } from '../../match-event-manager/services/match-events-manager.service';
 import { ParallelSlotsGameService } from '../shared/parallel-slots-game.service';
 import { computeStandings, StandingsRow } from '../league-standings/standings.util';
@@ -16,7 +16,11 @@ export class LeagueGameService extends ParallelSlotsGameService {
     super(LEAGUE_SLOTS, 1);
   }
 
-  readonly sessionId = signal<string | null>(null);
+  // Resumed league games bring back their session, so the next games join the same league table.
+  readonly sessionId = linkedSignal<string | null, string | null>({
+    source: this.matchEvents.liveSessionId,
+    computation: (liveSessionId, previous) => liveSessionId ?? previous?.value ?? null,
+  });
 
   readonly canFinishSession = computed(() => !!this.sessionId() && !this.anySlotLive());
 

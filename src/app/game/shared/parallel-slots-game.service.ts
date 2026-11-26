@@ -5,7 +5,8 @@ import { of } from 'rxjs';
 import { PopupsService } from 'ui';
 import { PlayersService } from '../../players/players.service';
 import { AdminControlService } from '../../user/admin-control.service';
-import { MatchEventsManagerService, StartMatchOptions } from '../../match-event-manager/services/match-events-manager.service';
+import { LiveMatch, MatchEventsManagerService, StartMatchOptions } from '../../match-event-manager/services/match-events-manager.service';
+import { countTeamsToShow } from './utils/team-count-to-show.util';
 import { MatchEventsApiService } from '../../match-event-manager/services/match-events-api.service';
 import { AllMatchDataService } from '../../match-event-manager/services/all-match-data.service';
 import { NavigationService } from '../../shared/navigation/navigation.service';
@@ -21,6 +22,7 @@ export interface SlotViewModel {
   teamKeys: string[];
   ready: boolean;
   live: boolean;
+  startedAtMs: number | null;
   score: Record<string, number>;
   scorers: PanelScorer[];
 }
@@ -55,10 +57,38 @@ export abstract class ParallelSlotsGameService {
             : of([] as MatchEventRecord[])
       })
     ]));
+    // An effect because games can be resumed while this page is open, and `assignments` is user-edited state
+    // that many methods write to, so it can't be a computed. untracked: it reads and writes assignments itself.
+    effect(() => {
+      const liveMatches = this.matchEvents.liveMatchesBySlot();
+      untracked(() => this.showLiveMatches(liveMatches));
+    });
     effect(() => {
       const teamCount = this.teamCount();
       untracked(() => this.adjustToTeamCount(teamCount));
     });
+  }
+
+  // Puts the teams of live games back in their game, e.g. after the games were resumed from a
+  // refresh. For a game started on this page they're already there, so nothing changes.
+  private showLiveMatches(liveMatches: Record<number, LiveMatch>): void {
+    const liveSlots = this.slots.filter(slot => liveMatches[slot]);
+    const missingTeams = liveSlots.some(slot =>
+      liveMatches[slot].teamKeys.some(teamKey => this.assignments()[teamKey] !== slot));
+    if (!missingTeams) return;
+
+    const next = { ...this.assignments() };
+    for (const slot of liveSlots) {
+      for (const [teamKey, assignedSlot] of Object.entries(next)) {
+        if (assignedSlot === slot) delete next[teamKey];
+      }
+      for (const teamKey of liveMatches[slot].teamKeys) next[teamKey] = slot;
+    }
+    this.assignments.set(next);
+    if (liveSlots.some(slot => slot !== this.slots[0])) this.matchCount.set(2);
+
+    const teamCountNeeded = countTeamsToShow(Object.keys(this.playersService.getTeams()), Object.keys(next));
+    if (teamCountNeeded > this.teamCount()) this.playersService.setNumberOfTeams(teamCountNeeded);
   }
 
   // Hidden teams can't play, and two parallel matches need 4 teams, so fall back to one match.
@@ -127,6 +157,7 @@ export abstract class ParallelSlotsGameService {
       teamKeys: this.slotTeams(slot),
       ready: this.slotReady(slot),
       live: this.slotLive(slot),
+      startedAtMs: this.matchEvents.liveMatchesBySlot()[slot]?.startedAtMs ?? null,
       score: this.score(slot),
       scorers: this.scorers(slot)
     }))
@@ -184,7 +215,7 @@ export abstract class ParallelSlotsGameService {
   updateTeams(teams: any): void {
     // Hidden teams are always empty here: lowering the count moves their players to the bench.
     this.playersService.setTeams(teams);
-    // Not saved here: the teams are saved when a game ends (GameService.endGame).
+    // Not saved here: the teams are saved when a game starts (startGame) and ends (GameService.endGame).
     this.unpickEmptyTeams();
   }
 
@@ -271,6 +302,8 @@ export abstract class ParallelSlotsGameService {
       return false;
     }
 
+    // Save the lineups now, so a refresh during the game brings back the teams that are playing.
+    void this.playersService.savePlayers.run(undefined, true);
     this.navigationService.lockNavigation();
     this.activeSlot.set(slot);
     return true;
