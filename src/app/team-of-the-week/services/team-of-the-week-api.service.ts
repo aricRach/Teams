@@ -46,6 +46,12 @@ export class TeamOfTheWeekApiService {
         return snapshotData['explanation'] ? snapshotData : null;
       }
 
+      // Nobody played that date (e.g. its matches were deleted): keep any saved team, never ask the AI.
+      if (!players.length) {
+        if (createNew) throw new Error('NO_PLAYERS');
+        return snapshotData['explanation'] ? snapshotData : null;
+      }
+
       if (totalTries >= TOTW_MAX_TOTAL_GENERATES) {
         throw new Error('LIMIT_TOTAL');
       }

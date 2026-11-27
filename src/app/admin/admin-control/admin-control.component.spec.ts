@@ -5,6 +5,7 @@ import { provideRouter } from '@angular/router';
 import { PopupsService } from 'ui';
 import { PlayersService } from '../../players/players.service';
 import { PlayersApiService } from '../../players/players-api.service';
+import { MatchEventsApiService } from '../../match-event-manager/services/match-events-api.service';
 import { AdminControlComponent } from './admin-control.component';
 
 describe('AdminControlComponent', () => {
@@ -22,6 +23,7 @@ describe('AdminControlComponent', () => {
           useValue: { groupUrl: () => '/home/group-1/manage-group', isGroupOwner: signal(false), selectedGroup: signal({ id: 'group-1' }) },
         },
         { provide: PlayersApiService, useValue: { deleteAllStatsAndSpecialCollections: () => Promise.resolve() } },
+        { provide: MatchEventsApiService, useValue: { deleteAllFinishedMatches: () => Promise.resolve() } },
         { provide: PopupsService, useValue: { addSuccessPopOut: () => {}, addErrorPopOut: () => {} } },
       ],
     })

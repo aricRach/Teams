@@ -58,13 +58,13 @@
   @if (adminControlDialogService.showDeleteButton()) {
     <section class="section danger-zone">
       <h3>Danger zone</h3>
-      <small>Deletes all statistics, Team of the Week and Fantasy data of this group.</small>
+      <small>Deletes all matches, statistics, Team of the Week and Fantasy data of this group.</small>
       <button type="button" class="alert-btn active-btn" (click)="adminControlDialogService.askToDeleteAll()">Delete all data</button>
     </section>
   } @else if (adminControlDialogService.isConfirmingDelete()) {
     <section class="section danger-zone">
       <h3>Danger zone</h3>
-      <small><b>This can't be undone.</b> Delete all statistics, Team of the Week and Fantasy data?</small>
+      <small><b>This can't be undone.</b> Delete all matches, statistics, Team of the Week and Fantasy data?</small>
       <div class="confirm-row">
         <button type="button" class="alert-btn active-btn" [disabled]="adminControlDialogService.deleteAllData.pending()" (click)="adminControlDialogService.deleteAllData.run()">Delete</button>
         <button type="button" class="text-btn" (click)="adminControlDialogService.cancelDeleteAll()">Cancel</button>

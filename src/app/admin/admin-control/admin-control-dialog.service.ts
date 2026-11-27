@@ -6,6 +6,7 @@ import {PopupsService} from 'ui';
 import {PlayersService} from '../../players/players.service';
 import {PlayersApiService} from '../../players/players-api.service';
 import {createMutation} from '../../shared/optimistic/run-optimistic';
+import {MatchEventsApiService} from '../../match-event-manager/services/match-events-api.service';
 
 const ADMIN_CODE = '2626';
 
@@ -17,6 +18,7 @@ export class AdminControlDialogService {
   private playersService = inject(PlayersService);
   private playersApiService = inject(PlayersApiService);
   private popupsService = inject(PopupsService);
+  private matchEventsApiService = inject(MatchEventsApiService);
 
   constructor() {
     // A shortcut save still waiting must not run after the dialog closed.
@@ -88,12 +90,17 @@ export class AdminControlDialogService {
   }
 
   readonly deleteAllData = createMutation({
-    run: () => this.playersApiService.deleteAllStatsAndSpecialCollections(this.playersService.selectedGroup().id),
+    run: async () => {
+      const groupId = this.playersService.selectedGroup().id;
+      await this.matchEventsApiService.deleteAllFinishedMatches(groupId);
+      await this.playersApiService.deleteAllStatsAndSpecialCollections(groupId);
+    },
     onSuccess: () => {
       this.isAskingToDelete.set(false);
-      this.popupsService.addSuccessPopOut('All statistics, Team of the Week and Fantasy data was deleted.');
+      this.popupsService.addSuccessPopOut('All matches, statistics, Team of the Week and Fantasy data was deleted.');
     },
-    onError: () => this.popupsService.addErrorPopOut('Could not delete the data, so nothing was changed.'),
+    // Large groups delete in several batches, so a failure can leave part of the data deleted.
+    onError: () => this.popupsService.addErrorPopOut('Could not delete all the data. Try again to finish deleting.'),
   });
 
   close() {

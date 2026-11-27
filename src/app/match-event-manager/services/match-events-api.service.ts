@@ -4,6 +4,7 @@ import {
   collection,
   collectionData,
   doc,
+  DocumentReference,
   Firestore,
   getDocs,
   orderBy,
@@ -17,6 +18,7 @@ import {
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { MatchEventRecord, MatchRecord } from '../models/match-event.model';
+import { deleteInBatches } from '../../shared/firestore/delete-in-batches';
 
 @Injectable({
   providedIn: 'root'
@@ -41,6 +43,24 @@ export class MatchEventsApiService {
       });
     });
     await batch.commit();
+  }
+
+  /**
+   * Deletes every match that is not live, with its events (Firestore does not delete subcollections
+   * with their parent). Live matches are kept so a game in progress can still save its result.
+   */
+  async deleteAllFinishedMatches(groupId: string): Promise<void> {
+    const matchesSnap = await getDocs(collection(this.firestore, `groups/${groupId}/matches`));
+    const finishedMatchDocs = matchesSnap.docs.filter(matchDoc => matchDoc.data()['status'] !== 'live');
+    const eventsSnaps = await Promise.all(
+      finishedMatchDocs.map(matchDoc =>
+        getDocs(collection(this.firestore, `groups/${groupId}/matches/${matchDoc.id}/events`))
+      )
+    );
+    const refsToDelete: DocumentReference[] = [];
+    eventsSnaps.forEach(eventsSnap => eventsSnap.forEach(eventDoc => refsToDelete.push(eventDoc.ref)));
+    finishedMatchDocs.forEach(matchDoc => refsToDelete.push(matchDoc.ref));
+    await deleteInBatches(this.firestore, refsToDelete);
   }
 
   async createMatch(groupId: string, match: Omit<MatchRecord, 'id'>): Promise<string> {

@@ -4,6 +4,7 @@ import {
   collectionData,
   deleteField,
   doc,
+  DocumentReference,
   Firestore,
   getDoc,
   getDocs,
@@ -17,6 +18,7 @@ import {Auth} from '@angular/fire/auth';
 import {from, map, Observable} from 'rxjs';
 import {DuplicatePlayerError} from './errors/duplicate-player-error';
 import {Player} from './models/player.model';
+import {deleteInBatches} from '../shared/firestore/delete-in-batches';
 
 @Injectable({
   providedIn: 'root'
@@ -181,32 +183,32 @@ export class PlayersApiService {
   }
 
 
+  /** Deletes player statistics, Team of the Week and fantasy drafts (matches are deleted by MatchEventsApiService). */
   async deleteAllStatsAndSpecialCollections(groupId: string) {
-    const batch = writeBatch(this.firestore);
+    const refsToDelete: DocumentReference[] = [];
 
-    // --- 1. Delete all player statistics ---
-    const playersCol = collection(this.firestore, `groups/${groupId}/players`);
-    const playersSnap = await getDocs(playersCol);
-
+    // Player statistics live under each player.
+    const playersSnap = await getDocs(collection(this.firestore, `groups/${groupId}/players`));
     const statsSnaps = await Promise.all(
       playersSnap.docs.map(playerDoc =>
         getDocs(collection(this.firestore, `groups/${groupId}/players/${playerDoc.id}/statistics`))
       )
     );
-    statsSnaps.forEach(statsSnap => statsSnap.forEach(statDoc => batch.delete(statDoc.ref)));
+    statsSnaps.forEach(statsSnap => statsSnap.forEach(statDoc => refsToDelete.push(statDoc.ref)));
 
-    // // --- 2. Delete all Team Of The Week ---
-    const totwCol = collection(this.firestore, `groups/${groupId}/teamOfTheWeek`);
-    const totwSnap = await getDocs(totwCol);
-    totwSnap.forEach(totwDoc => batch.delete(totwDoc.ref));
+    const totwSnap = await getDocs(collection(this.firestore, `groups/${groupId}/teamOfTheWeek`));
+    totwSnap.forEach(totwDoc => refsToDelete.push(totwDoc.ref));
 
-    // // --- 3. Delete all Fantasy Drafts ---
-    const fantasyCol = collection(this.firestore, `groups/${groupId}/fantasyDrafts`);
-    const fantasySnap = await getDocs(fantasyCol);
-    fantasySnap.forEach(fantasyDoc => batch.delete(fantasyDoc.ref));
+    const fantasySnap = await getDocs(collection(this.firestore, `groups/${groupId}/fantasyDrafts`));
+    const userPicksSnaps = await Promise.all(
+      fantasySnap.docs.map(fantasyDoc =>
+        getDocs(collection(this.firestore, `groups/${groupId}/fantasyDrafts/${fantasyDoc.id}/userPicks`))
+      )
+    );
+    userPicksSnaps.forEach(userPicksSnap => userPicksSnap.forEach(pickDoc => refsToDelete.push(pickDoc.ref)));
+    fantasySnap.forEach(fantasyDoc => refsToDelete.push(fantasyDoc.ref));
 
-    // --- Commit ---
-    await batch.commit();
+    await deleteInBatches(this.firestore, refsToDelete);
   }
 }
 

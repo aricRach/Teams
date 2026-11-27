@@ -1,4 +1,4 @@
-import {computed, inject, signal} from '@angular/core';
+import {computed, inject, linkedSignal, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {NavigationEnd, Router} from '@angular/router';
 import {toSignal} from '@angular/core/rxjs-interop';
@@ -9,12 +9,18 @@ import {ComputedStatisticsService} from './computed-statistics.service';
 export class StatisticsService {
 
   selectAllLabel = signal('Select All');
-  private selectedDate = signal(this.selectAllLabel());
   private computedStatsService = inject(ComputedStatisticsService);
 
   allUniqueDates = computed(() =>
     [this.selectAllLabel(), ...this.computedStatsService.allDatesWithActivity()]
   );
+
+  /** Falls back to "Select All" when the picked date no longer has games (e.g. after all data was deleted). */
+  private selectedDate = linkedSignal<string[], string>({
+    source: this.allUniqueDates,
+    computation: (dates, previous) =>
+      previous && dates.includes(previous.value) ? previous.value : this.selectAllLabel(),
+  });
 
   getSelectedDate = computed(() => this.selectedDate());
 
