@@ -3,6 +3,7 @@ import {AllMatchDataService} from '../../match-event-manager/services/all-match-
 import {Statistics} from '../../players/models/player.model';
 import {compareDates, formatDateToString} from '../../utils/date-utils';
 import {buildMatchSummaries, MatchSummary} from '../utils/match-summary.util';
+import {buildLeagueDays, LeagueDay} from '../utils/championships.util';
 
 @Injectable({providedIn: 'root'})
 export class ComputedStatisticsService {
@@ -18,6 +19,11 @@ export class ComputedStatisticsService {
   /** Completed matches (who was on which side, winning goal), oldest first. */
   readonly matchSummaries = computed<MatchSummary[]>(() =>
     buildMatchSummaries(this.allMatchData.matchesWithEvents())
+  );
+
+  /** League days that crowned a champion, for the championships stat. */
+  readonly leagueDays = computed<LeagueDay[]>(() =>
+    buildLeagueDays(this.allMatchData.matchesWithEvents().map(({match}) => match))
   );
 
   readonly statsMap = computed<Map<string, Map<string, Statistics>>>(() => {

@@ -71,7 +71,13 @@ No success popup is needed when the UI change itself is the feedback.
 
 ## Style
 
-Prefer plain, simple code — an `@if` over a clever abstraction. Lazy-load new routes with `loadComponent`.
+Prefer plain, simple code — an `@if` over a clever abstraction.
+
+Keep complexity in check when it stays simple: use a `Map`/`Set` for lookups and grouping instead of
+`find`/`includes`/`filter` inside a loop, and push into a grouped array instead of copying it
+(`[...list, item]`) on every step. Don't add a `Map` where a short loop over a handful of items is clearer.
+
+Lazy-load new routes with `loadComponent`.
 
 Avoid `effect` and `untracked` unless there's no simpler way. First try a `computed`, a `linkedSignal`
 (a value that follows a source but can still be set), or doing the work directly in the action that
