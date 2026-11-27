@@ -16,7 +16,8 @@ import {
   CHART_MODES, CHART_STATS, ChartMode, ChartStat, DEFAULT_CHART_MODE, DEFAULT_CHART_STAT, parseChartMode, parseChartStat,
 } from './utils/chart-settings.util';
 import {buildChartCaption, buildChartDataset, buildChartOptions} from './utils/chart.util';
-import {buildStatTableRows} from './utils/stat-table.util';
+import {buildStatTableRows, StatTableTotals} from './utils/stat-table.util';
+import {countChampionships, leagueDaysOnDates} from '../utils/championships.util';
 import {buildPerformanceExample} from './utils/performance-example.util';
 import {buildHeadToHeadView} from './utils/head-to-head-view.util';
 
@@ -152,18 +153,33 @@ export class PlayerStatsService {
 
   // ---------- stat table ----------
 
+  private leagueDays = computed(() => leagueDaysOnDates(this.computedStatisticsService.leagueDays(), this.dates()));
+
+  private championships = computed(() => countChampionships(this.leagueDays()));
+
+  private tableTotalsFor(playerId: string): StatTableTotals {
+    const championshipRecord = this.championships().get(playerId);
+    return {
+      ...totalsForDates(this.statsByDateFor(playerId), this.dates()),
+      championships: championshipRecord?.championships ?? 0,
+      leagueDays: championshipRecord?.leagueDays ?? 0,
+    };
+  }
+
   private selectedPlayersTotals = computed(() =>
-    this.selectedPlayers().map(player => totalsForDates(this.statsByDateFor(player.id), this.dates()))
+    this.selectedPlayers().map(player => this.tableTotalsFor(player.id))
   );
 
   /** Active non-guest players who played in the range; used for the rank in the single-player view. */
   private groupTotals = computed(() =>
     this.playersService.flattenPlayers(true, false)
-      .map((player: Player) => totalsForDates(this.statsByDateFor(player.id), this.dates()))
+      .map((player: Player) => this.tableTotalsFor(player.id))
       .filter(totals => totals.games > 0)
   );
 
-  tableRows = computed(() => buildStatTableRows(this.selectedPlayersTotals(), this.groupTotals()));
+  tableRows = computed(() =>
+    buildStatTableRows(this.selectedPlayersTotals(), this.groupTotals(), this.leagueDays().length > 0)
+  );
 
   // ---------- performance explainer ----------
 

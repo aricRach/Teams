@@ -1,6 +1,7 @@
 import { Player } from '../../players/models/player.model';
 import { countWinningGoals, duoRecords, longestWinStreaks } from './utils/match-records.util';
 import { MatchSummary } from '../utils/match-summary.util';
+import { countChampionships, LeagueDay } from '../utils/championships.util';
 import { PlayerTotals } from '../utils/player-totals.util';
 import { plural } from '../utils/stats-format.util';
 import { percentOf, ratio, roundTo } from '../utils/stats-math.util';
@@ -84,7 +85,7 @@ function buildDuoEntries(players: Player[], matches: MatchSummary[], minDuoMatch
  * `playersWithTotals` holds only players who played in the range.
  */
 export function buildLeaderCards(
-  players: Player[], playersWithTotals: PlayerWithTotals[], matches: MatchSummary[], gameDayCount: number,
+  players: Player[], playersWithTotals: PlayerWithTotals[], matches: MatchSummary[], gameDayCount: number, leagueDays: LeagueDay[],
 ): LeaderCardContent[] {
   const matchCount = matches.length;
   const minMatches = minimumCount(matchCount, MIN_SHARE_FOR_PLAYER);
@@ -100,7 +101,21 @@ export function buildLeaderCards(
   const card = (title: string, description: string, entries: LeaderEntry[], better: 'high' | 'low' = 'high'): LeaderCardContent =>
     ({ title, description, entries, better });
 
+  const championships = countChampionships(leagueDays);
+  const championEntries = playersWithTotals
+    .map(({ player }) => {
+      const record = championships.get(player.id) ?? { championships: 0, leagueDays: 0 };
+      return playerEntry(player, record.championships, record.championships, `of ${plural(record.leagueDays, 'league day')}`);
+    })
+    .filter(entry => entry.value > 0);
+  // Only league mode crowns champions, so the card is left out when nobody in the range won one.
+  const championsCards = championEntries.length
+    ? [card('Champions', 'Most league days won: 1st in the league table that day', championEntries)]
+    : [];
+
   return [
+    ...championsCards,
+
     card('Top scorer', 'Most goals',
       countEntries(playersWithTotals, ({ totals }) => totals.goals)),
 

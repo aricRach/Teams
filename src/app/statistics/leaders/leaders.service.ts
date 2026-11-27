@@ -10,6 +10,7 @@ import {totalsForDates} from '../utils/player-totals.util';
 import {rankTopThree} from './utils/ranking.util';
 import {datesInRange, parseRange, rangeQueryParam, STATS_RANGES, StatsRange} from '../utils/stats-range.util';
 import {buildLeaderCards} from './leaders.util';
+import {leagueDaysOnDates} from '../utils/championships.util';
 
 export interface LeaderCard {
   title: string;
@@ -82,7 +83,8 @@ export class LeadersService {
 
   cards = computed<LeaderCard[]>(() => {
     const range = rangeQueryParam(this.range());
-    return buildLeaderCards(this.players(), this.playersWithTotals(), this.matches(), this.dates().length)
+    const leagueDays = leagueDaysOnDates(this.computedStatisticsService.leagueDays(), this.dates());
+    return buildLeaderCards(this.players(), this.playersWithTotals(), this.matches(), this.dates().length, leagueDays)
       .map(card => ({
         title: card.title,
         description: card.description,

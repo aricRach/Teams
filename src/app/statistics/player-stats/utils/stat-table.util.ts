@@ -1,6 +1,9 @@
 import { PlayerTotals } from '../../utils/player-totals.util';
 import { percentOf, ratio, roundTo } from '../../utils/stats-math.util';
 
+/** The totals plus championships won and league days played, which come from the league days instead of the game-day stats. */
+export type StatTableTotals = PlayerTotals & { championships: number; leagueDays: number };
+
 interface StatRow {
   label: string;
   sub?: string;
@@ -8,10 +11,12 @@ interface StatRow {
   better: 'high' | 'low';
   /** Shows the group rank when one player is selected. */
   rankable: boolean;
-  value: (totals: PlayerTotals) => number;
-  format: (totals: PlayerTotals) => string;
+  /** Only shown when the range has league days. */
+  leagueOnly?: boolean;
+  value: (totals: StatTableTotals) => number;
+  format: (totals: StatTableTotals) => string;
   /** False when the stat can't be worked out for this player (shown as '–'). Default: they played. */
-  hasValue?: (totals: PlayerTotals) => boolean;
+  hasValue?: (totals: StatTableTotals) => boolean;
 }
 
 const STAT_ROWS: StatRow[] = [
@@ -34,6 +39,13 @@ const STAT_ROWS: StatRow[] = [
     label: 'Wins', better: 'high', rankable: true,
     value: totals => totals.wins,
     format: totals => `${totals.wins}`,
+  },
+  {
+    label: 'Championships', sub: 'league days won', better: 'high', rankable: true, leagueOnly: true,
+    value: totals => totals.championships,
+    format: totals => `${totals.championships}`,
+    // '–' for players who played no league day in the range, so 0 only means "played but didn't win".
+    hasValue: totals => totals.leagueDays > 0,
   },
   {
     label: 'Losses', better: 'low', rankable: false,
@@ -75,12 +87,12 @@ export interface StatTableRow {
   cells: { text: string; isBest: boolean; rank: string }[];
 }
 
-function rowHasValue(row: StatRow, totals: PlayerTotals): boolean {
+function rowHasValue(row: StatRow, totals: StatTableTotals): boolean {
   return totals.games > 0 && (row.hasValue?.(totals) ?? true);
 }
 
 /** 1 + the number of group players who did better. */
-function rankInGroup(row: StatRow, value: number, groupTotals: PlayerTotals[]): number {
+function rankInGroup(row: StatRow, value: number, groupTotals: StatTableTotals[]): number {
   const betterCount = groupTotals
     .filter(totals => rowHasValue(row, totals))
     .filter(totals => row.better === 'high' ? row.value(totals) > value : row.value(totals) < value)
@@ -92,9 +104,11 @@ function rankInGroup(row: StatRow, value: number, groupTotals: PlayerTotals[]): 
  * One row per stat, one cell per selected player.
  * Comparing: the best value is highlighted. One player: the cell shows their rank in the group.
  */
-export function buildStatTableRows(selectedTotals: PlayerTotals[], groupTotals: PlayerTotals[]): StatTableRow[] {
+export function buildStatTableRows(
+  selectedTotals: StatTableTotals[], groupTotals: StatTableTotals[], hasLeagueDays: boolean,
+): StatTableRow[] {
   const isComparing = selectedTotals.length > 1;
-  return STAT_ROWS.map(row => {
+  return STAT_ROWS.filter(row => hasLeagueDays || !row.leagueOnly).map(row => {
     const hasValue = selectedTotals.map(totals => rowHasValue(row, totals));
     const values = selectedTotals.map(row.value);
     const knownValues = values.filter((_, index) => hasValue[index]);
