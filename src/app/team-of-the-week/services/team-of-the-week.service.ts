@@ -3,7 +3,6 @@ import {PlayersService} from '../../players/players.service';
 import {TeamOfTheWeekApiService, TOTW_MAX_DAILY_GENERATES, TOTW_MAX_TOTAL_GENERATES} from './team-of-the-week-api.service';
 import {StatisticsService} from '../../statistics/services/statistics.service';
 import {ModalsService, PopupsService} from 'ui';
-import {SpinnerService} from '../../spinner.service';
 import {shuffleArray} from '../../utils/array-utils';
 import {createMutation} from '../../shared/optimistic/run-optimistic';
 import {ComputedStatisticsService} from '../../statistics/services/computed-statistics.service';
@@ -28,7 +27,6 @@ export class TeamOfTheWeekService {
   statisticService = inject(StatisticsService);
   teamOfTheWeekApiService = inject(TeamOfTheWeekApiService);
   popupsService = inject(PopupsService);
-  spinnerService = inject(SpinnerService);
   modalsService = inject(ModalsService);
   private computedStatsService = inject(ComputedStatisticsService);
   readonly regenerate = createMutation({
@@ -89,11 +87,9 @@ export class TeamOfTheWeekService {
       this.popupsService.addErrorPopOut('Please select a specific date');
       return Promise.resolve(null);
     } else {
-      this.spinnerService.setIsLoading(true);
+      // The page shows its skeleton while this loads (totwResource.isLoading()).
       const weekStates = this.calculateWeekStates(date);
-      return this.teamOfTheWeekApiService.generateAiTotw(date, weekStates.players, weekStates.teamSize).finally(() => {
-        this.spinnerService.setIsLoading(false)
-      });
+      return this.teamOfTheWeekApiService.generateAiTotw(date, weekStates.players, weekStates.teamSize);
     }
   }
 
