@@ -78,6 +78,38 @@
     </div>
     }
   </div>
+
+  <div class="lineups">
+    <h4>Who played</h4>
+    @for (lineup of lineupViews(); track lineup.teamKey) {
+    <div class="lineup">
+      <span class="lineup-team">{{ lineup.label }}</span>
+      <div class="lineup-players">
+        @for (player of lineup.players; track player.id) {
+        <span class="lineup-chip">
+          {{ player.name }}
+          <button type="button" class="chip-remove" [attr.aria-label]="'Remove ' + player.name"
+            (click)="matchLineupService.removeFromLineup(lineup.teamKey, player.id)">&times;</button>
+        </span>
+        }
+        <select class="lineup-add" #addSelect (change)="matchLineupService.addToLineup(lineup.teamKey, addSelect)">
+          <option value="" selected>+ Add player</option>
+          @for (player of lineup.addOptions; track player.id) {
+          <option [value]="player.id">{{ player.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    }
+  </div>
+  }
+
+  @if (usesBoardLineup()) {
+  <div class="info-box">A lineup here wasn't saved with the match, so it comes from today's team board. Check who played before saving.</div>
+  }
+
+  @if (lineupProblem()) {
+  <div class="warning-box">⚠️ {{ lineupProblem() }}</div>
   }
 
   @if(selectedMatchId() && isEditingMatch() && !editingEvent() && localMatch()?.status !== 'abandoned') {
@@ -176,7 +208,7 @@
 
   @if(isEditingMatch()) {
     <ng-container ngProjectAs="[form-actions]">
-      <button class="primary draft-action" [disabled]="!isTallyConsistent() || draftMatchModel().status === 'live'"
+      <button class="primary draft-action" [disabled]="!isTallyConsistent() || draftMatchModel().status === 'live' || !!lineupProblem()"
         (click)="saveEditingMatch()">Save All Changes</button>
       <button class="draft-action" (click)="cancelEditingMatch()">Back</button>
     </ng-container>

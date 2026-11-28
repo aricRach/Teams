@@ -13,12 +13,14 @@ import { MatchEventRecord, MatchRecord, MatchStatus } from '../models/match-even
 import { isScoringEvent } from '../utils/scoring.util';
 import { formatTeamLabel } from '../../utils/team-label.util';
 import { FormLayoutComponent } from '../../shared/layouts/form-layout/form-layout.component';
+import { MatchLineupService } from './match-lineup.service';
+import { RosterPlayer } from './utils/lineup-roster.util';
 
 @Component({
   selector: 'app-match-events-manager',
   standalone: true,
   imports: [FormField, FormLayoutComponent],
-  providers: [DatePipe],
+  providers: [DatePipe, MatchLineupService],
   templateUrl: './match-events-manager.component.html',
   styleUrl: './match-events-manager.component.scss'
 })
@@ -29,10 +31,14 @@ export class MatchEventsManagerComponent {
   private auth = inject(Auth);
   private popupsService = inject(PopupsService);
   private datePipe = inject(DatePipe);
+  protected matchLineupService = inject(MatchLineupService);
 
   user = toSignal(authState(this.auth));
 
-  playingTeamKeys = computed(() => this.playersService.selectedTeamsKeys())
+  // The teams on today's board, without the bench.
+  playingTeamKeys = computed(() =>
+    this.playersService.selectedTeamsKeys().filter(teamKey => teamKey !== this.playersService.allPlayersLabel)
+  );
 
   teamLabelOf = (teamKey: string | undefined | null): string =>
     teamKey ? formatTeamLabel(teamKey, this.playersService.teamAliases()[teamKey]) : '';
@@ -143,19 +149,25 @@ export class MatchEventsManagerComponent {
     return this.matches().find((match) => match.id === id) ?? null;
   });
 
+  // The two teams of a match. A match without a winner/loser (live, or reset and abandoned) still has the
+  // teamKeys saved when it started; only very old matches without them fall back to the goals and today's board.
   private getMatchTeams(match: MatchRecord | null): string[] {
     const teams = new Set<string>();
     if (match?.winner) teams.add(match.winner);
     if (match?.loser) teams.add(match.loser);
 
     if (teams.size < 2) {
-      this.playingTeamKeys().forEach((team) => teams.add(team));
+      match?.teamKeys?.forEach((team) => teams.add(team));
     }
 
     if (teams.size < 2) {
       this.goalEvents().forEach((event) => {
         if (event.teamKey) teams.add(event.teamKey);
       });
+    }
+
+    if (teams.size < 2) {
+      this.playingTeamKeys().forEach((team) => teams.add(team));
     }
 
     return Array.from(teams).slice(0, 2);
@@ -172,6 +184,7 @@ export class MatchEventsManagerComponent {
     const originalMatch = this.matches().find((match) => match.id === this.selectedMatchId());
     if (originalMatch?.winner) uniqueTeams.add(originalMatch.winner);
     if (originalMatch?.loser) uniqueTeams.add(originalMatch.loser);
+    originalMatch?.teamKeys?.forEach(team => uniqueTeams.add(team));
 
     this.playingTeamKeys().forEach(team => uniqueTeams.add(team));
 
@@ -254,7 +267,11 @@ export class MatchEventsManagerComponent {
   });
 
 
-  rosterPlayers = computed(() => {
+  // While editing, goals can be credited to the players in the match lineups.
+  rosterPlayers = computed<RosterPlayer[]>(() => {
+    if (this.isEditingMatch()) {
+      return this.matchLineupService.rosterPlayers(this.lineupTeams());
+    }
     const allPlayers = this.playersService.flattenPlayers(true, true);
     const matchId = this.selectedMatchId();
     const match = this.matches().find(m => m.id === matchId);
@@ -277,6 +294,17 @@ export class MatchEventsManagerComponent {
 
     return filtered.sort((a, b) => (a.team || '').localeCompare(b.team || ''));
   });
+
+  // The teams of the match being edited, whose lineups are shown and saved.
+  lineupTeams = computed(() => this.getMatchTeams(this.localMatch()));
+
+  lineupViews = computed(() => this.matchLineupService.views(this.lineupTeams()));
+
+  usesBoardLineup = computed(() => this.isEditingMatch() && this.matchLineupService.usesBoardLineup(this.lineupTeams()));
+
+  lineupProblem = computed(() => this.isEditingMatch()
+    ? this.matchLineupService.problem(this.lineupTeams(), this.goalEvents(), this.draftMatchModel().status === 'completed')
+    : '');
 
   activePlayerNames = computed(() => this.rosterPlayers().map((player) => player.name));
 
@@ -316,6 +344,7 @@ export class MatchEventsManagerComponent {
 
     const player = this.rosterPlayers().find((p) => p.id === playerId);
     if (!player) {
+      this.popupsService.addErrorPopOut('Pick a player from the lineup.');
       return;
     }
 
@@ -355,7 +384,10 @@ export class MatchEventsManagerComponent {
 
     const { playerId, time } = this.ownGoalModel();
     const player = this.rosterPlayers().find((p) => p.id === playerId);
-    if (!player) return;
+    if (!player) {
+      this.popupsService.addErrorPopOut('Pick a player from the lineup.');
+      return;
+    }
 
     const beneficiaryTeamKey = this.ownGoalBeneficiaryTeam();
     if (!beneficiaryTeamKey) {
@@ -408,7 +440,10 @@ export class MatchEventsManagerComponent {
     const playerIdStr = this.eventModel().playerId;
 
     const player = this.rosterPlayers().find((p) => p.id === playerIdStr);
-    if (!player) return;
+    if (!player) {
+      this.popupsService.addErrorPopOut('Pick a player from the lineup.');
+      return;
+    }
 
     // An own_goal's teamKey is the beneficiary team, not the (conceding) player's team - keep it.
     const patch: Partial<MatchEventRecord> = {
@@ -440,6 +475,7 @@ export class MatchEventsManagerComponent {
     if (!match) return;
     this.localMatch.set(structuredClone(match));
     this.localEvents.set(structuredClone(this.events()));
+    this.matchLineupService.start(match, this.events());
     this.isEditingMatch.set(true);
   }
 
@@ -447,6 +483,7 @@ export class MatchEventsManagerComponent {
     this.isEditingMatch.set(false);
     this.localMatch.set(null);
     this.localEvents.set([]);
+    this.matchLineupService.reset();
   }
 
   async saveEditingMatch() {
@@ -458,6 +495,10 @@ export class MatchEventsManagerComponent {
 
     if (!this.isTallyConsistent()) {
       this.popupsService.addErrorPopOut('Goal tally must match the result (Winner/Loser/Draw).');
+      return;
+    }
+    if (this.lineupProblem()) {
+      this.popupsService.addErrorPopOut(this.lineupProblem());
       return;
     }
 
@@ -478,17 +519,15 @@ export class MatchEventsManagerComponent {
     const updatedMatch = { ...newMatch, ...this.draftMatchModel() };
     const identifiedTeams = this.getMatchTeams(updatedMatch);
 
-    const playerArray = this.playersService.flattenPlayers(true, true);
-
     const winningTeam = updatedMatch.winner || identifiedTeams[0];
     const losingTeam = updatedMatch.loser || identifiedTeams[1];
 
     if (winningTeam) {
-      updatedMatch.winnerPlayerIds = playerArray.filter((player) => player.team === winningTeam).map((player) => player.id);
+      updatedMatch.winnerPlayerIds = this.matchLineupService.lineupFor(winningTeam);
       updatedMatch.winner = winningTeam;
     }
     if (losingTeam) {
-      updatedMatch.loserPlayerIds = playerArray.filter((player) => player.team === losingTeam).map((player) => player.id);
+      updatedMatch.loserPlayerIds = this.matchLineupService.lineupFor(losingTeam);
       updatedMatch.loser = losingTeam;
     }
 
@@ -532,13 +571,7 @@ export class MatchEventsManagerComponent {
       updated.winner = '';
     }
 
-    const playerArray = this.playersService.flattenPlayers(true, true);
-    if (updated.winner) {
-      updated.winnerPlayerIds = playerArray.filter((player) => player.team === updated.winner).map((player) => player.id);
-    }
-    if (updated.loser) {
-      updated.loserPlayerIds = playerArray.filter((player) => player.team === updated.loser).map((player) => player.id);
-    }
+    // Lineups aren't taken from the team board here: MatchLineupService keeps them per team and they're written on save.
 
     this.localMatch.set(updated);
   }
