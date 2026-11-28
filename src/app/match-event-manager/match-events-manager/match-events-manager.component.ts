@@ -15,12 +15,13 @@ import { formatTeamLabel } from '../../utils/team-label.util';
 import { FormLayoutComponent } from '../../shared/layouts/form-layout/form-layout.component';
 import { MatchLineupService } from './match-lineup.service';
 import { RosterPlayer } from './utils/lineup-roster.util';
+import { MatchDayVoidService } from './match-day-void.service';
 
 @Component({
   selector: 'app-match-events-manager',
   standalone: true,
   imports: [FormField, FormLayoutComponent],
-  providers: [DatePipe, MatchLineupService],
+  providers: [DatePipe, MatchLineupService, MatchDayVoidService],
   templateUrl: './match-events-manager.component.html',
   styleUrl: './match-events-manager.component.scss'
 })
@@ -32,6 +33,7 @@ export class MatchEventsManagerComponent {
   private popupsService = inject(PopupsService);
   private datePipe = inject(DatePipe);
   protected matchLineupService = inject(MatchLineupService);
+  protected matchDayVoidService = inject(MatchDayVoidService);
 
   user = toSignal(authState(this.auth));
 
@@ -81,6 +83,8 @@ export class MatchEventsManagerComponent {
         if (match.winner || match.loser) {
           label += ` (${this.matchTeamLabelOf(match.winner, match)} - ${this.matchTeamLabelOf(match.loser, match)})`;
         }
+      } else if (match.status === 'voided') {
+        label += ` - Voided (doesn't count)`;
       }
       label = `${match.mode === 'league' ? '[League]' : '[Single]'} ${label}`;
       return { id: matchId, label };
@@ -91,7 +95,13 @@ export class MatchEventsManagerComponent {
     this.currentMatch()?.mode === 'league' ? 'league' : 'single'
   );
 
-  selectedMatchId = linkedSignal(() => this.matches()[0]?.id ?? '');
+  // The matches update live (e.g. after Void day or a save), so keep the selected match while it still exists
+  // instead of jumping back to the newest one.
+  selectedMatchId = linkedSignal<MatchRecord[], string>({
+    source: this.matches,
+    computation: (matches, previous) =>
+      previous && matches.some(match => match.id === previous.value) ? previous.value : matches[0]?.id ?? ''
+  });
 
   selectedMatchLabel = computed(() =>
     this.matchOptions().find(o => o.id === this.selectedMatchId())?.label ?? ''
@@ -267,10 +277,9 @@ export class MatchEventsManagerComponent {
   });
 
 
-  // While editing, goals can be credited to the players in the match lineups.
   rosterPlayers = computed<RosterPlayer[]>(() => {
     if (this.isEditingMatch()) {
-      return this.matchLineupService.rosterPlayers(this.lineupTeams());
+      return this.matchLineupService.rosterPlayers();
     }
     const allPlayers = this.playersService.flattenPlayers(true, true);
     const matchId = this.selectedMatchId();
@@ -295,18 +304,20 @@ export class MatchEventsManagerComponent {
     return filtered.sort((a, b) => (a.team || '').localeCompare(b.team || ''));
   });
 
-  // The teams of the match being edited, whose lineups are shown and saved.
-  lineupTeams = computed(() => this.getMatchTeams(this.localMatch()));
-
-  lineupViews = computed(() => this.matchLineupService.views(this.lineupTeams()));
-
-  usesBoardLineup = computed(() => this.isEditingMatch() && this.matchLineupService.usesBoardLineup(this.lineupTeams()));
-
-  lineupProblem = computed(() => this.isEditingMatch()
-    ? this.matchLineupService.problem(this.lineupTeams(), this.goalEvents(), this.draftMatchModel().status === 'completed')
-    : '');
-
   activePlayerNames = computed(() => this.rosterPlayers().map((player) => player.name));
+
+  constructor() {
+    // The day actions are hidden while a match is being edited.
+    this.matchDayVoidService.connect(computed(() => this.isEditingMatch()
+      ? null
+      : { matches: this.matches(), selectedMatch: this.currentMatch() }));
+    // The teams of the match being edited are the ones whose lineups are shown and saved.
+    this.matchLineupService.connect(computed(() => ({
+      teamKeys: this.getMatchTeams(this.localMatch()),
+      goalEvents: this.goalEvents(),
+      isCompleted: this.draftMatchModel().status === 'completed'
+    })));
+  }
 
   formatEventTime(event: MatchEventRecord): string {
     const timerMs = event.payload?.['timerMs'] as number | undefined;
@@ -497,15 +508,42 @@ export class MatchEventsManagerComponent {
       this.popupsService.addErrorPopOut('Goal tally must match the result (Winner/Loser/Draw).');
       return;
     }
-    if (this.lineupProblem()) {
-      this.popupsService.addErrorPopOut(this.lineupProblem());
+    if (this.matchLineupService.problem()) {
+      this.popupsService.addErrorPopOut(this.matchLineupService.problem());
       return;
     }
 
+    const draft = this.draftMatchModel();
+    // Only a completed match gets a result and lineups. Any other status keeps the saved result as it was,
+    // so e.g. a voided match doesn't get a made-up winner and loser.
+    const updatedMatch = draft.status === 'completed'
+      ? this.withResult(newMatch, draft)
+      : { ...oldMatch, status: draft.status, mode: draft.mode };
+    if (!updatedMatch) return;
+
+    try {
+      await this.matchEvents.reconcileMatch(
+        groupId,
+        matchId,
+        oldMatch,
+        updatedMatch,
+        (this.eventsResource.value() ?? []) as MatchEventRecord[],
+        this.localEvents()
+      );
+      this.popupsService.addSuccessPopOut('Match and statistics updated!');
+      this.cancelEditingMatch();
+    } catch (err) {
+      console.error(err);
+      this.popupsService.addErrorPopOut('Failed to save changes.');
+    }
+  }
+
+  // The winner, loser, lineups and scores of a completed match, or null (with an error popup) when its teams are unknown.
+  private withResult(newMatch: MatchRecord, draft: Partial<MatchRecord>): MatchRecord | null {
     const teams = this.getMatchTeams(newMatch);
     if (teams.length < 2) {
       this.popupsService.addErrorPopOut('Could not identify teams for this match.');
-      return;
+      return null;
     }
 
     const tally: Record<string, number> = {};
@@ -516,7 +554,7 @@ export class MatchEventsManagerComponent {
       }
     });
 
-    const updatedMatch = { ...newMatch, ...this.draftMatchModel() };
+    const updatedMatch: MatchRecord = { ...newMatch, ...draft };
     const identifiedTeams = this.getMatchTeams(updatedMatch);
 
     const winningTeam = updatedMatch.winner || identifiedTeams[0];
@@ -539,21 +577,7 @@ export class MatchEventsManagerComponent {
       updatedMatch.loseTeamScore = tally[updatedMatch.loser!] || 0;
     }
 
-    try {
-      await this.matchEvents.reconcileMatch(
-        groupId,
-        matchId,
-        oldMatch,
-        updatedMatch,
-        (this.eventsResource.value() ?? []) as MatchEventRecord[],
-        this.localEvents()
-      );
-      this.popupsService.addSuccessPopOut('Match and statistics updated!');
-      this.cancelEditingMatch();
-    } catch (err) {
-      console.error(err);
-      this.popupsService.addErrorPopOut('Failed to save changes.');
-    }
+    return updatedMatch;
   }
 
   updateLocalMatch(patch: Partial<MatchRecord>) {

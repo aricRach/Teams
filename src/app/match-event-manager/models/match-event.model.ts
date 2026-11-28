@@ -1,4 +1,4 @@
-export type MatchStatus = 'live' | 'completed' | 'abandoned' | 'correction' | 'voided';
+export type MatchStatus = 'live' | 'completed' | 'abandoned' | 'voided';
 
 export type MatchEventType =
   | 'match_started'
@@ -7,7 +7,6 @@ export type MatchEventType =
   | 'player_goal'
   | 'own_goal'
   | 'player_assist'
-  | 'stat_correction'
   | 'custom';
 
 export interface MatchRecord {
@@ -31,6 +30,8 @@ export interface MatchRecord {
   round?: number;
   teamKeys?: string[];
   teamAliasSnapshot?: Record<string, string>;
+  // 'day' when the match was voided by "Void the whole day", so Restore day brings back only those matches.
+  voidedBy?: 'day' | null;
 }
 
 export interface MatchEventRecord {

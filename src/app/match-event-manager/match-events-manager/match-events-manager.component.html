@@ -17,6 +17,22 @@
     }
   </div>
 
+  <div class="day-actions">
+    @if (matchDayVoidService.showVoidDay()) {
+    <button type="button" class="danger" [disabled]="matchDayVoidService.busy()"
+      (click)="matchDayVoidService.voidDay()">{{ matchDayVoidService.voidDayLabel() }}</button>
+    <span class="day-hint">Not just this match: every match of that day stops counting in all statistics.</span>
+    }
+    @if (matchDayVoidService.showRestoreDay()) {
+    <button type="button" [disabled]="matchDayVoidService.busy()"
+      (click)="matchDayVoidService.restoreDay()">{{ matchDayVoidService.restoreDayLabel() }}</button>
+    <span class="day-hint">Every voided match of that day counts in the statistics again.</span>
+    }
+    @if (matchDayVoidService.showLiveMatchHint()) {
+    <span class="day-hint">A match of this day is still live. End or discard it to void the day.</span>
+    }
+  </div>
+
   @if (isEditingMatch() && localMatch()) {
   <div class="edit-match-form">
     <h4>Editing Match Result</h4>
@@ -27,6 +43,7 @@
           <option value="completed">Completed</option>
           <option value="live">Live</option>
           <option value="abandoned">Abandoned</option>
+          <option value="voided">Voided (doesn't count)</option>
         </select>
       </div>
 
@@ -78,10 +95,12 @@
     </div>
     }
   </div>
+  }
 
+  @if (matchLineupService.showLineups()) {
   <div class="lineups">
     <h4>Who played</h4>
-    @for (lineup of lineupViews(); track lineup.teamKey) {
+    @for (lineup of matchLineupService.views(); track lineup.teamKey) {
     <div class="lineup">
       <span class="lineup-team">{{ lineup.label }}</span>
       <div class="lineup-players">
@@ -92,7 +111,7 @@
             (click)="matchLineupService.removeFromLineup(lineup.teamKey, player.id)">&times;</button>
         </span>
         }
-        <select class="lineup-add" #addSelect (change)="matchLineupService.addToLineup(lineup.teamKey, addSelect)">
+        <select class="lineup-add" #addSelect (change)="matchLineupService.addToLineup(lineup.teamKey, addSelect.value); addSelect.value = ''">
           <option value="" selected>+ Add player</option>
           @for (player of lineup.addOptions; track player.id) {
           <option [value]="player.id">{{ player.name }}</option>
@@ -104,12 +123,12 @@
   </div>
   }
 
-  @if (usesBoardLineup()) {
+  @if (matchLineupService.usesBoardLineup()) {
   <div class="info-box">A lineup here wasn't saved with the match, so it comes from today's team board. Check who played before saving.</div>
   }
 
-  @if (lineupProblem()) {
-  <div class="warning-box">⚠️ {{ lineupProblem() }}</div>
+  @if (matchLineupService.problem()) {
+  <div class="warning-box">⚠️ {{ matchLineupService.problem() }}</div>
   }
 
   @if(selectedMatchId() && isEditingMatch() && !editingEvent() && localMatch()?.status !== 'abandoned') {
@@ -208,7 +227,7 @@
 
   @if(isEditingMatch()) {
     <ng-container ngProjectAs="[form-actions]">
-      <button class="primary draft-action" [disabled]="!isTallyConsistent() || draftMatchModel().status === 'live' || !!lineupProblem()"
+      <button class="primary draft-action" [disabled]="!isTallyConsistent() || draftMatchModel().status === 'live' || !!matchLineupService.problem()"
         (click)="saveEditingMatch()">Save All Changes</button>
       <button class="draft-action" (click)="cancelEditingMatch()">Back</button>
     </ng-container>

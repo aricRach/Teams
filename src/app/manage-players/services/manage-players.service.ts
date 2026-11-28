@@ -2,37 +2,13 @@ import {computed, inject, Injectable, signal} from '@angular/core';
 import {PlayersService} from '../../players/players.service';
 import {AutoCompleteOption} from 'ui';
 import {Player} from '../../players/models/player.model';
-import {AdminControlService} from '../../user/admin-control.service';
 
 @Injectable()
 export class ManagePlayersService {
   playersService = inject(PlayersService);
-  adminControlService = inject(AdminControlService);
 
   selectedPlayer = signal<any>(null);
 
-  innerTabs = computed(() => {
-    return [
-      ...(
-        this.playersService.isAdmin() ?
-          [
-            {
-            link: 'edit-player',
-            title: 'Edit player',
-            tooltip: this.adminControlService.getAdminControl().showProtectedPages ? '' : "In order to see this page enable 'show protected pages' in admin control",
-            isDisabled: !this.adminControlService.getAdminControl().showProtectedPages,
-          },
-            {
-              link: 'edit-player-statistics',
-              title: 'Edit last statistics',
-              tooltip: this.adminControlService.getAdminControl().showProtectedPages ? '' : "In order to see this page enable 'show protected pages' in admin control",
-              isDisabled: !this.adminControlService.getAdminControl().showProtectedPages,
-            },
-          ]
-          : []
-      )
-    ]
-  })
   allPlayersArray = computed(() => {
     return [...this.playersService.flattenPlayers()]
   });

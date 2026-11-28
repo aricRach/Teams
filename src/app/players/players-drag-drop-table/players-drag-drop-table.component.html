@@ -22,8 +22,6 @@
         } @else {
         <div class="team-name">
           <h2 [title]="teamKey | teamLabel: aliases()">{{ teamKey | teamLabel: aliases() }}</h2>
-          <!-- Edit-statistics doesn't handle team renames or colors. -->
-          @if (!editStatistics()) {
           <button type="button" class="button-icon team-rename-pencil" aria-label="Edit team name"
             (click)="startTeamRename(teamKey)">
             <img src="assets/icons/pencil.svg" alt="edit" height="16" width="16">
@@ -32,7 +30,6 @@
             [color]="colors()[teamKey]"
             [takenColors]="takenColorsExcluding(teamKey)"
             (colorChange)="changeTeamColor.emit({teamKey, color: $event})" />
-          }
         </div>
         }
         @if (availableSlots().length === 1) {
@@ -62,36 +59,6 @@
         }
       </div>
 
-      @if(editStatistics() ) {
-      <div class="edit-buttons">
-        @if(clonedTeams()?.[teamKey]?.players.length > 0 ) {
-        <div>
-          <button
-            (click)="updateTeamStatistics.emit({players: clonedTeams()?.[teamKey]?.players, team: teamKey, name: 'wins', number: 1})">+
-            win</button>
-          <button
-            (click)="updateTeamStatistics.emit({players: clonedTeams()?.[teamKey]?.players, team: teamKey, name: 'wins', number: -1})">-
-            win</button>
-        </div>
-        <div>
-          <button
-            (click)="updateTeamStatistics.emit({players: clonedTeams()?.[teamKey]?.players, team: teamKey, name: 'loses', number: 1})">+
-            loose</button>
-          <button
-            (click)="updateTeamStatistics.emit({players: clonedTeams()?.[teamKey]?.players, team: teamKey, name: 'loses', number: -1})">-
-            loose</button>
-        </div>
-        <div>
-          <button
-            (click)="updateTeamStatistics.emit({players: clonedTeams()?.[teamKey]?.players, team: teamKey, name: 'games', number: 1})">+
-            game</button>
-          <button
-            (click)="updateTeamStatistics.emit({players: clonedTeams()?.[teamKey]?.players, team: teamKey, name: 'games', number: -1})">-
-            game</button>
-        </div>
-        }
-      </div>
-      }
       @if (enableShowRatings()) {
         @if ((playersDragDropTableService.teamScores()[teamKey]?.attackScore ?? 0) > 0 ||
              (playersDragDropTableService.teamScores()[teamKey]?.defenseScore ?? 0) > 0) {
@@ -146,8 +113,6 @@
       </div>
     </section>
 
-    <!-- Editing a past day's statistics has no guest flow. -->
-    @if (!editStatistics()) {
     <section class="bench guests">
       <div class="bench-head">
         <h2>Guests <span class="bench-count">{{ benchPlayers(true).length }}</span></h2>
@@ -167,7 +132,6 @@
         }
       </div>
     </section>
-    }
   </div>
 
 </div>
