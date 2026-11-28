@@ -12,7 +12,7 @@ describe('isScoringEvent', () => {
   });
 
   it('is false for non-scoring event types', () => {
-    for (const type of ['match_started', 'match_ended', 'team_result', 'stat_correction', 'player_assist', 'custom'] as const) {
+    for (const type of ['match_started', 'match_ended', 'team_result', 'player_assist', 'custom'] as const) {
       expect(isScoringEvent(ev({ type }))).toBe(false);
     }
   });

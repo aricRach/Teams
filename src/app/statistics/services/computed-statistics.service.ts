@@ -70,20 +70,6 @@ export class ComputedStatisticsService {
           if (stats.games === 0) stats.games++;
         }
       }
-
-      for (const correctionEvent of events) {
-        if (correctionEvent.type === 'stat_correction' && !correctionEvent.deletedAt && correctionEvent.payload?.['playerId']) {
-          const correctionPlayerId = correctionEvent.payload['playerId'] as string;
-          const correctionDelta = correctionEvent.payload['delta'] as Partial<Statistics>;
-          const correctionDateKey = (correctionEvent.payload['dateKey'] as string) || dateKey;
-          const correctionStats = this.getOrInitStats(result, correctionPlayerId, correctionDateKey);
-          for (const statKey of Object.keys(correctionDelta) as (keyof Statistics)[]) {
-            if (correctionDelta[statKey] !== undefined) {
-              correctionStats[statKey] = Math.max(0, (correctionStats[statKey] || 0) + (correctionDelta[statKey] || 0));
-            }
-          }
-        }
-      }
     }
 
     return result;

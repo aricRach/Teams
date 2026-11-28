@@ -26,7 +26,6 @@ export class PlayersDragDropTableComponent {
   playersDragDropTableService = inject(PlayersDragDropTableService);
   isLocked = input.required();
   dateStatistics = input<string>();
-  editStatistics = input(false);
   clonedTeams = input<any>();
   enableShowRatings = input(false);
   aliases = input<Record<string, string>>({});
@@ -99,11 +98,7 @@ export class PlayersDragDropTableComponent {
   readonly benchKey = 'allPlayers';
   readonly guestsListId = 'guests';
 
-  // Edit-statistics has no Guests list, so it isn't connected there.
-  readonly dropListRefs = computed(() => this.editStatistics()
-    ? [...this.unlockedTeamKeys(), this.benchKey]
-    : [...this.unlockedTeamKeys(), this.benchKey, this.guestsListId]
-  );
+  readonly dropListRefs = computed(() => [...this.unlockedTeamKeys(), this.benchKey, this.guestsListId]);
 
   readonly teamColorStyles = computed<Record<string, Record<string, string>>>(() =>
     Object.fromEntries(this.teamKeys().map(key => [key, teamColorStyle(this.colors()[key])]))
@@ -115,7 +110,6 @@ export class PlayersDragDropTableComponent {
 
 
   dropPlayer = output();
-  updateTeamStatistics = output<{players: Player[], team: TeamsOptions, name: string, number: number}>();
 
   slotTeamCount(slot: number, exceptTeamKey?: string): number {
     return Object.entries(this.teamSlots())
@@ -196,12 +190,11 @@ export class PlayersDragDropTableComponent {
   }
 
   /**
-   * The bench is shown as two sections: regulars and guests. Edit-statistics has no Guests section,
-   * so its Bench shows everyone. A method, not a computed: drops change the teams in place.
+   * The bench is shown as two sections: regulars and guests.
+   * A method, not a computed: drops change the teams in place.
    */
   benchPlayers(guests: boolean): Player[] {
     const players: Player[] = this.clonedTeams()?.[this.benchKey]?.players ?? [];
-    if (this.editStatistics()) return guests ? [] : players;
     return players.filter(player => !!player.isGuest === guests);
   }
 

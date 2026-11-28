@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { PlayersService } from '../../players/players.service';
 import { MatchEventRecord, MatchRecord } from '../models/match-event.model';
 import { formatTeamLabel } from '../../utils/team-label.util';
@@ -7,10 +7,21 @@ import { findLineupProblem } from './utils/lineup-problem.util';
 import { buildLineupViews, LineupView } from './utils/lineup-view.util';
 import { buildRosterPlayers, RosterPlayer } from './utils/lineup-roster.util';
 
-// Who played in the match being edited. The page passes in the match's teams, since it owns the edited match.
+// What the lineups depend on in the match being edited. The page owns the edited match, so it passes these in.
+export interface LineupMatch {
+  teamKeys: string[];
+  goalEvents: MatchEventRecord[];
+  isCompleted: boolean;
+}
+
+// Who played in the match being edited.
 @Injectable()
 export class MatchLineupService {
   private playersService = inject(PlayersService);
+
+  // Set once by the page with connect().
+  private readonly editedMatch = signal<Signal<LineupMatch>>(signal({ teamKeys: [], goalEvents: [], isCompleted: false }));
+  private readonly isEditing = signal(false);
 
   private readonly lineups = signal<MatchLineups>({});
   // Taken from the match when editing starts. Match players are the saved lineups plus the goal scorers.
@@ -39,6 +50,31 @@ export class MatchLineupService {
   private readonly teamLabelOf = (teamKey: string): string =>
     formatTeamLabel(teamKey, this.teamAliasSnapshot()[teamKey] ?? this.playersService.teamAliases()[teamKey]);
 
+  // The lineups of just the match's current teams, e.g. not the old winner after the winner was changed.
+  private readonly currentLineups = computed<MatchLineups>(() =>
+    Object.fromEntries(this.editedMatch()().teamKeys.map(teamKey => [teamKey, this.lineupFor(teamKey)])));
+
+  readonly views = computed<LineupView[]>(() =>
+    buildLineupViews(this.currentLineups(), this.addCandidates(), this.teamLabelOf, this.playerNameOf));
+
+  // While editing, goals can be credited to the players in the lineups.
+  readonly rosterPlayers = computed<RosterPlayer[]>(() => buildRosterPlayers(this.currentLineups(), this.playerNameOf));
+
+  // Only a completed match saves its lineups, so they're edited (and checked) only then.
+  readonly showLineups = computed(() => this.isEditing() && this.editedMatch()().isCompleted);
+
+  // True when a lineup shown is only a guess from today's team board.
+  readonly usesBoardLineup = computed(() =>
+    this.showLineups() && this.editedMatch()().teamKeys.some(teamKey => !this.lineups()[teamKey]));
+
+  readonly problem = computed(() => this.showLineups()
+    ? findLineupProblem(this.currentLineups(), this.editedMatch()().goalEvents, true, this.teamLabelOf, this.playerNameOf)
+    : '');
+
+  connect(editedMatch: Signal<LineupMatch>): void {
+    this.editedMatch.set(editedMatch);
+  }
+
   start(match: MatchRecord, events: MatchEventRecord[]): void {
     const lineups = savedLineups(match);
     const eventPlayers = events.filter(event => event.playerId && !event.deletedAt);
@@ -51,6 +87,7 @@ export class MatchLineupService {
       .filter(event => event.playerNameSnapshot)
       .map(event => [event.playerId!, event.playerNameSnapshot!])));
     this.teamAliasSnapshot.set(match.teamAliasSnapshot ?? {});
+    this.isEditing.set(true);
   }
 
   reset(): void {
@@ -58,6 +95,7 @@ export class MatchLineupService {
     this.matchPlayerIds.set(new Set());
     this.nameSnapshots.set(new Map());
     this.teamAliasSnapshot.set({});
+    this.isEditing.set(false);
   }
 
   // A team with no saved lineup (live, reset or very old match, or a team newly picked as winner/loser)
@@ -66,38 +104,14 @@ export class MatchLineupService {
     return this.lineups()[teamKey] ?? boardLineup(this.playersService.flattenPlayers(true, true), teamKey);
   }
 
-  // True when a lineup shown is only a guess from today's team board.
-  usesBoardLineup(teamKeys: string[]): boolean {
-    return teamKeys.some(teamKey => !this.lineups()[teamKey]);
-  }
-
-  views(teamKeys: string[]): LineupView[] {
-    return buildLineupViews(this.lineupsOf(teamKeys), this.addCandidates(), this.teamLabelOf, this.playerNameOf);
-  }
-
-  rosterPlayers(teamKeys: string[]): RosterPlayer[] {
-    return buildRosterPlayers(this.lineupsOf(teamKeys), this.playerNameOf);
-  }
-
-  problem(teamKeys: string[], goalEvents: MatchEventRecord[], isCompleted: boolean): string {
-    return findLineupProblem(this.lineupsOf(teamKeys), goalEvents, isCompleted, this.teamLabelOf, this.playerNameOf);
-  }
-
   removeFromLineup(teamKey: string, playerId: string): void {
     const lineup = this.lineupFor(teamKey).filter(id => id !== playerId);
     this.lineups.update(lineups => ({ ...lineups, [teamKey]: lineup }));
   }
 
-  addToLineup(teamKey: string, select: HTMLSelectElement): void {
-    const playerId = select.value;
-    select.value = '';
+  addToLineup(teamKey: string, playerId: string): void {
     if (!playerId) return;
     const lineup = [...this.lineupFor(teamKey), playerId];
     this.lineups.update(lineups => ({ ...lineups, [teamKey]: lineup }));
-  }
-
-  // The lineups of just the match's current teams, e.g. not the old winner after the winner was changed.
-  private lineupsOf(teamKeys: string[]): MatchLineups {
-    return Object.fromEntries(teamKeys.map(teamKey => [teamKey, this.lineupFor(teamKey)]));
   }
 }

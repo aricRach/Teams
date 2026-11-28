@@ -3,7 +3,6 @@ import {PlayersService} from '../../players/players.service';
 import {NavigationEnd, Router} from '@angular/router';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {filter, map} from 'rxjs';
-import {AdminControlService} from '../../user/admin-control.service';
 import {ComputedStatisticsService} from './computed-statistics.service';
 
 export class StatisticsService {
@@ -55,17 +54,9 @@ export class StatisticsService {
         tooltip: '',
         isDisabled: false,
       },
-      // Admins only; everyone else would just see a disabled tab.
-      ...(this.playersService.isAdmin() ? [{
-        link: 'edit-statistics',
-        title: 'Edit statistics',
-        tooltip: this.adminControl.getAdminControl().showProtectedPages ? '' : 'In order to see this page enable \'show protected pages\' in admin control',
-        isDisabled: !this.adminControl.getAdminControl().showProtectedPages
-      }] : [])
     ]
   })
   playersService = inject(PlayersService);
-  adminControl = inject(AdminControlService);
   router = inject(Router);
 
   showGuests = signal(true);
@@ -95,11 +86,6 @@ export class StatisticsService {
 
   reloadStatistics() {
     this.computedStatsService.reload();
-  }
-
-  refreshTable() {
-    this.selectedDate.set(this.selectAllLabel());
-    this.router.navigate([this.playersService.groupUrl('statistics', 'table')]);
   }
 
   isAdmin() {

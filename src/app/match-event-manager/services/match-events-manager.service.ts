@@ -327,7 +327,7 @@ export class MatchEventsManagerService {
     oldEvents: MatchEventRecord[],
     newEvents: MatchEventRecord[]
   ): Promise<void> {
-    const matchPatch: Partial<MatchRecord> = {
+    const fullPatch: Partial<MatchRecord> = {
       status: newMatch.status,
       winner: newMatch.winner,
       loser: newMatch.loser,
@@ -337,8 +337,14 @@ export class MatchEventsManagerService {
       loserPlayerIds: newMatch.loserPlayerIds,
       gameStatus: newMatch.gameStatus,
       mode: newMatch.mode,
-      endedAt: newMatch.endedAt || (newMatch.status === 'completed' ? new Date() : undefined)
+      endedAt: newMatch.endedAt || (newMatch.status === 'completed' ? new Date() : undefined),
+      // A match whose status is changed here is no longer part of a voided day, so Restore day leaves it alone.
+      ...(newMatch.status !== oldMatch.status ? { voidedBy: null } : {})
     };
+    // Firestore rejects undefined values (e.g. no endedAt when a live match is voided), so leave those fields out.
+    const matchPatch = Object.fromEntries(
+      Object.entries(fullPatch).filter(([, value]) => value !== undefined)
+    ) as Partial<MatchRecord>;
 
     const eventChanges = {
       add: newEvents

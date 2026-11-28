@@ -104,12 +104,6 @@ export const routes: Routes = [
             resolve: { inactivePlayers: inactivePlayersResolver },
             data: { breadcrumb: 'Leaders' },
           },
-          {
-            path: 'edit-statistics',
-            loadComponent: () => import('./statistics/edit-statistics/edit-statistics.component').then(m => m.EditStatisticsComponent),
-            data: { breadcrumb: 'Edit Statistics' },
-            canActivate: [groupAdminGuard, adminControlGuard],
-          }
         ]
       },
       {
@@ -174,16 +168,6 @@ export const routes: Routes = [
                 canActivate: [groupAdminGuard, adminControlGuard],
                 canDeactivate: [exitFormGuard],
                 data: { breadcrumb: 'Edit Player' },
-              },
-              {
-                path: 'edit-player-statistics',
-                loadComponent: () =>
-                  import('./manage-players/edit-statistics/edit-player-statistics.component').then(
-                    (m) => m.EditPlayerStatisticsComponent
-                  ),
-                canActivate: [groupAdminGuard, adminControlGuard],
-                canDeactivate: [exitFormGuard],
-                data: { breadcrumb: 'Edit Player Statistics' },
               },
             ]
           },

@@ -166,24 +166,6 @@ app-team-score-bars {
   }
 }
 
-.edit-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 10px;
-  justify-content: space-around;
-  min-height: 50px;
-
-  div {
-    display: flex;
-    flex-direction: column;
-
-    button {
-      margin-top: 5px;
-      width: 65px;
-    }
-  }
-}
-
 .list {
   min-height: 64px;
   padding: 0 0.4rem 0.5rem;
