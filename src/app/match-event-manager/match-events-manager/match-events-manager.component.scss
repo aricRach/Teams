@@ -221,3 +221,68 @@ input.invalid {
   color: #c0392b;
   font-style: italic;
 }
+
+.lineups {
+  margin-bottom: 16px;
+
+  h4 {
+    margin: 0 0 8px;
+  }
+}
+
+.lineup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.lineup-team {
+  font-weight: 600;
+}
+
+.lineup-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.lineup-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 2px 10px;
+  border: 1px solid #ced4da;
+  border-radius: 999px;
+  background: #f8f9fa;
+  font-size: 0.9em;
+}
+
+.chip-remove {
+  border: none;
+  background: transparent;
+  padding: 0 4px;
+  font-size: 1.1em;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+}
+
+.lineup-add {
+  padding: 3px 8px;
+  border: 1px dashed #adb5bd;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.info-box {
+  background: #e7f1ff;
+  border: 1px solid #b6d4fe;
+  color: #084298;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
